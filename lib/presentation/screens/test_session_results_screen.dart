@@ -2,6 +2,7 @@ import 'package:athleticcoach/data/athlete_database.dart';
 import 'package:athleticcoach/data/models/athlete_model.dart';
 import 'package:athleticcoach/data/models/test_definition_model.dart';
 import 'package:athleticcoach/data/models/test_result_model.dart';
+import 'package:athleticcoach/presentation/screens/test_session_analysis_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -71,6 +72,58 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
       }
     }
     return true;
+  }
+
+  Future<void> _analyzeResults() async {
+    if (!_validateResults()) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      // Test sonuçlarını hazırla
+      final List<Map<String, dynamic>> results = [];
+      
+      for (final athlete in widget.selectedAthletes) {
+        final resultText = _resultControllers[athlete.id]!.text.trim();
+        final result = double.parse(resultText);
+        final notes = _notesControllers[athlete.id]?.text.trim();
+        
+        results.add({
+          'athlete': athlete,
+          'result': result,
+          'notes': notes,
+        });
+      }
+
+      // AI analizi ekranına git
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => TestSessionAnalysisScreen(
+              selectedTest: widget.selectedTest,
+              results: results,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Analiz hazırlanırken hata: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
   }
 
   Future<void> _saveResults() async {
@@ -319,15 +372,15 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
               ),
             ),
             ElevatedButton.icon(
-              onPressed: _isSaving ? null : _saveResults,
+              onPressed: _isSaving ? null : _analyzeResults,
               icon: _isSaving 
                   ? const SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.save),
-              label: Text(_isSaving ? 'Kaydediliyor...' : 'Sonuçları Kaydet'),
+                  : const Icon(Icons.auto_awesome),
+              label: Text(_isSaving ? 'Analiz Ediliyor...' : 'AI Analizi Yap'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,

@@ -9,6 +9,7 @@ class TestResultModel {
   final double result;
   final String resultUnit;
   final String? notes;
+  final String? aiAnalysis;
 
   TestResultModel({
     required this.id,
@@ -21,6 +22,7 @@ class TestResultModel {
     required this.result,
     required this.resultUnit,
     this.notes,
+    this.aiAnalysis,
   });
 
   Map<String, dynamic> toMap() {
@@ -35,6 +37,7 @@ class TestResultModel {
       'result': result,
       'resultUnit': resultUnit,
       'notes': notes,
+      'aiAnalysis': aiAnalysis,
     };
   }
 
@@ -58,6 +61,7 @@ class TestResultModel {
       result: parseResult(map['result']),
       resultUnit: map['resultUnit'].toString(),
       notes: map['notes']?.toString(),
+      aiAnalysis: map['aiAnalysis']?.toString(),
     );
   }
 } 

@@ -22,7 +22,7 @@ class AthleteDatabase {
     final path = join(dbPath, 'athletes.db');
     return openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE athletes(
@@ -70,6 +70,9 @@ class AthleteDatabase {
               FOREIGN KEY (athleteId) REFERENCES athletes (id)
             )
           ''');
+        }
+        if (oldVersion < 3) {
+          await db.execute('ALTER TABLE test_results ADD COLUMN aiAnalysis TEXT');
         }
       },
     );
@@ -170,6 +173,16 @@ class AthleteDatabase {
       'test_results',
       where: 'id = ?',
       whereArgs: [resultId],
+    );
+  }
+
+  Future<void> updateTestResult(TestResultModel result) async {
+    final db = await database;
+    await db.update(
+      'test_results',
+      result.toMap(),
+      where: 'id = ?',
+      whereArgs: [result.id],
     );
   }
 } 

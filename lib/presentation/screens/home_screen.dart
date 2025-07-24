@@ -12,11 +12,14 @@ class HomeScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Athletic Coach'),
-        centerTitle: true,
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        elevation: 2,
+        title: const Text(
+          'Athletic Coach',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -27,8 +30,8 @@ class HomeScreen extends StatelessWidget {
               context,
               title: 'Sporcular',
               icon: Icons.people,
-              color: colorScheme.primaryContainer,
-              iconColor: colorScheme.primary,
+              color: const Color(0xFFF3F4F6),
+              iconColor: const Color(0xFF6366F1),
               onTap: () {
                 debugPrint('Sporcular sayfasına geçiliyor...');
                 try {
@@ -47,8 +50,8 @@ class HomeScreen extends StatelessWidget {
               context,
               title: 'Test Kütüphanesi',
               icon: Icons.library_books,
-              color: colorScheme.secondaryContainer,
-              iconColor: colorScheme.secondary,
+              color: const Color(0xFFFEF3C7),
+              iconColor: const Color(0xFFF59E0B),
               onTap: () {
                 debugPrint('Test Kütüphanesi sayfasına geçiliyor...');
                 try {
@@ -67,8 +70,8 @@ class HomeScreen extends StatelessWidget {
               context,
               title: 'Test Sonuçları',
               icon: Icons.analytics,
-              color: colorScheme.tertiaryContainer,
-              iconColor: colorScheme.tertiary,
+              color: const Color(0xFFDBEAFE),
+              iconColor: const Color(0xFF3B82F6),
               onTap: () {
                 debugPrint('Test Sonuçları sayfasına geçiliyor...');
                 try {
@@ -87,12 +90,15 @@ class HomeScreen extends StatelessWidget {
               icon: const Icon(Icons.play_circle_fill, size: 28),
               label: const Text('Yeni Test Oturumu Başlat'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
+                backgroundColor: const Color(0xFF6366F1),
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 18),
-                textStyle: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                textStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 4,
+                elevation: 3,
               ),
               onPressed: () async {
                 debugPrint('Yeni Test Oturumu başlatılıyor...');
@@ -117,19 +123,33 @@ class HomeScreen extends StatelessWidget {
   Widget _buildFeatureCard(BuildContext context,
       {required String title, required IconData icon, required Color color, required Color iconColor, required VoidCallback onTap}) {
     return Card(
-      elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       color: color,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 28.0, horizontal: 16),
           child: Column(
             children: [
-              Icon(icon, size: 54, color: iconColor),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, size: 48, color: iconColor),
+              ),
               const SizedBox(height: 16),
-              Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              Text(
+                title, 
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: color == const Color(0xFF6366F1) ? Colors.white : const Color(0xFF1F2937),
+                ),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),
