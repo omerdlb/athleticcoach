@@ -5,6 +5,7 @@ class TestDefinitionModel {
   final String description; // Kısa açıklama
   final String protocol;    // Detaylı uygulama protokolü
   final String resultUnit;
+  final String purpose;     // Ne işe yarar?
 
   TestDefinitionModel({
     required this.id,
@@ -13,5 +14,6 @@ class TestDefinitionModel {
     required this.description,
     required this.protocol,
     required this.resultUnit,
+    required this.purpose,
   });
 } 

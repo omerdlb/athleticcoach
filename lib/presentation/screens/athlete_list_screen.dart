@@ -96,54 +96,123 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
                     itemCount: _athletes.length,
                     itemBuilder: (context, index) {
                       final athlete = _athletes[index];
-                      return Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: colorScheme.primaryContainer,
-                            child: Icon(
-                              athlete.gender == 'Kadın' ? Icons.female : Icons.male,
-                              color: colorScheme.primary,
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(18),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => AthleteDetailScreen(athlete: athlete),
                             ),
-                          ),
-                          title: Text(
-                            '${athlete.name} ${athlete.surname}',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            '${athlete.gender} - ${athlete.branch} - ${athlete.birthDate.year} doğumlu',
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () async {
-                                  final updatedAthlete = await Navigator.of(context).push<AthleteModel>(
-                                    MaterialPageRoute(
-                                      builder: (context) => AthleteAddScreen(athlete: athlete),
-                                    ),
-                                  );
-                                  if (updatedAthlete != null) {
-                                    await AthleteDatabase().updateAthlete(updatedAthlete);
-                                    setState(() {
-                                      _athletes[index] = updatedAthlete;
-                                    });
-                                  }
-                                },
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: index % 2 == 0
+                                  ? [colorScheme.primary.withOpacity(0.08), Colors.white]
+                                  : [colorScheme.secondary.withOpacity(0.08), Colors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: colorScheme.primary.withOpacity(0.07),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
                               ),
-                              const Icon(Icons.arrow_forward_ios, size: 18),
                             ],
                           ),
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => AthleteDetailScreen(athlete: athlete),
-                              ),
-                            );
-                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 28,
+                                  backgroundColor: athlete.gender == 'Kadın'
+                                      ? colorScheme.secondaryContainer
+                                      : colorScheme.primaryContainer,
+                                  child: Icon(
+                                    athlete.gender == 'Kadın' ? Icons.female : Icons.male,
+                                    color: athlete.gender == 'Kadın'
+                                        ? colorScheme.secondary
+                                        : colorScheme.primary,
+                                    size: 28,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${athlete.name} ${athlete.surname}',
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.sports, size: 16, color: colorScheme.primary),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            athlete.branch,
+                                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                  color: colorScheme.primary,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Icon(Icons.cake, size: 15, color: colorScheme.outline),
+                                          const SizedBox(width: 2),
+                                          Text(
+                                            '${athlete.birthDate.year}',
+                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                  color: colorScheme.outline,
+                                                ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Icon(
+                                            athlete.gender == 'Kadın' ? Icons.female : Icons.male,
+                                            size: 15,
+                                            color: colorScheme.outline,
+                                          ),
+                                          const SizedBox(width: 2),
+                                          Text(
+                                            athlete.gender,
+                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                  color: colorScheme.outline,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.edit, size: 22),
+                                  tooltip: 'Düzenle',
+                                  onPressed: () async {
+                                    final updatedAthlete = await Navigator.of(context).push<AthleteModel>(
+                                      MaterialPageRoute(
+                                        builder: (context) => AthleteAddScreen(athlete: athlete),
+                                      ),
+                                    );
+                                    if (updatedAthlete != null) {
+                                      await AthleteDatabase().updateAthlete(updatedAthlete);
+                                      setState(() {
+                                        _athletes[index] = updatedAthlete;
+                                      });
+                                    }
+                                  },
+                                ),
+                                const Icon(Icons.arrow_forward_ios, size: 18, color: Color(0xFF6366F1)),
+                              ],
+                            ),
+                          ),
                         ),
                       );
                     },
