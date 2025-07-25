@@ -1,6 +1,7 @@
 import 'package:athleticcoach/data/athlete_database.dart';
 import 'package:athleticcoach/data/models/athlete_model.dart';
 import 'package:athleticcoach/data/models/test_result_model.dart';
+import 'package:athleticcoach/presentation/screens/test_result_analysis_screen.dart';
 import 'package:athleticcoach/services/gemini_service.dart';
 import 'package:flutter/material.dart';
 
@@ -534,12 +535,16 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                           ),
                           child: Column(
                             children: [
-                              // Başlık ve toggle butonu
+                              // Başlık ve AI detay sayfasına yönlendirme
                               InkWell(
                                 onTap: () {
-                                  setState(() {
-                                    _isAnalysisExpanded[result.id] = !(_isAnalysisExpanded[result.id] ?? false);
-                                  });
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => TestResultAnalysisScreen(
+                                        testResult: result,
+                                      ),
+                                    ),
+                                  );
                                 },
                                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                                 child: Container(
@@ -596,106 +601,40 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                         ),
                                       ),
                                       Container(
-                                        padding: const EdgeInsets.all(6),
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF6366F1).withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(8),
+                                          color: const Color(0xFF6366F1).withOpacity(0.15),
+                                          borderRadius: BorderRadius.circular(20),
+                                          border: Border.all(
+                                            color: const Color(0xFF6366F1).withOpacity(0.3),
+                                            width: 1,
+                                          ),
                                         ),
-                                        child: Icon(
-                                          _isAnalysisExpanded[result.id] == true
-                                              ? Icons.keyboard_arrow_up
-                                              : Icons.keyboard_arrow_down,
-                                          color: const Color(0xFF6366F1),
-                                          size: 20,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'Detayları Gör',
+                                              style: TextStyle(
+                                                color: const Color(0xFF6366F1),
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Icon(
+                                              Icons.arrow_forward_ios,
+                                              color: const Color(0xFF6366F1),
+                                              size: 14,
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
-                              // Analiz içeriği (parçalanmış bölümler)
-                              if (_isAnalysisExpanded[result.id] == true)
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(20),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Başlık
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF6366F1).withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          'Analiz Bölümleri',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: const Color(0xFF6366F1),
-                                            letterSpacing: 0.3,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      
-                                      // Sonuç Değerlendirmesi
-                                      _buildAnalysisSection(
-                                        result.id,
-                                        'degerlendirme',
-                                        'Sonuç Değerlendirmesi',
-                                        Icons.analytics,
-                                        const Color(0xFF10B981),
-                                      ),
-                                      
-                                      // Eksik Yönler ve Güçlü Yanlar
-                                      _buildAnalysisSection(
-                                        result.id,
-                                        'eksik_guclu',
-                                        'Eksik Yönler ve Güçlü Yanlar',
-                                        Icons.trending_up,
-                                        const Color(0xFFF59E0B),
-                                      ),
-                                      
-                                      // Genel Notlar
-                                      _buildAnalysisSection(
-                                        result.id,
-                                        'genel_notlar',
-                                        'Genel Notlar',
-                                        Icons.note,
-                                        const Color(0xFF8B5CF6),
-                                      ),
-                                      
-                                      // Haftalık Program
-                                      _buildAnalysisSection(
-                                        result.id,
-                                        'haftalik_program',
-                                        'Haftalık Program',
-                                        Icons.calendar_today,
-                                        const Color(0xFFEF4444),
-                                      ),
-                                      
-                                      // Beslenme ve Dinlenme
-                                      _buildAnalysisSection(
-                                        result.id,
-                                        'beslenme_dinlenme',
-                                        'Beslenme ve Dinlenme',
-                                        Icons.restaurant,
-                                        const Color(0xFF06B6D4),
-                                      ),
-                                      
-                                      // Uzun Vadeli Gelişim
-                                      _buildAnalysisSection(
-                                        result.id,
-                                        'uzun_vadeli',
-                                        'Uzun Vadeli Gelişim',
-                                        Icons.timeline,
-                                        const Color(0xFF8B5CF6),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+
                             ],
                           ),
                         )

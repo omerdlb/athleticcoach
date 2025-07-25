@@ -106,14 +106,14 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                       color: colorScheme.primary.withOpacity(0.10),
                       blurRadius: 18,
                       offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
+          ),
+        ],
+      ),
                 child: Form(
-                  key: _formKey,
+        key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
+            children: [
                       // Avatar ve başlık
                       CircleAvatar(
                         radius: 38,
@@ -138,126 +138,126 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                       ),
                       const SizedBox(height: 24),
                       // Form alanları
-                      TextFormField(
-                        controller: _nameController,
+              TextFormField(
+                controller: _nameController,
                         decoration: InputDecoration(
                           labelText: 'İsim',
                           prefixIcon: const Icon(Icons.person),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        validator: (value) => value == null || value.isEmpty ? 'İsim girin' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _surnameController,
+                validator: (value) => value == null || value.isEmpty ? 'İsim girin' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _surnameController,
                         decoration: InputDecoration(
                           labelText: 'Soyisim',
                           prefixIcon: const Icon(Icons.person_outline),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        validator: (value) => value == null || value.isEmpty ? 'Soyisim girin' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _birthDateController,
-                        decoration: InputDecoration(
-                          labelText: 'Doğum Tarihi',
+                validator: (value) => value == null || value.isEmpty ? 'Soyisim girin' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _birthDateController,
+                decoration: InputDecoration(
+                  labelText: 'Doğum Tarihi',
                           prefixIcon: const Icon(Icons.cake),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.calendar_today),
-                            onPressed: () async {
-                              final pickedDate = await showDatePicker(
-                                context: context,
-                                initialDate: _selectedBirthDate ?? DateTime(2005),
-                                firstDate: DateTime(1950),
-                                lastDate: DateTime.now(),
-                              );
-                              if (pickedDate != null) {
-                                setState(() {
-                                  _selectedBirthDate = pickedDate;
-                                  _birthDateController.text =
-                                      "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                                });
-                              }
-                            },
-                          ),
-                        ),
-                        readOnly: true,
-                        validator: (value) => value == null || value.isEmpty ? 'Doğum tarihi seçin' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        value: _selectedGender,
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.calendar_today),
+                    onPressed: () async {
+                      final pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedBirthDate ?? DateTime(2005),
+                        firstDate: DateTime(1950),
+                        lastDate: DateTime.now(),
+                      );
+                      if (pickedDate != null) {
+                        setState(() {
+                          _selectedBirthDate = pickedDate;
+                          _birthDateController.text =
+                              "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                        });
+                      }
+                    },
+                  ),
+                ),
+                readOnly: true,
+                validator: (value) => value == null || value.isEmpty ? 'Doğum tarihi seçin' : null,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedGender,
                         decoration: InputDecoration(
                           labelText: 'Cinsiyet',
                           prefixIcon: const Icon(Icons.wc),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        items: ['Erkek', 'Kadın']
-                            .map((label) => DropdownMenuItem(
-                                  child: Text(label),
-                                  value: label,
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedGender = value;
-                          });
-                        },
-                        validator: (value) => value == null ? 'Cinsiyet seçin' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _weightController,
+                items: ['Erkek', 'Kadın']
+                    .map((label) => DropdownMenuItem(
+                          child: Text(label),
+                          value: label,
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedGender = value;
+                  });
+                },
+                validator: (value) => value == null ? 'Cinsiyet seçin' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _weightController,
                         decoration: InputDecoration(
                           labelText: 'Kilo (kg)',
                           prefixIcon: const Icon(Icons.monitor_weight),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        keyboardType: TextInputType.number,
-                        validator: (value) => value == null || value.isEmpty ? 'Kilo girin' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _heightController,
+                keyboardType: TextInputType.number,
+                validator: (value) => value == null || value.isEmpty ? 'Kilo girin' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _heightController,
                         decoration: InputDecoration(
                           labelText: 'Boy (cm)',
                           prefixIcon: const Icon(Icons.height),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        keyboardType: TextInputType.number,
-                        validator: (value) => value == null || value.isEmpty ? 'Boy girin' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      Autocomplete<String>(
-                        optionsBuilder: (TextEditingValue textEditingValue) {
-                          if (textEditingValue.text == '') {
-                            return _branches;
-                          }
-                          return _branches.where((String option) {
-                            return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
-                          });
-                        },
-                        initialValue: TextEditingValue(text: _selectedBranch ?? ''),
-                        onSelected: (String selection) {
-                          setState(() {
-                            _selectedBranch = selection;
-                          });
-                        },
-                        fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                          controller.text = _selectedBranch ?? '';
-                          return TextFormField(
-                            controller: controller,
-                            focusNode: focusNode,
+                keyboardType: TextInputType.number,
+                validator: (value) => value == null || value.isEmpty ? 'Boy girin' : null,
+              ),
+              const SizedBox(height: 16),
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text == '') {
+                    return _branches;
+                  }
+                  return _branches.where((String option) {
+                    return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                initialValue: TextEditingValue(text: _selectedBranch ?? ''),
+                onSelected: (String selection) {
+                  setState(() {
+                    _selectedBranch = selection;
+                  });
+                },
+                fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+                  controller.text = _selectedBranch ?? '';
+                  return TextFormField(
+                    controller: controller,
+                    focusNode: focusNode,
                             decoration: InputDecoration(
                               labelText: 'Branş',
                               prefixIcon: const Icon(Icons.sports),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             ),
-                            validator: (value) => value == null || value.isEmpty ? 'Branş seçin' : null,
-                          );
-                        },
+                    validator: (value) => value == null || value.isEmpty ? 'Branş seçin' : null,
+                  );
+                },
                         optionsViewBuilder: (context, onSelected, options) {
                           return Align(
                             alignment: Alignment.topLeft,
@@ -316,10 +316,10 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                             }
                           },
                         ),
-                      ),
-                    ],
-                  ),
-                ),
+              ),
+            ],
+          ),
+        ),
               ),
             ),
           ),

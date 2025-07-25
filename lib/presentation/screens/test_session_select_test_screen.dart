@@ -70,7 +70,7 @@ class _TestSessionSelectTestScreenState extends State<TestSessionSelectTestScree
           Expanded(
             child: ListView.builder(
               itemCount: filteredTests.length,
-              itemBuilder: (context, index) {
+        itemBuilder: (context, index) {
                 final test = filteredTests[index];
                 return InkWell(
                   borderRadius: BorderRadius.circular(16),
@@ -111,8 +111,8 @@ class _TestSessionSelectTestScreenState extends State<TestSessionSelectTestScree
                           const SizedBox(width: 16),
                           Expanded(
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                                 Row(
                                   children: [
                                     Container(
@@ -145,16 +145,16 @@ class _TestSessionSelectTestScreenState extends State<TestSessionSelectTestScree
                                   ],
                                 ),
                                 const SizedBox(height: 8),
-                                Text(
-                                  test.description,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: colorScheme.outline,
-                                      ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
+                  Text(
+                    test.description,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.outline,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
                           ),
                           const SizedBox(width: 10),
                           const Icon(Icons.arrow_forward_ios, size: 20, color: Color(0xFF6366F1)),

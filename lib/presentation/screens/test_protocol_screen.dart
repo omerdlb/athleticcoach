@@ -29,13 +29,13 @@ class TestProtocolScreen extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: ListView(
-              children: [
-                Center(
-                  child: Icon(Icons.fitness_center, size: 60, color: colorScheme.primary),
-                ),
-                const SizedBox(height: 18),
+        padding: const EdgeInsets.all(20.0),
+        child: ListView(
+          children: [
+            Center(
+              child: Icon(Icons.fitness_center, size: 60, color: colorScheme.primary),
+            ),
+            const SizedBox(height: 18),
                 _sectionCard(
                   context,
                   icon: Icons.info_outline,
@@ -60,17 +60,17 @@ class TestProtocolScreen extends StatelessWidget {
                   child: Text(test.protocol, style: Theme.of(context).textTheme.bodyLarge),
                 ),
                 const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Icon(Icons.straighten, color: colorScheme.tertiary),
-                    const SizedBox(width: 8),
-                    Text('Sonuç Birimi: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text(test.resultUnit, style: TextStyle(color: colorScheme.tertiary)),
-                  ],
-                ),
-                ..._buildReferenceTables(test, context, colorScheme),
+            Row(
+              children: [
+                Icon(Icons.straighten, color: colorScheme.tertiary),
+                const SizedBox(width: 8),
+                Text('Sonuç Birimi: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(test.resultUnit, style: TextStyle(color: colorScheme.tertiary)),
               ],
             ),
+                ..._buildReferenceTables(test, context, colorScheme),
+          ],
+        ),
           ),
         ],
       ),
@@ -99,10 +99,10 @@ class TestProtocolScreen extends StatelessWidget {
               Icon(icon, color: color, size: 24),
               const SizedBox(width: 10),
               Text(
-                title,
+      title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
+            fontWeight: FontWeight.bold,
+            color: color,
                     ),
               ),
             ],
@@ -110,7 +110,7 @@ class TestProtocolScreen extends StatelessWidget {
           const SizedBox(height: 10),
           child,
         ],
-      ),
+          ),
     );
   }
 
