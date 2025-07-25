@@ -42,6 +42,8 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
         'eksik_guclu': false,
         'genel_notlar': false,
         'haftalik_program': false,
+        'beslenme_dinlenme': false,
+        'uzun_vadeli': false,
       };
     }
   }
@@ -54,40 +56,19 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
     try {
       final age = DateTime.now().year - athlete.birthDate.year;
       
-      final prompt = '''
-Bir sporcu için test sonucu analizi ve antrenman önerisi hazırla.
-
-Sporcu Bilgileri (Bu bilgileri cevabında tekrar yazma, sadece analiz için kullan):
-- Ad Soyad: ${athlete.name} ${athlete.surname}
-- Yaş: ${DateTime.now().year - athlete.birthDate.year} yaşında
-- Cinsiyet: ${athlete.gender}
-- Branş: ${athlete.branch}
-- Boy: ${athlete.height} cm
-- Kilo: ${athlete.weight} kg
-
-Test Bilgileri:
-- Test: ${widget.selectedTest.name}
-- Sonuç: $result ${widget.selectedTest.resultUnit}
-- Antrenör notu: ${notes ?? 'Not girilmemiş'}
-
-Lütfen şu başlıklar altında yanıtla (sporcu bilgilerini tekrar yazma):
-
-1. SONUÇ DEĞERLENDİRMESİ:
-Bu yaş ve cinsiyet için sonuç nasıl? Ortalama, iyi, çok iyi, zayıf?
-
-2. EKSİK YÖNLER VE GÜÇLÜ YANLAR:
-Sporcunun eksik yönleri ve güçlü yanları nelerdir?
-
-3. GENEL NOTLAR:
-Branşına göre bu kapasite önemli mi? Genel performans değerlendirmesi.
-
-4. HAFTALIK PROGRAM:
-Bu kapasiteyi geliştirmek için 4 haftalık örnek antrenman planı.
-
-Türkçe olarak, kısa ve öz bir şekilde yanıtla. Her bölüm maksimum 100 kelime olsun. Gereksiz çizgiler, yıldızlar veya formatlamalar kullanma. Sporcu bilgilerini cevabında tekrar yazma.
-''';
-
-      final analysis = await GeminiService.generateContent(prompt);
+      final analysis = await GeminiService.generateDetailedAnalysis(
+        athleteName: athlete.name,
+        athleteSurname: athlete.surname,
+        age: age,
+        gender: athlete.gender,
+        branch: athlete.branch,
+        height: athlete.height,
+        weight: athlete.weight,
+        testName: widget.selectedTest.name,
+        result: result,
+        resultUnit: widget.selectedTest.resultUnit,
+        notes: notes,
+      );
       
       if (mounted && analysis != null) {
         setState(() {
@@ -221,10 +202,19 @@ Türkçe olarak, kısa ve öz bir şekilde yanıtla. Her bölüm maksimum 100 ke
         .replaceAll(RegExp(r'^\s+|\s+$', multiLine: true), '') // Satır başı/sonu boşlukları
         .trim();
     
-    // Bölümleri ayır
+    // Bölümleri ayır - yeni detaylı format için
     final parts = cleanAnalysis.split(RegExp(r'\d+\.\s*'));
     
-    if (parts.length >= 5) {
+    if (parts.length >= 7) {
+      // Yeni detaylı format: 6 bölüm
+      sections['degerlendirme'] = _cleanSection(parts[1]);
+      sections['eksik_guclu'] = _cleanSection(parts[2]);
+      sections['genel_notlar'] = _cleanSection(parts[3]);
+      sections['haftalik_program'] = _cleanSection(parts[4]);
+      sections['beslenme_dinlenme'] = _cleanSection(parts[5]);
+      sections['uzun_vadeli'] = _cleanSection(parts[6]);
+    } else if (parts.length >= 5) {
+      // Eski format: 4 bölüm
       sections['degerlendirme'] = _cleanSection(parts[1]);
       sections['eksik_guclu'] = _cleanSection(parts[2]);
       sections['genel_notlar'] = _cleanSection(parts[3]);
@@ -784,6 +774,26 @@ Türkçe olarak, kısa ve öz bir şekilde yanıtla. Her bölüm maksimum 100 ke
                                           'Haftalık Program',
                                           Icons.calendar_today,
                                           const Color(0xFFEF4444),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        
+                                        // Beslenme ve Dinlenme
+                                        _buildAnalysisSection(
+                                          athlete.id,
+                                          'beslenme_dinlenme',
+                                          'Beslenme ve Dinlenme',
+                                          Icons.restaurant,
+                                          const Color(0xFF06B6D4),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        
+                                        // Uzun Vadeli Gelişim
+                                        _buildAnalysisSection(
+                                          athlete.id,
+                                          'uzun_vadeli',
+                                          'Uzun Vadeli Gelişim',
+                                          Icons.timeline,
+                                          const Color(0xFF8B5CF6),
                                         ),
                                       ],
                                     ),

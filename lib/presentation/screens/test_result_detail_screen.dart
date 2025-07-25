@@ -39,6 +39,8 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
         'eksik_guclu': false,
         'genel_notlar': false,
         'haftalik_program': false,
+        'beslenme_dinlenme': false,
+        'uzun_vadeli': false,
       };
       
       // Eğer analiz varsa, parçala
@@ -70,30 +72,19 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
           ? DateTime.now().year - athlete.birthDate.year 
           : DateTime.now().year - result.testDate.year;
       
-      final prompt = '''
-Bir sporcu için test sonucu analizi ve antrenman önerisi hazırla.
-
-Sporcu bilgileri:
-- Ad: ${athlete?.name ?? result.athleteName} ${athlete?.surname ?? result.athleteSurname}
-- Yaş: $age yaş
-- Cinsiyet: ${athlete?.gender ?? 'Belirtilmemiş'}
-- Branş: ${athlete?.branch ?? 'Belirtilmemiş'}
-- Boy: ${athlete?.height ?? 0} cm
-- Kilo: ${athlete?.weight ?? 0} kg
-- Test: ${result.testName}
-- Sonuç: ${result.result} ${result.resultUnit}
-- Testin amacı: ${result.testName} testi ile ölçülen kapasite
-- Antrenör notu: ${result.notes ?? 'Not girilmemiş'}
-
-Lütfen:
-- Sonucu yaş/cinsiyet/branş ortalamalarına göre değerlendir.
-- Eksik yönleri ve güçlü yanları belirt.
-- Testin amacına göre kapasiteyi geliştirmek için 4 haftalık örnek antrenman planı öner.
-
-Türkçe olarak, detaylı ve uygulanabilir bir şekilde yanıtla. Antrenman planı spesifik ve ölçülebilir olsun.
-''';
-
-      final analysis = await GeminiService.generateContent(prompt);
+      final analysis = await GeminiService.generateDetailedAnalysis(
+        athleteName: athlete?.name ?? result.athleteName,
+        athleteSurname: athlete?.surname ?? result.athleteSurname,
+        age: age,
+        gender: athlete?.gender ?? 'Belirtilmemiş',
+        branch: athlete?.branch ?? 'Belirtilmemiş',
+        height: athlete?.height ?? 0,
+        weight: athlete?.weight ?? 0,
+        testName: result.testName,
+        result: result.result,
+        resultUnit: result.resultUnit,
+        notes: result.notes,
+      );
       
       if (mounted && analysis != null) {
         // Analizi parçala
@@ -201,10 +192,19 @@ Türkçe olarak, detaylı ve uygulanabilir bir şekilde yanıtla. Antrenman plan
         .replaceAll(RegExp(r'^\s+|\s+$', multiLine: true), '') // Satır başı/sonu boşlukları
         .trim();
     
-    // Bölümleri ayır
+    // Bölümleri ayır - yeni detaylı format için
     final parts = cleanAnalysis.split(RegExp(r'\d+\.\s*'));
     
-    if (parts.length >= 5) {
+    if (parts.length >= 7) {
+      // Yeni detaylı format: 6 bölüm
+      sections['degerlendirme'] = _cleanSection(parts[1]);
+      sections['eksik_guclu'] = _cleanSection(parts[2]);
+      sections['genel_notlar'] = _cleanSection(parts[3]);
+      sections['haftalik_program'] = _cleanSection(parts[4]);
+      sections['beslenme_dinlenme'] = _cleanSection(parts[5]);
+      sections['uzun_vadeli'] = _cleanSection(parts[6]);
+    } else if (parts.length >= 5) {
+      // Eski format: 4 bölüm
       sections['degerlendirme'] = _cleanSection(parts[1]);
       sections['eksik_guclu'] = _cleanSection(parts[2]);
       sections['genel_notlar'] = _cleanSection(parts[3]);
@@ -570,6 +570,26 @@ Türkçe olarak, detaylı ve uygulanabilir bir şekilde yanıtla. Antrenman plan
                                         'Haftalık Program',
                                         Icons.calendar_today,
                                         const Color(0xFFEF4444),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      
+                                      // Beslenme ve Dinlenme
+                                      _buildAnalysisSection(
+                                        result.id,
+                                        'beslenme_dinlenme',
+                                        'Beslenme ve Dinlenme',
+                                        Icons.restaurant,
+                                        const Color(0xFF06B6D4),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      
+                                      // Uzun Vadeli Gelişim
+                                      _buildAnalysisSection(
+                                        result.id,
+                                        'uzun_vadeli',
+                                        'Uzun Vadeli Gelişim',
+                                        Icons.timeline,
+                                        const Color(0xFF8B5CF6),
                                       ),
                                     ],
                                   ),

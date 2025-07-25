@@ -22,7 +22,7 @@ class AthleteDatabase {
     final path = join(dbPath, 'athletes.db');
     return openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE athletes(
@@ -49,6 +49,7 @@ class AthleteDatabase {
             result REAL,
             resultUnit TEXT,
             notes TEXT,
+            aiAnalysis TEXT,
             FOREIGN KEY (athleteId) REFERENCES athletes (id)
           )
         ''');
@@ -73,6 +74,14 @@ class AthleteDatabase {
         }
         if (oldVersion < 3) {
           await db.execute('ALTER TABLE test_results ADD COLUMN aiAnalysis TEXT');
+        }
+        if (oldVersion < 4) {
+          // Eğer aiAnalysis sütunu hala yoksa ekle
+          try {
+            await db.execute('ALTER TABLE test_results ADD COLUMN aiAnalysis TEXT');
+          } catch (e) {
+            // Sütun zaten varsa hata vermesin
+          }
         }
       },
     );

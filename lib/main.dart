@@ -5,7 +5,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load();
+  
+  try {
+    await dotenv.load();
+  } catch (e) {
+    print('Uyarı: .env dosyası yüklenemedi: $e');
+    print('Uygulama varsayılan ayarlarla çalışacak.');
+  }
+  
   runApp(const MyApp());
 }
 

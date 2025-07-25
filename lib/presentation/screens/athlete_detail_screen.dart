@@ -42,6 +42,8 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
           'eksik_guclu': false,
           'genel_notlar': false,
           'haftalik_program': false,
+          'beslenme_dinlenme': false,
+          'uzun_vadeli': false,
         };
         _analysisExpanded[result.id] = false; // Ana analiz kapalı başlasın
         _testGroupExpanded[result.testName] = true; // Test grupları açık başlasın
@@ -94,10 +96,19 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
         .replaceAll(RegExp(r'^\s+|\s+$', multiLine: true), '') // Satır başı/sonu boşlukları
         .trim();
     
-    // Bölümleri ayır
+    // Bölümleri ayır - yeni detaylı format için
     final parts = cleanAnalysis.split(RegExp(r'\d+\.\s*'));
     
-    if (parts.length >= 5) {
+    if (parts.length >= 7) {
+      // Yeni detaylı format: 6 bölüm
+      sections['degerlendirme'] = _cleanSection(parts[1]);
+      sections['eksik_guclu'] = _cleanSection(parts[2]);
+      sections['genel_notlar'] = _cleanSection(parts[3]);
+      sections['haftalik_program'] = _cleanSection(parts[4]);
+      sections['beslenme_dinlenme'] = _cleanSection(parts[5]);
+      sections['uzun_vadeli'] = _cleanSection(parts[6]);
+    } else if (parts.length >= 5) {
+      // Eski format: 4 bölüm
       sections['degerlendirme'] = _cleanSection(parts[1]);
       sections['eksik_guclu'] = _cleanSection(parts[2]);
       sections['genel_notlar'] = _cleanSection(parts[3]);
