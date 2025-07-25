@@ -50,12 +50,19 @@ class _TestLibraryScreenState extends State<TestLibraryScreen> {
                 final cat = _categories[i];
                 final selected = cat == _selectedCategory;
                 return ChoiceChip(
-                  label: Text(cat, style: TextStyle(fontWeight: FontWeight.w600)),
+                  label: Text(
+                    cat, 
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: MediaQuery.of(context).size.width < 400 ? 13 : 14,
+                    ),
+                  ),
                   selected: selected,
                   selectedColor: colorScheme.primary,
                   backgroundColor: colorScheme.primary.withOpacity(0.08),
                   labelStyle: TextStyle(
                     color: selected ? Colors.white : colorScheme.primary,
+                    fontSize: MediaQuery.of(context).size.width < 400 ? 13 : 14,
                   ),
                   onSelected: (_) {
                     setState(() => _selectedCategory = cat);
@@ -92,7 +99,14 @@ class _TestLibraryScreenState extends State<TestLibraryScreen> {
                     leading: Icon(Icons.fitness_center, color: colorScheme.primary, size: 32),
                     title: Text(
                       test.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: MediaQuery.of(context).size.width < 400 ? 16 : 18,
+                        letterSpacing: 0.2,
+                        height: 1.2,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 4.0),
@@ -109,7 +123,7 @@ class _TestLibraryScreenState extends State<TestLibraryScreen> {
                               style: TextStyle(
                                 color: colorScheme.secondary,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 13,
+                                fontSize: MediaQuery.of(context).size.width < 400 ? 11 : 13,
                               ),
                             ),
                           ),

@@ -207,9 +207,11 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                   const SizedBox(width: 8),
                                   Text(
                                     currentDate,
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
+                                      fontSize: MediaQuery.of(context).size.width < 400 ? 16 : 18,
                                       color: colorScheme.primary,
+                                      letterSpacing: 0.2,
                                     ),
                                   ),
                                 ],
@@ -236,18 +238,25 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                               ),
                               title: Text(
                                 firstResult.testName,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
+                                  fontSize: MediaQuery.of(context).size.width < 400 ? 16 : 18,
+                                  letterSpacing: 0.2,
+                                  height: 1.2,
                                 ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     '${results.length} katılımcı',
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.w500,
+                                      fontSize: MediaQuery.of(context).size.width < 400 ? 14 : 16,
                                       color: colorScheme.primary,
+                                      letterSpacing: 0.1,
                                     ),
                                   ),
                                   const SizedBox(height: 4),

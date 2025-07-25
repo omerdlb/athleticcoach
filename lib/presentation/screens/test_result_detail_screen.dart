@@ -234,13 +234,21 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
     final isExpanded = _sectionExpanded[resultId]?[sectionKey] ?? false;
     
     return Container(
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: color.withOpacity(0.2),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -250,20 +258,24 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                 _sectionExpanded[resultId]![sectionKey] = !isExpanded;
               });
             },
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.05),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              ),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
+                      color: color.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       icon,
-                      size: 16,
+                      size: 18,
                       color: color,
                     ),
                   ),
@@ -274,14 +286,22 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: color,
-                        fontSize: 14,
+                        fontSize: MediaQuery.of(context).size.width < 400 ? 14 : 16,
+                        letterSpacing: 0.2,
                       ),
                     ),
                   ),
-                  Icon(
-                    isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    color: color,
-                    size: 20,
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Icon(
+                      isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                      color: color,
+                      size: 18,
+                    ),
                   ),
                 ],
               ),
@@ -290,14 +310,39 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
           if (isExpanded)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: Text(
-                content,
-                style: TextStyle(
-                  color: color.withOpacity(0.8),
-                  fontSize: 13,
-                  height: 1.4,
-                ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // İçerik başlığı
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'Detaylar',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: color,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // İçerik metni
+                  Text(
+                    content,
+                    style: TextStyle(
+                      color: const Color(0xFF374151),
+                      fontSize: MediaQuery.of(context).size.width < 400 ? 14 : 15,
+                      height: 1.6,
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+                ],
               ),
             ),
         ],
@@ -473,12 +518,19 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: const Color(0xFFE2E8F0),
+                              color: const Color(0xFFE5E7EB),
                               width: 1,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF6366F1).withOpacity(0.08),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: Column(
                             children: [
@@ -489,38 +541,73 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                     _isAnalysisExpanded[result.id] = !(_isAnalysisExpanded[result.id] ?? false);
                                   });
                                 },
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                                 child: Container(
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        const Color(0xFF6366F1).withOpacity(0.1),
+                                        const Color(0xFF8B5CF6).withOpacity(0.1),
+                                      ],
+                                    ),
+                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                  ),
                                   child: Row(
                                     children: [
                                       Container(
-                                        padding: const EdgeInsets.all(8),
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF6366F1).withOpacity(0.15),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: const Icon(
+                                          Icons.auto_awesome,
+                                          size: 22,
+                                          color: Color(0xFF6366F1),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'AI Analizi',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: MediaQuery.of(context).size.width < 400 ? 16 : 18,
+                                                color: const Color(0xFF1F2937),
+                                                letterSpacing: 0.2,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Detaylı performans değerlendirmesi',
+                                              style: TextStyle(
+                                                fontSize: MediaQuery.of(context).size.width < 400 ? 12 : 13,
+                                                color: const Color(0xFF6B7280),
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFF6366F1).withOpacity(0.1),
                                           borderRadius: BorderRadius.circular(8),
                                         ),
-                                        child: const Icon(
-                                          Icons.auto_awesome,
+                                        child: Icon(
+                                          _isAnalysisExpanded[result.id] == true
+                                              ? Icons.keyboard_arrow_up
+                                              : Icons.keyboard_arrow_down,
+                                          color: const Color(0xFF6366F1),
                                           size: 20,
-                                          color: Color(0xFF6366F1),
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          'AI Analizi',
-                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            color: const Color(0xFF1F2937),
-                                          ),
-                                        ),
-                                      ),
-                                      Icon(
-                                        _isAnalysisExpanded[result.id] == true
-                                            ? Icons.keyboard_arrow_up
-                                            : Icons.keyboard_arrow_down,
-                                        color: const Color(0xFF6B7280),
                                       ),
                                     ],
                                   ),
@@ -530,9 +617,29 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                               if (_isAnalysisExpanded[result.id] == true)
                                 Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(20),
                                   child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
+                                      // Başlık
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF6366F1).withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          'Analiz Bölümleri',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF6366F1),
+                                            letterSpacing: 0.3,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      
                                       // Sonuç Değerlendirmesi
                                       _buildAnalysisSection(
                                         result.id,
@@ -541,7 +648,6 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                         Icons.analytics,
                                         const Color(0xFF10B981),
                                       ),
-                                      const SizedBox(height: 12),
                                       
                                       // Eksik Yönler ve Güçlü Yanlar
                                       _buildAnalysisSection(
@@ -551,7 +657,6 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                         Icons.trending_up,
                                         const Color(0xFFF59E0B),
                                       ),
-                                      const SizedBox(height: 12),
                                       
                                       // Genel Notlar
                                       _buildAnalysisSection(
@@ -561,7 +666,6 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                         Icons.note,
                                         const Color(0xFF8B5CF6),
                                       ),
-                                      const SizedBox(height: 12),
                                       
                                       // Haftalık Program
                                       _buildAnalysisSection(
@@ -571,7 +675,6 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                         Icons.calendar_today,
                                         const Color(0xFFEF4444),
                                       ),
-                                      const SizedBox(height: 12),
                                       
                                       // Beslenme ve Dinlenme
                                       _buildAnalysisSection(
@@ -581,7 +684,6 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                         Icons.restaurant,
                                         const Color(0xFF06B6D4),
                                       ),
-                                      const SizedBox(height: 12),
                                       
                                       // Uzun Vadeli Gelişim
                                       _buildAnalysisSection(
@@ -720,4 +822,4 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
       ),
     );
   }
-} 
+}
