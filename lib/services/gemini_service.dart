@@ -7,30 +7,88 @@ class GeminiService {
   static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
   static Future<String?> generateContent(String prompt) async {
-    final response = await http.post(
-      Uri.parse(_baseUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'X-goog-api-key': _apiKey,
-      },
-      body: jsonEncode({
-        "contents": [
-          {
-            "parts": [
-              {"text": prompt}
+    print('=== GEMINI API ÇAĞRISI ===');
+    print('Prompt Uzunluğu: ${prompt.length} karakter');
+    print('API Key: ${_apiKey.isNotEmpty ? 'Mevcut' : 'EKSİK!'}');
+    print('==========================');
+    
+    // Retry mekanizması
+    int maxRetries = 3;
+    int currentRetry = 0;
+    
+    while (currentRetry < maxRetries) {
+      try {
+        final response = await http.post(
+          Uri.parse(_baseUrl),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-goog-api-key': _apiKey,
+          },
+          body: jsonEncode({
+            "contents": [
+              {
+                "parts": [
+                  {"text": prompt}
+                ]
+              }
             ]
-          }
-        ]
-      }),
-    );
+          }),
+        );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final text = data['candidates']?[0]?['content']?['parts']?[0]?['text'];
-      return text?.toString();
-    } else {
-      return 'Hata: ${response.statusCode} - ${response.body}';
+        print('=== API YANITI (Deneme ${currentRetry + 1}) ===');
+        print('Status Code: ${response.statusCode}');
+        print('Response Body: ${response.body}');
+        print('==================');
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final text = data['candidates']?[0]?['content']?['parts']?[0]?['text'];
+          
+          print('=== PARSE EDİLEN YANIT ===');
+          print('Text: ${text?.toString().substring(0, text.toString().length > 100 ? 100 : text.toString().length)}...');
+          print('==========================');
+          
+          return text?.toString();
+        } else if (response.statusCode == 503) {
+          // Model aşırı yüklü, tekrar dene
+          print('=== MODEL AŞIRI YÜKLÜ, TEKRAR DENENİYOR ===');
+          print('Deneme: ${currentRetry + 1}/$maxRetries');
+          print('Bekleme süresi: ${(currentRetry + 1) * 2} saniye');
+          print('==========================================');
+          
+          currentRetry++;
+          if (currentRetry < maxRetries) {
+            // Exponential backoff: 2, 4, 6 saniye bekle
+            await Future.delayed(Duration(seconds: currentRetry * 2));
+            continue;
+          }
+        } else {
+          print('=== API HATASI ===');
+          print('Status Code: ${response.statusCode}');
+          print('Error Body: ${response.body}');
+          print('==================');
+          return 'Hata: ${response.statusCode} - ${response.body}';
+        }
+      } catch (e) {
+        print('=== NETWORK HATASI ===');
+        print('Hata: $e');
+        print('Deneme: ${currentRetry + 1}/$maxRetries');
+        print('======================');
+        
+        currentRetry++;
+        if (currentRetry < maxRetries) {
+          await Future.delayed(Duration(seconds: currentRetry * 2));
+          continue;
+        }
+      }
     }
+    
+    // Tüm denemeler başarısız
+    print('=== TÜM DENEMELER BAŞARISIZ ===');
+    print('Maksimum deneme sayısına ulaşıldı: $maxRetries');
+    print('===============================');
+    
+    return 'API aşırı yüklü. Lütfen birkaç dakika sonra tekrar deneyin.';
   }
 
   static Future<String?> generateDetailedAnalysis({
@@ -46,63 +104,51 @@ class GeminiService {
     required String resultUnit,
     String? notes,
   }) async {
+    // Debug bilgileri
+    print('=== AI ANALİZ VERİLERİ ===');
+    print('Sporcu: $athleteName $athleteSurname');
+    print('Yaş: $age');
+    print('Cinsiyet: $gender');
+    print('Branş: $branch');
+    print('Boy: $height cm');
+    print('Kilo: $weight kg');
+    print('Test: $testName');
+    print('Sonuç: $result $resultUnit');
+    print('Notlar: ${notes ?? 'Yok'}');
+    print('========================');
+
+    // Veri doğrulama
+    if (height <= 0 || weight <= 0 || result <= 0) {
+      print('HATA: Geçersiz veri değerleri!');
+      return 'Hata: Geçersiz veri değerleri. Boy, kilo ve test sonucu 0\'dan büyük olmalıdır.';
+    }
+
+    final bmi = weight / ((height / 100) * (height / 100));
+    
     final prompt = '''
-Sen deneyimli bir spor antrenörü ve performans analisti olarak, sporcu test sonuçlarını detaylı bir şekilde analiz et ve kapsamlı öneriler sun.
+        Sen spor antrenörüsün. Sporcu test sonucunu analiz et.
 
-SPORCU PROFİLİ:
-- Ad Soyad: $athleteName $athleteSurname
-- Yaş: $age yaşında
-- Cinsiyet: $gender
-- Branş: $branch
-- Boy: ${height}cm
-- Kilo: ${weight}kg
-- BMI: ${(weight / ((height / 100) * (height / 100))).toStringAsFixed(1)}
+        SPORCU: $athleteName $athleteSurname ($age yaş, $gender, $branch)
+        BOY: ${height.toStringAsFixed(1)} cm, KİLO: ${weight.toStringAsFixed(1)} kg
+        TEST: $testName
+        SONUÇ: ${result.toStringAsFixed(2)} $resultUnit
+        NOT: ${notes ?? 'Yok'}
 
-TEST BİLGİLERİ:
-- Test: $testName
-- Sonuç: $result $resultUnit
-- Antrenör Notu: ${notes ?? 'Not girilmemiş'}
+        Şu 3 bölümde kısa analiz yap:
 
-Lütfen aşağıdaki başlıklar altında detaylı analiz yap:
+        1. SONUÇ DEĞERLENDİRMESİ:
+        Bu yaş grubu için sonucun seviyesi (zayıf/orta/iyi/çok iyi)
 
-1. SONUÇ DEĞERLENDİRMESİ:
-- Bu yaş ve cinsiyet grubu için sonucun seviyesi (çok zayıf/zayıf/orta/iyi/çok iyi/mükemmel)
-- Yaş grubuna göre yüzdelik dilim tahmini
-- Branş için bu kapasitenin önemi ve etkisi
-- Sonucun genel performans üzerindeki etkisi
+        2. EKSİK YÖNLER:
+        Geliştirilmesi gereken 2-3 alan
 
-2. EKSİK YÖNLER VE GÜÇLÜ YANLAR:
-- Bu test sonucuna göre sporcunun güçlü yanları
-- Geliştirilmesi gereken alanlar
-- Branş için kritik olan eksiklikler
-- Potansiyel risk faktörleri
+        3. EGZERSİZ ÖNERİSİ:
+        Bu kapasiteyi geliştirmek için 3-4 egzersiz
 
-3. GENEL PERFORMANS DEĞERLENDİRMESİ:
-- Branş için bu kapasitenin önemi (1-10 arası puan)
-- Diğer fiziksel özelliklerle ilişkisi
-- Uzun vadeli gelişim potansiyeli
-- Sezon içi performans etkisi
+        Her bölüm maksimum 50 kelime olsun. Kısa ve öz yaz.
+        ''';
 
-4. HAFTALIK GELİŞTİRME PROGRAMI:
-- 4 haftalık detaylı antrenman planı
-- Her hafta için spesifik hedefler
-- Antrenman yoğunluğu ve süreleri
-- İlerleme takibi için ölçüm noktaları
-
-5. BESLENME VE DİNLENME ÖNERİLERİ:
-- Bu kapasiteyi destekleyecek beslenme önerileri
-- Dinlenme ve toparlanma stratejileri
-- Uyku kalitesi için öneriler
-
-6. UZUN VADELİ GELİŞİM PLANI:
-- 3-6 aylık hedefler
-- Sezonluk gelişim stratejisi
-- Performans zirvesi için zamanlama
-
-Yanıtını Türkçe olarak, profesyonel antrenör diliyle, kısa ve öz paragraflar halinde ver. Her bölüm maksimum 150 kelime olsun. Sporcu bilgilerini cevabında tekrar yazma, sadece analiz ve önerilere odaklan.
-''';
-
-    return await generateContent(prompt);
+            return await generateContent(prompt);
   }
 
   static Future<String?> generateComparativeAnalysis({
@@ -148,6 +194,43 @@ Lütfen aşağıdaki başlıklar altında karşılaştırmalı analiz yap:
 
 Türkçe olarak, kısa ve öz paragraflar halinde yanıtla. Her bölüm maksimum 120 kelime olsun.
 ''';
+
+    return await generateContent(prompt);
+  }
+
+  static Future<String?> generateTeamAnalysis({
+    required List<Map<String, dynamic>> results,
+    required String testName,
+  }) async {
+    final resultsText = results.map((result) {
+      final athlete = result['athlete'];
+      return '''
+        - ${athlete['name']} ${athlete['surname']} (${athlete['age']} yaş, ${athlete['gender']}): ${result['result']} ${result['unit']}
+        ''';
+    }).join('\n');
+
+    final prompt = '''
+        Sen spor antrenörüsün. Takım test sonuçlarını analiz et.
+
+        TEST: $testName
+        SPORCU SAYISI: ${results.length}
+
+        SONUÇLAR:
+        $resultsText
+
+        Şu 3 bölümde kısa analiz yap:
+
+        1. GENEL DEĞERLENDİRME:
+        En iyi ve en zayıf performans gösteren sporcular
+
+        2. TAKIM SEVİYESİ:
+        Genel takım performansı ve seviyesi
+
+        3. GELİŞİM ÖNERİSİ:
+        Takım için 2-3 genel öneri
+
+        Her bölüm maksimum 40 kelime olsun. Kısa ve öz yaz.
+        ''';
 
     return await generateContent(prompt);
   }

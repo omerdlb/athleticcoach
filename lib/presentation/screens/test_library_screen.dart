@@ -1,5 +1,9 @@
 import 'package:athleticcoach/data/predefined_data.dart';
+import 'package:athleticcoach/data/models/recent_test_model.dart';
+import 'package:athleticcoach/data/models/test_definition_model.dart';
+import 'package:athleticcoach/data/athlete_database.dart';
 import 'package:athleticcoach/presentation/screens/test_protocol_screen.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class TestLibraryScreen extends StatefulWidget {
@@ -25,15 +29,14 @@ class _TestLibraryScreenState extends State<TestLibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final filteredTests = _selectedCategory == 'Tümü'
         ? predefinedTests
         : predefinedTests.where((t) => t.category == _selectedCategory).toList();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Test Kütüphanesi'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: AppTheme.whiteTextColor,
         elevation: 2,
       ),
       body: Column(
@@ -54,15 +57,15 @@ class _TestLibraryScreenState extends State<TestLibraryScreen> {
                     cat, 
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      fontSize: MediaQuery.of(context).size.width < 400 ? 13 : 14,
+                      fontSize: AppTheme.getResponsiveFontSize(context, 14),
                     ),
                   ),
                   selected: selected,
-                  selectedColor: colorScheme.primary,
-                  backgroundColor: colorScheme.primary.withOpacity(0.08),
+                  selectedColor: AppTheme.primaryColor,
+                  backgroundColor: AppTheme.primaryColor.withOpacity(0.08),
                   labelStyle: TextStyle(
-                    color: selected ? Colors.white : colorScheme.primary,
-                    fontSize: MediaQuery.of(context).size.width < 400 ? 13 : 14,
+                    color: selected ? AppTheme.whiteTextColor : AppTheme.primaryColor,
+                    fontSize: AppTheme.getResponsiveFontSize(context, 14),
                   ),
                   onSelected: (_) {
                     setState(() => _selectedCategory = cat);
@@ -82,28 +85,29 @@ class _TestLibraryScreenState extends State<TestLibraryScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [colorScheme.primary.withOpacity(0.07), Colors.white],
+                      colors: [AppTheme.primaryColor.withOpacity(0.07), AppTheme.cardBackgroundColor],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: colorScheme.primary.withOpacity(0.08),
+                        color: AppTheme.shadowColorWithOpacity,
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: ListTile(
-                    leading: Icon(Icons.fitness_center, color: colorScheme.primary, size: 32),
+                    leading: Icon(Icons.fitness_center, color: AppTheme.primaryColor, size: 32),
                     title: Text(
                       test.name,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: MediaQuery.of(context).size.width < 400 ? 16 : 18,
+                        fontSize: AppTheme.getResponsiveFontSize(context, 18),
                         letterSpacing: 0.2,
                         height: 1.2,
+                        color: AppTheme.primaryTextColor,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -115,23 +119,24 @@ class _TestLibraryScreenState extends State<TestLibraryScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: colorScheme.secondaryContainer,
+                              color: AppTheme.secondaryColor.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               test.category,
                               style: TextStyle(
-                                color: colorScheme.secondary,
+                                color: AppTheme.secondaryColor,
                                 fontWeight: FontWeight.w600,
-                                fontSize: MediaQuery.of(context).size.width < 400 ? 11 : 13,
+                                fontSize: AppTheme.getResponsiveFontSize(context, 13),
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 20, color: Color(0xFF6366F1)),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 20, color: AppTheme.primaryColor),
                     onTap: () {
+                      _addToRecentTests(test);
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => TestProtocolScreen(test: test),
@@ -146,5 +151,21 @@ class _TestLibraryScreenState extends State<TestLibraryScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _addToRecentTests(TestDefinitionModel test) async {
+    try {
+      final recentTest = RecentTestModel(
+        testName: test.name,
+        athleteName: '', // Sporcu ismi kullanılmıyor
+        testDate: DateTime.now().toString().split(' ')[0], // Bugünün tarihi
+        viewedAt: DateTime.now(),
+      );
+      
+      await AthleteDatabase().addRecentTest(recentTest);
+    } catch (e) {
+      // Hata durumunda sessizce devam et
+      print('Recent test eklenirken hata: $e');
+    }
   }
 } 

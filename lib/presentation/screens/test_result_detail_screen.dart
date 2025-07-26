@@ -3,6 +3,7 @@ import 'package:athleticcoach/data/models/athlete_model.dart';
 import 'package:athleticcoach/data/models/test_result_model.dart';
 import 'package:athleticcoach/presentation/screens/test_result_analysis_screen.dart';
 import 'package:athleticcoach/services/gemini_service.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class TestResultDetailScreen extends StatefulWidget {
@@ -39,9 +40,6 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
         'degerlendirme': false,
         'eksik_guclu': false,
         'genel_notlar': false,
-        'haftalik_program': false,
-        'beslenme_dinlenme': false,
-        'uzun_vadeli': false,
       };
       
       // Eğer analiz varsa, parçala
@@ -108,6 +106,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
           resultUnit: result.resultUnit,
           notes: result.notes,
           aiAnalysis: analysis,
+          sessionId: result.sessionId,
         );
         
         await database.updateTestResult(updatedResult);
@@ -119,9 +118,9 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Analiz tamamlandı ve kaydedildi!'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppTheme.successColor,
             duration: Duration(seconds: 2),
           ),
         );
@@ -131,7 +130,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Analiz sırasında hata oluştu: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorColor,
           ),
         );
       }
@@ -160,7 +159,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('$analyzedCount sonuç analiz edildi ve kaydedildi!'),
-          backgroundColor: Colors.green,
+          backgroundColor: AppTheme.successColor,
           duration: const Duration(seconds: 3),
         ),
       );
@@ -193,26 +192,18 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
         .replaceAll(RegExp(r'^\s+|\s+$', multiLine: true), '') // Satır başı/sonu boşlukları
         .trim();
     
-    // Bölümleri ayır - yeni detaylı format için
+    // Bölümleri ayır - yeni 3 bölümlü format için
     final parts = cleanAnalysis.split(RegExp(r'\d+\.\s*'));
     
-    if (parts.length >= 7) {
-      // Yeni detaylı format: 6 bölüm
+    if (parts.length >= 4) { // 3 bölüm için (0. boş, 1-2-3. bölümler)
       sections['degerlendirme'] = _cleanSection(parts[1]);
       sections['eksik_guclu'] = _cleanSection(parts[2]);
       sections['genel_notlar'] = _cleanSection(parts[3]);
-      sections['haftalik_program'] = _cleanSection(parts[4]);
-      sections['beslenme_dinlenme'] = _cleanSection(parts[5]);
-      sections['uzun_vadeli'] = _cleanSection(parts[6]);
-    } else if (parts.length >= 5) {
-      // Eski format: 4 bölüm
-      sections['degerlendirme'] = _cleanSection(parts[1]);
-      sections['eksik_guclu'] = _cleanSection(parts[2]);
-      sections['genel_notlar'] = _cleanSection(parts[3]);
-      sections['haftalik_program'] = _cleanSection(parts[4]);
     } else {
-      // Eğer bölümler ayrılamazsa, tüm metni genel notlara koy
-      sections['genel_notlar'] = _cleanSection(cleanAnalysis);
+      // Fallback: Tüm analizi tek bölüm olarak göster
+      sections['degerlendirme'] = cleanAnalysis;
+      sections['eksik_guclu'] = 'Bölüm ayrıştırılamadı';
+      sections['genel_notlar'] = 'Bölüm ayrıştırılamadı';
     }
     
     return sections;
@@ -229,23 +220,24 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
         .trim();
   }
 
-  Widget _buildAnalysisSection(String resultId, String sectionKey, String title, IconData icon, Color color) {
-    final sections = _analysisSections[resultId];
+  Widget _buildAnalysisSection(String sectionKey, String title, IconData icon, Color color, TestResultModel result) {
+    final sections = _analysisSections[result.id];
     final content = sections?[sectionKey] ?? 'İçerik bulunamadı';
-    final isExpanded = _sectionExpanded[resultId]?[sectionKey] ?? false;
+    final isExpanded = _sectionExpanded[result.id]?[sectionKey] ?? false;
     
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      width: 250, // Yatay kartlar için sabit genişlik
+      margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardBackgroundColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.2),
+          color: color.withOpacity(0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.05),
+            color: AppTheme.shadowColorWithOpacity,
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -253,10 +245,11 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
       ),
       child: Column(
         children: [
+          // Başlık
           InkWell(
             onTap: () {
               setState(() {
-                _sectionExpanded[resultId]![sectionKey] = !isExpanded;
+                _sectionExpanded[result.id]![sectionKey] = !isExpanded;
               });
             },
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
@@ -286,8 +279,8 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                       title,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: color,
-                        fontSize: MediaQuery.of(context).size.width < 400 ? 14 : 16,
+                        color: AppTheme.primaryTextColor,
+                        fontSize: AppTheme.getResponsiveFontSize(context, 16),
                         letterSpacing: 0.2,
                       ),
                     ),
@@ -308,42 +301,19 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
               ),
             ),
           ),
+          
+          // İçerik
           if (isExpanded)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // İçerik başlığı
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      'Detaylar',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: color,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // İçerik metni
-                  Text(
-                    content,
-                    style: TextStyle(
-                      color: const Color(0xFF374151),
-                      fontSize: MediaQuery.of(context).size.width < 400 ? 14 : 15,
-                      height: 1.6,
-                      letterSpacing: 0.1,
-                    ),
-                  ),
-                ],
+              child: Text(
+                content,
+                style: TextStyle(
+                  color: AppTheme.primaryTextColor,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
               ),
             ),
         ],
@@ -352,8 +322,6 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
   }
 
   Widget _buildResultsList() {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     // Test sonuçlarını tarihe göre grupla
     final Map<String, List<TestResultModel>> dateGroups = {};
     for (final result in widget.results) {
@@ -388,10 +356,10 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
+                color: AppTheme.primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: colorScheme.primary.withOpacity(0.3),
+                  color: AppTheme.primaryColor.withOpacity(0.3),
                   width: 1,
                 ),
               ),
@@ -400,14 +368,14 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                   Icon(
                     Icons.calendar_today,
                     size: 16,
-                    color: colorScheme.primary,
+                    color: AppTheme.primaryColor,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     date,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
+                      color: AppTheme.primaryColor,
                     ),
                   ),
                 ],
@@ -435,11 +403,11 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                       Row(
                         children: [
                           CircleAvatar(
-                            backgroundColor: colorScheme.primary,
+                            backgroundColor: AppTheme.primaryColor,
                             child: Text(
                               '${result.athleteName[0]}${result.athleteSurname[0]}',
                               style: TextStyle(
-                                color: colorScheme.onPrimary,
+                                color: AppTheme.whiteTextColor,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -453,12 +421,13 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                   '${result.athleteName} ${result.athleteSurname}',
                                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
+                                    color: AppTheme.primaryTextColor,
                                   ),
                                 ),
                                 Text(
-                                  'Saat: ${result.testDate.hour.toString().padLeft(2, '0')}:${result.testDate.minute.toString().padLeft(2, '0')}',
+                                  'Saat: ${result.testDate.hour.toString().padLeft(2, '0')}:${result.testDate.minute.toString().padLeft(2, '0')}:${result.testDate.second.toString().padLeft(2, '0')}',
                                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: colorScheme.outline,
+                                    color: AppTheme.secondaryTextColor,
                                   ),
                                 ),
                               ],
@@ -471,14 +440,14 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                 '${result.result.toStringAsFixed(2)} ${result.resultUnit}',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: colorScheme.primary,
+                                  color: AppTheme.primaryColor,
                                 ),
                               ),
                               if (result.notes?.isNotEmpty == true)
                                 Text(
                                   'Not: ${result.notes}',
                                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.outline,
+                                    color: AppTheme.secondaryTextColor,
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),
@@ -495,21 +464,21 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: colorScheme.secondaryContainer,
+                            color: AppTheme.secondaryColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
                             children: [
-                              const SizedBox(
+                              SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.secondaryColor),
                               ),
                               const SizedBox(width: 12),
                               Text(
                                 'AI analizi yapılıyor...',
                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onSecondaryContainer,
+                                  color: AppTheme.secondaryColor,
                                 ),
                               ),
                             ],
@@ -519,15 +488,15 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppTheme.cardBackgroundColor,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: const Color(0xFFE5E7EB),
+                              color: AppTheme.borderColor,
                               width: 1,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF6366F1).withOpacity(0.08),
+                                color: AppTheme.shadowColorWithOpacity,
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -535,117 +504,121 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                           ),
                           child: Column(
                             children: [
-                              // Başlık ve AI detay sayfasına yönlendirme
-                              InkWell(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => TestResultAnalysisScreen(
-                                        testResult: result,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        const Color(0xFF6366F1).withOpacity(0.1),
-                                        const Color(0xFF8B5CF6).withOpacity(0.1),
-                                      ],
-                                    ),
-                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                              // Başlık
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppTheme.primaryColor.withOpacity(0.1),
+                                      AppTheme.accentColor.withOpacity(0.1),
+                                    ],
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF6366F1).withOpacity(0.15),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: const Icon(
-                                          Icons.auto_awesome,
-                                          size: 22,
-                                          color: Color(0xFF6366F1),
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryColor.withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Icon(
+                                        Icons.auto_awesome,
+                                        size: 22,
+                                        color: AppTheme.primaryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'AI Analizi',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: AppTheme.getResponsiveFontSize(context, 18),
+                                              color: AppTheme.primaryTextColor,
+                                              letterSpacing: 0.2,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Performans değerlendirmesi',
+                                            style: TextStyle(
+                                              fontSize: AppTheme.getResponsiveFontSize(context, 13),
+                                              color: AppTheme.secondaryTextColor,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              
+                              // AI Analizi Bölümü - Sadece Detayları Gör Butonu
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => TestResultAnalysisScreen(
+                                          testResult: result,
                                         ),
                                       ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'AI Analizi',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: MediaQuery.of(context).size.width < 400 ? 16 : 18,
-                                                color: const Color(0xFF1F2937),
-                                                letterSpacing: 0.2,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Detaylı performans değerlendirmesi',
-                                              style: TextStyle(
-                                                fontSize: MediaQuery.of(context).size.width < 400 ? 12 : 13,
-                                                color: const Color(0xFF6B7280),
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                    );
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primaryColor.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: AppTheme.primaryColor.withOpacity(0.3),
+                                        width: 1,
                                       ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF6366F1).withOpacity(0.15),
-                                          borderRadius: BorderRadius.circular(20),
-                                          border: Border.all(
-                                            color: const Color(0xFF6366F1).withOpacity(0.3),
-                                            width: 1,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.arrow_forward,
+                                          color: AppTheme.primaryColor,
+                                          size: 18,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Detayları Gör',
+                                          style: TextStyle(
+                                            color: AppTheme.primaryColor,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
                                           ),
                                         ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              'Detayları Gör',
-                                              style: TextStyle(
-                                                color: const Color(0xFF6366F1),
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Icon(
-                                              Icons.arrow_forward_ios,
-                                              color: const Color(0xFF6366F1),
-                                              size: 14,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-
                             ],
                           ),
                         )
                       else
                         ElevatedButton.icon(
                           onPressed: () => _analyzeResult(result),
-                          icon: const Icon(Icons.auto_awesome),
-                          label: const Text('Bu Sonucu Analiz Et'),
+                          icon: Icon(Icons.auto_awesome, color: AppTheme.whiteTextColor),
+                          label: Text('Bu Sonucu Analiz Et', style: TextStyle(color: AppTheme.whiteTextColor)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF6366F1),
-                            foregroundColor: Colors.white,
+                            backgroundColor: AppTheme.primaryColor,
+                            foregroundColor: AppTheme.whiteTextColor,
                             elevation: 2,
                           ),
                         ),
@@ -662,14 +635,13 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final hasExistingAnalyses = widget.results.any((r) => r.aiAnalysis != null && r.aiAnalysis!.isNotEmpty);
     
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.testName),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: AppTheme.whiteTextColor,
         elevation: 2,
       ),
       body: Column(
@@ -683,8 +655,8 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFF6366F1),
-                  const Color(0xFF8B5CF6),
+                  AppTheme.primaryColor,
+                  AppTheme.accentColor,
                 ],
               ),
             ),
@@ -695,7 +667,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                   widget.testName,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: AppTheme.whiteTextColor,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -704,13 +676,13 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: AppTheme.whiteTextColor.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         '${widget.results.length} katılımcı',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
+                          color: AppTheme.whiteTextColor,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -719,13 +691,13 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: AppTheme.whiteTextColor.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         _formatDate(widget.results.first.testDate),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
+                          color: AppTheme.whiteTextColor,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -742,11 +714,11 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
               padding: const EdgeInsets.all(16),
               child: ElevatedButton.icon(
                 onPressed: _analyzeAllResults,
-                icon: const Icon(Icons.auto_awesome),
-                label: const Text('Tümünü Analiz Et'),
+                icon: Icon(Icons.auto_awesome, color: AppTheme.whiteTextColor),
+                label: Text('Tümünü Analiz Et', style: TextStyle(color: AppTheme.whiteTextColor)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6366F1),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: AppTheme.whiteTextColor,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   elevation: 2,
                 ),

@@ -1,5 +1,6 @@
-import 'package:athleticcoach/data/models/athlete_model.dart';
 import 'package:flutter/material.dart';
+import 'package:athleticcoach/data/models/athlete_model.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 
 class AthleteAddScreen extends StatefulWidget {
   final AthleteModel? athlete;
@@ -42,6 +43,8 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
     'Diğer',
   ];
 
+  final List<String> _genders = ['Erkek', 'Kadın'];
+
   @override
   void initState() {
     super.initState();
@@ -73,257 +76,510 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.athlete != null;
-    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? 'Sporcuyu Düzenle' : 'Sporcu Ekle'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        elevation: 2,
-      ),
-      body: Stack(
-        children: [
-          // Arka plan degrade
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFF1F5FE), Color(0xFFFDF6E3)],
-              ),
-            ),
+        title: Text(
+          isEdit ? 'Sporcuyu Düzenle' : 'Sporcu Ekle',
+          style: TextStyle(
+            color: AppTheme.whiteTextColor,
+            fontWeight: FontWeight.w600,
           ),
-          Center(
-            child: SingleChildScrollView(
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
-                padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 22),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.97),
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.primary.withOpacity(0.10),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
-          ),
-        ],
+        ),
+        backgroundColor: AppTheme.primaryColor,
+        elevation: 0,
+        iconTheme: IconThemeData(color: AppTheme.whiteTextColor),
       ),
-                child: Form(
-        key: _formKey,
+      body: Container(
+        decoration: AppTheme.gradientDecoration,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: AppTheme.getResponsivePadding(context),
+            child: Column(
+              children: [
+                // Avatar and title card
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: AppTheme.cardDecoration,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
-            children: [
-                      // Avatar ve başlık
+                    children: [
                       CircleAvatar(
-                        radius: 38,
+                        radius: 40,
                         backgroundColor: _selectedGender == 'Kadın'
-                            ? colorScheme.secondaryContainer
-                            : colorScheme.primaryContainer,
+                            ? AppTheme.femaleColor.withOpacity(0.2)
+                            : AppTheme.maleColor.withOpacity(0.2),
                         child: Icon(
                           _selectedGender == 'Kadın' ? Icons.female : Icons.male,
                           color: _selectedGender == 'Kadın'
-                              ? colorScheme.secondary
-                              : colorScheme.primary,
-                          size: 38,
+                              ? AppTheme.femaleColor
+                              : AppTheme.maleColor,
+                          size: 40,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       Text(
                         isEdit ? 'Sporcuyu Düzenle' : 'Yeni Sporcu Ekle',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.primary,
-                            ),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryColor,
+                        ),
                       ),
-                      const SizedBox(height: 24),
-                      // Form alanları
-              TextFormField(
-                controller: _nameController,
-                        decoration: InputDecoration(
-                          labelText: 'İsim',
-                          prefixIcon: const Icon(Icons.person),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                validator: (value) => value == null || value.isEmpty ? 'İsim girin' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _surnameController,
-                        decoration: InputDecoration(
-                          labelText: 'Soyisim',
-                          prefixIcon: const Icon(Icons.person_outline),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                validator: (value) => value == null || value.isEmpty ? 'Soyisim girin' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _birthDateController,
-                decoration: InputDecoration(
-                  labelText: 'Doğum Tarihi',
-                          prefixIcon: const Icon(Icons.cake),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () async {
-                      final pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: _selectedBirthDate ?? DateTime(2005),
-                        firstDate: DateTime(1950),
-                        lastDate: DateTime.now(),
-                      );
-                      if (pickedDate != null) {
-                        setState(() {
-                          _selectedBirthDate = pickedDate;
-                          _birthDateController.text =
-                              "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                        });
-                      }
-                    },
+                    ],
                   ),
                 ),
-                readOnly: true,
-                validator: (value) => value == null || value.isEmpty ? 'Doğum tarihi seçin' : null,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _selectedGender,
-                        decoration: InputDecoration(
-                          labelText: 'Cinsiyet',
-                          prefixIcon: const Icon(Icons.wc),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                items: ['Erkek', 'Kadın']
-                    .map((label) => DropdownMenuItem(
-                          child: Text(label),
-                          value: label,
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedGender = value;
-                  });
-                },
-                validator: (value) => value == null ? 'Cinsiyet seçin' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _weightController,
-                        decoration: InputDecoration(
-                          labelText: 'Kilo (kg)',
-                          prefixIcon: const Icon(Icons.monitor_weight),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                keyboardType: TextInputType.number,
-                validator: (value) => value == null || value.isEmpty ? 'Kilo girin' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _heightController,
-                        decoration: InputDecoration(
-                          labelText: 'Boy (cm)',
-                          prefixIcon: const Icon(Icons.height),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                keyboardType: TextInputType.number,
-                validator: (value) => value == null || value.isEmpty ? 'Boy girin' : null,
-              ),
-              const SizedBox(height: 16),
-              Autocomplete<String>(
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  if (textEditingValue.text == '') {
-                    return _branches;
-                  }
-                  return _branches.where((String option) {
-                    return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
-                  });
-                },
-                initialValue: TextEditingValue(text: _selectedBranch ?? ''),
-                onSelected: (String selection) {
-                  setState(() {
-                    _selectedBranch = selection;
-                  });
-                },
-                fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                  controller.text = _selectedBranch ?? '';
-                  return TextFormField(
-                    controller: controller,
-                    focusNode: focusNode,
-                            decoration: InputDecoration(
-                              labelText: 'Branş',
-                              prefixIcon: const Icon(Icons.sports),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                    validator: (value) => value == null || value.isEmpty ? 'Branş seçin' : null,
-                  );
-                },
-                        optionsViewBuilder: (context, onSelected, options) {
-                          return Align(
-                            alignment: Alignment.topLeft,
-                            child: Material(
-                              elevation: 4,
+
+                const SizedBox(height: 20),
+
+                // Form fields card
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: AppTheme.cardDecoration,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        // İsim
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            labelText: 'İsim',
+                            labelStyle: TextStyle(color: AppTheme.primaryColor),
+                            prefixIcon: Icon(Icons.person, color: AppTheme.primaryColor),
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(maxHeight: 260, minWidth: 200),
-                                child: ListView.builder(
-                                  padding: EdgeInsets.zero,
-                                  shrinkWrap: true,
-                                  itemCount: options.length,
-                                  itemBuilder: (context, index) {
-                                    final option = options.elementAt(index);
-                                    return ListTile(
-                                      title: Text(option),
-                                      onTap: () => onSelected(option),
-                                    );
-                                  },
-                                ),
-                              ),
+                              borderSide: BorderSide(color: AppTheme.primaryColor),
                             ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 28),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.save),
-                          label: Text(isEdit ? 'Kaydet' : 'Ekle'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colorScheme.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                            elevation: 4,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                            ),
                           ),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              final athlete = AthleteModel(
-                                id: isEdit ? widget.athlete!.id : DateTime.now().toIso8601String(),
-                                name: _nameController.text,
-                                surname: _surnameController.text,
-                                birthDate: _selectedBirthDate!,
-                                gender: _selectedGender!,
-                                weight: double.parse(_weightController.text),
-                                height: double.parse(_heightController.text),
-                                branch: _selectedBranch!,
-                              );
-                              Navigator.of(context).pop(athlete);
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'İsim girin';
                             }
+                            return null;
                           },
                         ),
-              ),
-            ],
-          ),
-        ),
-              ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        // Soyisim
+                        TextFormField(
+                          controller: _surnameController,
+                          decoration: InputDecoration(
+                            labelText: 'Soyisim',
+                            labelStyle: TextStyle(color: AppTheme.primaryColor),
+                            prefixIcon: Icon(Icons.person_outline, color: AppTheme.primaryColor),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Soyisim girin';
+                            }
+                            return null;
+                          },
+                        ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        // Doğum Tarihi
+                        InkWell(
+                          onTap: () async {
+                            final DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: _selectedBirthDate ?? DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: ColorScheme.light(
+                                      primary: AppTheme.primaryColor,
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
+                            );
+                            if (picked != null && picked != _selectedBirthDate) {
+                              setState(() {
+                                _selectedBirthDate = picked;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.calendar_today, color: AppTheme.primaryColor),
+                                const SizedBox(width: 12),
+                                Text(
+                                  _selectedBirthDate != null
+                                      ? '${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}'
+                                      : 'Doğum Tarihi Seçin',
+                                  style: TextStyle(
+                                    color: _selectedBirthDate != null 
+                                        ? AppTheme.primaryTextColor 
+                                        : AppTheme.secondaryTextColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        // Cinsiyet
+                        DropdownButtonFormField<String>(
+                          value: _selectedGender,
+                          decoration: InputDecoration(
+                            labelText: 'Cinsiyet',
+                            labelStyle: TextStyle(color: AppTheme.primaryColor),
+                            prefixIcon: Icon(Icons.person_add, color: AppTheme.primaryColor),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                            ),
+                          ),
+                          items: _genders.map((String gender) {
+                            return DropdownMenuItem<String>(
+                              value: gender,
+                              child: Text(gender),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedGender = newValue!;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Cinsiyet seçin';
+                            }
+                            return null;
+                          },
+                        ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        // Kilo
+                        TextFormField(
+                          controller: _weightController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: 'Kilo (kg)',
+                            labelStyle: TextStyle(color: AppTheme.primaryColor),
+                            prefixIcon: Icon(Icons.monitor_weight, color: AppTheme.primaryColor),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Kilo girin';
+                            }
+                            final weight = double.tryParse(value);
+                            if (weight == null) {
+                              return 'Geçerli bir sayı girin';
+                            }
+                            if (weight <= 0 || weight > 500) {
+                              return 'Kilo 1-500 kg arasında olmalı';
+                            }
+                            return null;
+                          },
+                        ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        // Boy
+                        TextFormField(
+                          controller: _heightController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: 'Boy (cm)',
+                            labelStyle: TextStyle(color: AppTheme.primaryColor),
+                            prefixIcon: Icon(Icons.height, color: AppTheme.primaryColor),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Boy girin';
+                            }
+                            final height = double.tryParse(value);
+                            if (height == null) {
+                              return 'Geçerli bir sayı girin';
+                            }
+                            if (height <= 0 || height > 300) {
+                              return 'Boy 1-300 cm arasında olmalı';
+                            }
+                            return null;
+                          },
+                        ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        // Branş
+                        Autocomplete<String>(
+                          optionsBuilder: (TextEditingValue textEditingValue) {
+                            if (textEditingValue.text == '') {
+                              return _branches;
+                            }
+                            return _branches.where((String option) {
+                              return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                            });
+                          },
+                          initialValue: TextEditingValue(text: _selectedBranch ?? ''),
+                          onSelected: (String selection) {
+                            setState(() {
+                              _selectedBranch = selection;
+                            });
+                          },
+                          fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+                            controller.text = _selectedBranch ?? '';
+                            return TextFormField(
+                              controller: controller,
+                              focusNode: focusNode,
+                              decoration: InputDecoration(
+                                labelText: 'Branş',
+                                labelStyle: TextStyle(color: AppTheme.primaryColor),
+                                prefixIcon: Icon(Icons.sports, color: AppTheme.primaryColor),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: AppTheme.primaryColor),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Branş seçin';
+                                }
+                                // Branş listesinde var mı kontrol et
+                                if (!_branches.contains(value)) {
+                                  return 'Geçerli bir branş seçin';
+                                }
+                                return null;
+                              },
+                            );
+                          },
+                          optionsViewBuilder: (context, onSelected, options) {
+                            return Align(
+                              alignment: Alignment.topLeft,
+                              child: Material(
+                                elevation: 4,
+                                borderRadius: BorderRadius.circular(12),
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(maxHeight: 260, minWidth: 200),
+                                  child: ListView.builder(
+                                    padding: EdgeInsets.zero,
+                                    shrinkWrap: true,
+                                    itemCount: options.length,
+                                    itemBuilder: (context, index) {
+                                      final option = options.elementAt(index);
+                                      return ListTile(
+                                        title: Text(option),
+                                        onTap: () => onSelected(option),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Kaydet Butonu
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            icon: Icon(Icons.save, color: AppTheme.whiteTextColor),
+                            label: Text(
+                              isEdit ? 'Kaydet' : 'Ekle',
+                              style: TextStyle(
+                                color: AppTheme.whiteTextColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryColor,
+                              foregroundColor: AppTheme.whiteTextColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 4,
+                            ),
+                            onPressed: () {
+                              // Form validasyonu
+                              if (_formKey.currentState!.validate()) {
+                                // Ek validasyonlar
+                                final weight = double.tryParse(_weightController.text);
+                                final height = double.tryParse(_heightController.text);
+                                
+                                // Kilo kontrolü
+                                if (weight == null || weight <= 0 || weight > 500) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Geçerli bir kilo girin (1-500 kg)'),
+                                      backgroundColor: AppTheme.errorColor,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                
+                                // Boy kontrolü
+                                if (height == null || height <= 0 || height > 300) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Geçerli bir boy girin (1-300 cm)'),
+                                      backgroundColor: AppTheme.errorColor,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                
+                                // Branş kontrolü
+                                if (_selectedBranch == null || !_branches.contains(_selectedBranch)) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Geçerli bir branş seçin'),
+                                      backgroundColor: AppTheme.errorColor,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                
+                                // Tüm validasyonlar geçti, sporcuyu kaydet
+                                final athlete = AthleteModel(
+                                  id: isEdit ? widget.athlete!.id : DateTime.now().toIso8601String(),
+                                  name: _nameController.text,
+                                  surname: _surnameController.text,
+                                  birthDate: _selectedBirthDate!,
+                                  gender: _selectedGender!,
+                                  weight: weight,
+                                  height: height,
+                                  branch: _selectedBranch!,
+                                );
+                                Navigator.of(context).pop(athlete);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 100), // Added for keyboard spacing
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

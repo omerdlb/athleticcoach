@@ -3,8 +3,10 @@ import 'package:athleticcoach/data/models/athlete_model.dart';
 import 'package:athleticcoach/data/models/test_definition_model.dart';
 import 'package:athleticcoach/data/models/test_result_model.dart';
 import 'package:athleticcoach/presentation/screens/test_session_analysis_screen.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:uuid/uuid.dart';
 
 class TestSessionResultsScreen extends StatefulWidget {
   final TestDefinitionModel selectedTest;
@@ -24,10 +26,16 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
   final Map<String, TextEditingController> _resultControllers = {};
   final Map<String, TextEditingController> _notesControllers = {};
   bool _isSaving = false;
+  late final DateTime _testSessionStartTime; // Test oturumu başlangıç zamanı
+  late final String _sessionId;
 
   @override
   void initState() {
     super.initState();
+    // Test oturumu başlangıç zamanını kaydet
+    _testSessionStartTime = DateTime.now();
+    _sessionId = const Uuid().v4(); // Benzersiz sessionId
+    
     // Her sporcu için controller oluştur
     for (final athlete in widget.selectedAthletes) {
       _resultControllers[athlete.id] = TextEditingController();
@@ -54,7 +62,7 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${athlete.name} ${athlete.surname} için sonuç giriniz'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorColor,
           ),
         );
         return false;
@@ -65,7 +73,7 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${athlete.name} ${athlete.surname} için geçerli bir sayı giriniz'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorColor,
           ),
         );
         return false;
@@ -85,10 +93,23 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
       // Test sonuçlarını hazırla
       final List<Map<String, dynamic>> results = [];
       
+      print('=== TEST SONUÇLARI HAZIRLANIYOR ===');
+      print('Test: ${widget.selectedTest.name}');
+      print('Sporcu Sayısı: ${widget.selectedAthletes.length}');
+      
       for (final athlete in widget.selectedAthletes) {
         final resultText = _resultControllers[athlete.id]!.text.trim();
         final result = double.parse(resultText);
         final notes = _notesControllers[athlete.id]?.text.trim();
+        
+        print('--- Sporcu: ${athlete.name} ${athlete.surname} ---');
+        print('Ham Sonuç: $resultText');
+        print('Parse Edilen Sonuç: $result');
+        print('Notlar: ${notes ?? 'Yok'}');
+        print('Boy: ${athlete.height} cm');
+        print('Kilo: ${athlete.weight} kg');
+        print('Cinsiyet: ${athlete.gender}');
+        print('Branş: ${athlete.branch}');
         
         results.add({
           'athlete': athlete,
@@ -96,6 +117,10 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
           'notes': notes,
         });
       }
+      
+      print('=== TOPLAM SONUÇLAR ===');
+      print('Hazırlanan Sonuç Sayısı: ${results.length}');
+      print('========================');
 
       // AI analizi ekranına git
       if (mounted) {
@@ -104,16 +129,22 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
             builder: (context) => TestSessionAnalysisScreen(
               selectedTest: widget.selectedTest,
               results: results,
+              sessionId: _sessionId, // yeni parametre
+              testSessionStartTime: _testSessionStartTime, // yeni parametre
             ),
           ),
         );
       }
     } catch (e) {
+      print('=== HATA ===');
+      print('Analiz hazırlanırken hata: $e');
+      print('============');
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Analiz hazırlanırken hata: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorColor,
           ),
         );
       }
@@ -135,7 +166,8 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
 
     try {
       final database = AthleteDatabase();
-      final testDate = DateTime.now();
+      // Test oturumu başlangıç zamanını kullan (tüm sonuçlar aynı zamanı kullanır)
+      final testDate = _testSessionStartTime;
 
       for (final athlete in widget.selectedAthletes) {
         final resultText = _resultControllers[athlete.id]!.text.trim();
@@ -153,6 +185,8 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
           result: result,
           resultUnit: widget.selectedTest.resultUnit,
           notes: notes?.isNotEmpty == true ? notes : null,
+          aiAnalysis: null,
+          sessionId: _sessionId,
         );
 
         await database.insertTestResult(testResult);
@@ -160,9 +194,9 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Test sonuçları başarıyla kaydedildi!'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppTheme.successColor,
           ),
         );
         
@@ -173,8 +207,8 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Sonuçlar kaydedilirken hata: $e'),
-            backgroundColor: Colors.red,
+            content: Text('Kaydetme hatası: $e'),
+            backgroundColor: AppTheme.errorColor,
           ),
         );
       }
@@ -193,169 +227,193 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Test Sonuçları'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: AppTheme.whiteTextColor,
         elevation: 2,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Test bilgisi
+          // Arka plan degrade
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            color: colorScheme.primaryContainer,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.selectedTest.name,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Kategori: ${widget.selectedTest.category}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Sonuç Birimi: ${widget.selectedTest.resultUnit}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${widget.selectedAthletes.length} sporcu için sonuç giriniz',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onPrimaryContainer,
-                  ),
-                ),
-              ],
-            ),
+            decoration: AppTheme.gradientDecoration,
           ),
-          
-          // Sporcu sonuçları
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: widget.selectedAthletes.length,
-              itemBuilder: (context, index) {
-                final athlete = widget.selectedAthletes[index];
-                
-                return Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Sporcu bilgisi
-                        Row(
+          Column(
+            children: [
+              // Test bilgisi
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                color: AppTheme.primaryColor.withOpacity(0.1),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.selectedTest.name,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Kategori: ${widget.selectedTest.category}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.secondaryTextColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Sonuç Birimi: ${widget.selectedTest.resultUnit}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${widget.selectedAthletes.length} sporcu için sonuç giriniz',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.secondaryTextColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Sporcu sonuçları
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: widget.selectedAthletes.length,
+                  itemBuilder: (context, index) {
+                    final athlete = widget.selectedAthletes[index];
+                    
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: AppTheme.cardDecoration,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CircleAvatar(
-                              backgroundColor: colorScheme.primary,
-                              child: Text(
-                                '${athlete.name[0]}${athlete.surname[0]}',
-                                style: TextStyle(
-                                  color: colorScheme.onPrimary,
-                                  fontWeight: FontWeight.bold,
+                            // Sporcu bilgisi
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: athlete.gender == 'Kadın'
+                                      ? AppTheme.femaleColor.withOpacity(0.2)
+                                      : AppTheme.maleColor.withOpacity(0.2),
+                                  child: Icon(
+                                    athlete.gender == 'Kadın' ? Icons.female : Icons.male,
+                                    color: athlete.gender == 'Kadın'
+                                        ? AppTheme.femaleColor
+                                        : AppTheme.maleColor,
+                                    size: 24,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${athlete.name} ${athlete.surname}',
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.primaryTextColor,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${athlete.branch} • ${DateTime.now().year - athlete.birthDate.year} yaş',
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: AppTheme.secondaryTextColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${athlete.name} ${athlete.surname}',
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${athlete.branch} • ${DateTime.now().year - athlete.birthDate.year} yaş',
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.outline,
-                                    ),
-                                  ),
-                                ],
+                            
+                            const SizedBox(height: 16),
+                            
+                            // Sonuç girişi
+                            TextFormField(
+                              controller: _resultControllers[athlete.id],
+                              decoration: InputDecoration(
+                                labelText: 'Test Sonucu (${widget.selectedTest.resultUnit})',
+                                hintText: 'Örn: 12.5',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(color: AppTheme.borderColor),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+                                ),
+                                prefixIcon: Icon(Icons.timer, color: AppTheme.primaryColor),
+                                labelStyle: TextStyle(color: AppTheme.primaryTextColor),
                               ),
+                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Sonuç giriniz';
+                                }
+                                if (double.tryParse(value.trim()) == null) {
+                                  return 'Geçerli bir sayı giriniz';
+                                }
+                                return null;
+                              },
+                            ),
+                            
+                            const SizedBox(height: 12),
+                            
+                            // Notlar
+                            TextFormField(
+                              controller: _notesControllers[athlete.id],
+                              decoration: InputDecoration(
+                                labelText: 'Notlar (İsteğe bağlı)',
+                                hintText: 'Özel durumlar, gözlemler...',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(color: AppTheme.borderColor),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+                                ),
+                                prefixIcon: Icon(Icons.note, color: AppTheme.primaryColor),
+                                labelStyle: TextStyle(color: AppTheme.primaryTextColor),
+                              ),
+                              maxLines: 2,
                             ),
                           ],
                         ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        // Sonuç girişi
-                        TextFormField(
-                          controller: _resultControllers[athlete.id],
-                          decoration: InputDecoration(
-                            labelText: 'Test Sonucu (${widget.selectedTest.resultUnit})',
-                            hintText: 'Örn: 12.5',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            prefixIcon: const Icon(Icons.timer),
-                          ),
-                          keyboardType: TextInputType.numberWithOptions(decimal: true),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Sonuç giriniz';
-                            }
-                            if (double.tryParse(value.trim()) == null) {
-                              return 'Geçerli bir sayı giriniz';
-                            }
-                            return null;
-                          },
-                        ),
-                        
-                        const SizedBox(height: 12),
-                        
-                        // Notlar
-                        TextFormField(
-                          controller: _notesControllers[athlete.id],
-                          decoration: InputDecoration(
-                            labelText: 'Notlar (İsteğe bağlı)',
-                            hintText: 'Özel durumlar, gözlemler...',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            prefixIcon: const Icon(Icons.note),
-                          ),
-                          maxLines: 2,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: colorScheme.surface,
+          color: AppTheme.cardBackgroundColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: AppTheme.shadowColorWithOpacity,
               blurRadius: 4,
               offset: const Offset(0, -2),
             ),
@@ -368,23 +426,34 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
                 '${widget.selectedAthletes.length} sporcu için sonuç girildi',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryTextColor,
                 ),
               ),
             ),
             ElevatedButton.icon(
               onPressed: _isSaving ? null : _analyzeResults,
               icon: _isSaving 
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppTheme.whiteTextColor,
+                      ),
                     )
-                  : const Icon(Icons.auto_awesome),
-              label: Text(_isSaving ? 'Analiz Ediliyor...' : 'AI Analizi Yap'),
+                  : Icon(Icons.auto_awesome, color: AppTheme.whiteTextColor),
+              label: Text(
+                _isSaving ? 'Analiz Ediliyor...' : 'AI Analizi Yap',
+                style: TextStyle(color: AppTheme.whiteTextColor),
+              ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
+                backgroundColor: AppTheme.primaryColor,
+                foregroundColor: AppTheme.whiteTextColor,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 4,
               ),
             ),
           ],
@@ -392,6 +461,4 @@ class _TestSessionResultsScreenState extends State<TestSessionResultsScreen> {
       ),
     );
   }
-
-
 } 

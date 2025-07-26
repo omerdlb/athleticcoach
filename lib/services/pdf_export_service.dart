@@ -174,10 +174,10 @@ class PdfExportService {
                     ),
                   ),
                   child: pw.Text(
-                    'AI Performans Analizi',
-                    style: pw.TextStyle(
-                      fontSize: 18,
-                      fontWeight: pw.FontWeight.bold,
+                  'AI Performans Analizi',
+                  style: pw.TextStyle(
+                    fontSize: 18,
+                    fontWeight: pw.FontWeight.bold,
                       color: PdfColors.white,
                       font: bebasFont,
                     ),
@@ -206,7 +206,7 @@ class PdfExportService {
                         style: pw.TextStyle(
                           fontSize: 12,
                           height: 1.5,
-                          font: bebasFont,
+                    font: bebasFont,
                         ),
                       ),
                     ],
@@ -270,7 +270,7 @@ class PdfExportService {
       // Yan yana yerleştir
       pages.add(
         pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: widgets.map((widget) => 
             pw.Expanded(child: widget)
           ).toList(),
@@ -285,18 +285,18 @@ class PdfExportService {
     
     // Son sayfaya AI bilgisi ekle
     pages.add(
-      pw.Container(
-        width: double.infinity,
-        padding: const pw.EdgeInsets.all(15),
-        decoration: pw.BoxDecoration(
-          color: PdfColors.grey,
-          borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-        ),
+              pw.Container(
+                width: double.infinity,
+                padding: const pw.EdgeInsets.all(15),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.grey,
+                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                ),
         child: pw.Text(
           'Bu rapor Athletic Coach uygulaması tarafından yapay zeka ile hazırlanmıştır.',
           style: pw.TextStyle(
             fontSize: 12,
-            color: PdfColors.white,
+                        color: PdfColors.white,
             font: bebasFont,
           ),
           textAlign: pw.TextAlign.center,
@@ -322,38 +322,38 @@ class PdfExportService {
               borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
             ),
             child: pw.Text(
-              title,
-              style: pw.TextStyle(
+                      title,
+                      style: pw.TextStyle(
                 fontSize: 14,
-                fontWeight: pw.FontWeight.bold,
+                        fontWeight: pw.FontWeight.bold,
                 color: PdfColors.white,
-                font: bebasFont,
+                        font: bebasFont,
+                      ),
+                ),
               ),
-            ),
-          ),
-          
+              
           pw.SizedBox(height: 10),
-          
-          // İçerik
-          pw.Container(
-            width: double.infinity,
+              
+              // İçerik
+              pw.Container(
+                width: double.infinity,
             padding: const pw.EdgeInsets.all(12),
-            decoration: pw.BoxDecoration(
-              border: pw.Border.all(color: PdfColors.grey),
-              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-            ),
-            child: pw.Text(
-              content,
-              style: pw.TextStyle(
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey),
+                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                ),
+                child: pw.Text(
+                  content,
+                  style: pw.TextStyle(
                 fontSize: 11,
                 height: 1.4,
-                font: bebasFont,
+                    font: bebasFont,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    );
+      );
   }
   
   static Map<String, String> _parseAnalysis(String analysis) {

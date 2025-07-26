@@ -1,4 +1,6 @@
 import 'package:athleticcoach/data/models/test_definition_model.dart';
+import 'package:athleticcoach/core/app_theme.dart';
+import 'package:athleticcoach/presentation/screens/test_session_select_athletes_screen.dart';
 import 'package:flutter/material.dart';
 
 class TestProtocolScreen extends StatelessWidget {
@@ -6,69 +8,83 @@ class TestProtocolScreen extends StatelessWidget {
 
   const TestProtocolScreen({super.key, required this.test});
 
+  void _startTestSession(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => TestSessionSelectAthletesScreen(
+          selectedTest: test,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: Text(test.name),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: AppTheme.whiteTextColor,
         elevation: 2,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.play_arrow,
+              color: AppTheme.whiteTextColor,
+              size: 28,
+            ),
+            tooltip: 'Test Oturumu Başlat',
+            onPressed: () => _startTestSession(context),
+          ),
+        ],
       ),
       body: Stack(
         children: [
           // Arka plan degrade
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFF1F5FE), Color(0xFFFDF6E3)],
-              ),
-            ),
+            decoration: AppTheme.gradientDecoration,
           ),
           Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: AppTheme.getResponsivePadding(context),
         child: ListView(
           children: [
             Center(
-              child: Icon(Icons.fitness_center, size: 60, color: colorScheme.primary),
+              child: Icon(Icons.fitness_center, size: 60, color: AppTheme.primaryColor),
             ),
             const SizedBox(height: 18),
                 _sectionCard(
                   context,
                   icon: Icons.info_outline,
                   title: 'Açıklama',
-                  color: colorScheme.primary,
-                  child: Text(test.description, style: Theme.of(context).textTheme.bodyLarge),
+                  color: AppTheme.primaryColor,
+                  child: Text(test.description, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryTextColor)),
                 ),
                 const SizedBox(height: 18),
                 _sectionCard(
                   context,
                   icon: Icons.lightbulb_outline,
                   title: 'Ne İşe Yarar?',
-                  color: colorScheme.secondary,
-                  child: Text(test.purpose ?? 'Bilgi yok', style: Theme.of(context).textTheme.bodyLarge),
+                  color: AppTheme.secondaryColor,
+                  child: Text(test.purpose ?? 'Bilgi yok', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryTextColor)),
                 ),
                 const SizedBox(height: 18),
                 _sectionCard(
                   context,
                   icon: Icons.rule,
                   title: 'Protokol',
-                  color: colorScheme.tertiary,
-                  child: Text(test.protocol, style: Theme.of(context).textTheme.bodyLarge),
+                  color: AppTheme.accentColor,
+                  child: Text(test.protocol, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryTextColor)),
                 ),
                 const SizedBox(height: 24),
             Row(
               children: [
-                Icon(Icons.straighten, color: colorScheme.tertiary),
+                Icon(Icons.straighten, color: AppTheme.accentColor),
                 const SizedBox(width: 8),
-                Text('Sonuç Birimi: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(test.resultUnit, style: TextStyle(color: colorScheme.tertiary)),
+                Text('Sonuç Birimi: ', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryTextColor)),
+                Text(test.resultUnit, style: TextStyle(color: AppTheme.accentColor)),
               ],
             ),
-                ..._buildReferenceTables(test, context, colorScheme),
+                ..._buildReferenceTables(test, context),
           ],
         ),
           ),
@@ -79,17 +95,7 @@ class TestProtocolScreen extends StatelessWidget {
 
   Widget _sectionCard(BuildContext context, {required IconData icon, required String title, required Color color, required Widget child}) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: AppTheme.cardDecoration,
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +120,7 @@ class TestProtocolScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildReferenceTables(TestDefinitionModel test, BuildContext context, ColorScheme colorScheme) {
+  List<Widget> _buildReferenceTables(TestDefinitionModel test, BuildContext context) {
     final List<Widget> tables = [];
     // Yo-Yo IR1
     if (test.id == 'yo-yo-ir1') {
@@ -123,10 +129,12 @@ class TestProtocolScreen extends StatelessWidget {
         context,
         icon: Icons.table_chart,
         title: 'Mekik/Seviye Tablosu',
-        color: colorScheme.primary,
+        color: AppTheme.primaryColor,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
+            headingTextStyle: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+            dataTextStyle: TextStyle(color: AppTheme.primaryTextColor),
             columns: const [
               DataColumn(label: Text('Seviye')), 
               DataColumn(label: Text('Toplam Mesafe (m)')),
@@ -151,10 +159,12 @@ class TestProtocolScreen extends StatelessWidget {
         context,
         icon: Icons.table_chart,
         title: 'Mesafe ve VO2max Tablosu',
-        color: colorScheme.primary,
+        color: AppTheme.primaryColor,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
+            headingTextStyle: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+            dataTextStyle: TextStyle(color: AppTheme.primaryTextColor),
             columns: const [
               DataColumn(label: Text('Mesafe (m)')),
               DataColumn(label: Text('VO2max (ml/kg/dk)')),
@@ -177,8 +187,10 @@ class TestProtocolScreen extends StatelessWidget {
         context,
         icon: Icons.table_chart,
         title: 'Sıçrama Yüksekliği Değerlendirme',
-        color: colorScheme.primary,
+        color: AppTheme.primaryColor,
         child: DataTable(
+          headingTextStyle: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+          dataTextStyle: TextStyle(color: AppTheme.primaryTextColor),
           columns: const [
             DataColumn(label: Text('Yükseklik (cm)')),
             DataColumn(label: Text('Değerlendirme')),
@@ -200,8 +212,10 @@ class TestProtocolScreen extends StatelessWidget {
         context,
         icon: Icons.table_chart,
         title: 'Örnek Sprint ve Güç Tablosu',
-        color: colorScheme.primary,
+        color: AppTheme.primaryColor,
         child: DataTable(
+          headingTextStyle: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+          dataTextStyle: TextStyle(color: AppTheme.primaryTextColor),
           columns: const [
             DataColumn(label: Text('Sprint (sn)')),
             DataColumn(label: Text('Güç (Watt)')),

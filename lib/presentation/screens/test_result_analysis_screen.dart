@@ -29,26 +29,18 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
         .replaceAll(RegExp(r'^\s+|\s+$', multiLine: true), '') // Satır başı/sonu boşlukları
         .trim();
     
-    // Bölümleri ayır - yeni detaylı format için
+    // Bölümleri ayır - yeni 3 bölümlü format için
     final parts = cleanAnalysis.split(RegExp(r'\d+\.\s*'));
     
-    if (parts.length >= 7) {
-      // Yeni detaylı format: 6 bölüm
+    if (parts.length >= 4) { // 3 bölüm için (0. boş, 1-2-3. bölümler)
       sections['degerlendirme'] = _cleanSection(parts[1]);
       sections['eksik_guclu'] = _cleanSection(parts[2]);
       sections['genel_notlar'] = _cleanSection(parts[3]);
-      sections['haftalik_program'] = _cleanSection(parts[4]);
-      sections['beslenme_dinlenme'] = _cleanSection(parts[5]);
-      sections['uzun_vadeli'] = _cleanSection(parts[6]);
-    } else if (parts.length >= 5) {
-      // Eski format: 4 bölüm
-      sections['degerlendirme'] = _cleanSection(parts[1]);
-      sections['eksik_guclu'] = _cleanSection(parts[2]);
-      sections['genel_notlar'] = _cleanSection(parts[3]);
-      sections['haftalik_program'] = _cleanSection(parts[4]);
     } else {
-      // Eğer bölümler ayrılamazsa, tüm metni genel notlara koy
-      sections['genel_notlar'] = _cleanSection(cleanAnalysis);
+      // Fallback: Tüm analizi tek bölüm olarak göster
+      sections['degerlendirme'] = cleanAnalysis;
+      sections['eksik_guclu'] = 'Bölüm ayrıştırılamadı';
+      sections['genel_notlar'] = 'Bölüm ayrıştırılamadı';
     }
     
     return sections;
@@ -99,7 +91,7 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  color.withOpacity(0.15),
+                  color.withOpacity(0.1),
                   color.withOpacity(0.05),
                 ],
               ),
@@ -110,12 +102,12 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(14),
+                    color: color.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     icon,
-                    size: 26,
+                    size: 24,
                     color: color,
                   ),
                 ),
@@ -125,7 +117,7 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
                     title,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      fontSize: MediaQuery.of(context).size.width < 400 ? 17 : 19,
+                      fontSize: MediaQuery.of(context).size.width < 400 ? 16 : 18,
                       color: const Color(0xFF1F2937),
                       letterSpacing: 0.2,
                     ),
@@ -139,38 +131,14 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // İçerik başlığı
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Detaylar',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: color,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // İçerik metni
-                Text(
-                  content,
-                  style: TextStyle(
-                    color: const Color(0xFF374151),
-                    fontSize: MediaQuery.of(context).size.width < 400 ? 15 : 16,
-                    height: 1.7,
-                    letterSpacing: 0.1,
-                  ),
-                ),
-              ],
+            child: Text(
+              content,
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width < 400 ? 14 : 15,
+                color: const Color(0xFF374151),
+                height: 1.6,
+                letterSpacing: 0.1,
+              ),
             ),
           ),
         ],
@@ -380,7 +348,7 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${widget.testResult.testDate.hour.toString().padLeft(2, '0')}:${widget.testResult.testDate.minute.toString().padLeft(2, '0')}',
+                          '${widget.testResult.testDate.hour.toString().padLeft(2, '0')}:${widget.testResult.testDate.minute.toString().padLeft(2, '0')}:${widget.testResult.testDate.second.toString().padLeft(2, '0')}',
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.8),
                             fontWeight: FontWeight.w500,
@@ -498,43 +466,22 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
                     _buildAnalysisCard(
                       'degerlendirme',
                       'Sonuç Değerlendirmesi',
-                      Icons.analytics,
+                      Icons.insights,
                       const Color(0xFF10B981),
                     ),
                     
                     _buildAnalysisCard(
                       'eksik_guclu',
-                      'Eksik Yönler ve Güçlü Yanlar',
+                      'Eksik Yönler',
                       Icons.trending_up,
                       const Color(0xFFF59E0B),
                     ),
                     
                     _buildAnalysisCard(
                       'genel_notlar',
-                      'Genel Notlar',
-                      Icons.note,
-                      const Color(0xFF8B5CF6),
-                    ),
-                    
-                    _buildAnalysisCard(
-                      'haftalik_program',
-                      'Haftalık Program',
-                      Icons.calendar_today,
-                      const Color(0xFFEF4444),
-                    ),
-                    
-                    _buildAnalysisCard(
-                      'beslenme_dinlenme',
-                      'Beslenme ve Dinlenme',
-                      Icons.restaurant,
-                      const Color(0xFF06B6D4),
-                    ),
-                    
-                    _buildAnalysisCard(
-                      'uzun_vadeli',
-                      'Uzun Vadeli Gelişim',
-                      Icons.timeline,
-                      const Color(0xFF8B5CF6),
+                      'Egzersiz Önerisi',
+                      Icons.fitness_center,
+                      const Color(0xFF6366F1),
                     ),
                   ],
                 ),

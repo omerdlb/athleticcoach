@@ -2,18 +2,24 @@ import 'package:athleticcoach/data/athlete_database.dart';
 import 'package:athleticcoach/data/models/athlete_model.dart';
 import 'package:athleticcoach/data/models/test_definition_model.dart';
 import 'package:athleticcoach/data/models/test_result_model.dart';
+import 'package:athleticcoach/data/models/team_analysis_model.dart'; // Takım analizi modeli
 import 'package:athleticcoach/services/gemini_service.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
 class TestSessionAnalysisScreen extends StatefulWidget {
   final TestDefinitionModel selectedTest;
   final List<Map<String, dynamic>> results;
+  final String sessionId;
+  final DateTime testSessionStartTime;
 
   const TestSessionAnalysisScreen({
     super.key,
     required this.selectedTest,
     required this.results,
+    required this.sessionId,
+    required this.testSessionStartTime,
   });
 
   @override
@@ -27,10 +33,16 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
   final Map<String, bool> _isAnalysisExpanded = {};
   final Map<String, Map<String, bool>> _sectionExpanded = {}; // Her bölüm için ayrı durum
   bool _isSaving = false;
+  bool _isInitialAnalysisStarted = false; // Added
+  late final DateTime _testSessionStartTime; // Test oturumu başlangıç zamanı
+  late final String _sessionId;
 
   @override
   void initState() {
     super.initState();
+    _testSessionStartTime = widget.testSessionStartTime;
+    _sessionId = widget.sessionId;
+    
     for (final result in widget.results) {
       final athlete = result['athlete'] as AthleteModel;
       _isAnalyzing[athlete.id] = false;
@@ -46,6 +58,14 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
         'uzun_vadeli': false,
       };
     }
+
+    // Sayfa açılır açılmaz tüm analizleri başlat
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_isInitialAnalysisStarted) {
+        _isInitialAnalysisStarted = true;
+        _analyzeAllResults();
+      }
+    });
   }
 
   Future<void> _analyzeAthleteResult(AthleteModel athlete, double result, String? notes) async {
@@ -55,6 +75,20 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
 
     try {
       final age = DateTime.now().year - athlete.birthDate.year;
+      
+      // Debug bilgileri
+      print('=== ANALİZ BAŞLATILIYOR ===');
+      print('Sporcu ID: ${athlete.id}');
+      print('Sporcu: ${athlete.name} ${athlete.surname}');
+      print('Yaş: $age');
+      print('Cinsiyet: ${athlete.gender}');
+      print('Branş: ${athlete.branch}');
+      print('Boy: ${athlete.height} cm');
+      print('Kilo: ${athlete.weight} kg');
+      print('Test: ${widget.selectedTest.name}');
+      print('Sonuç: $result ${widget.selectedTest.resultUnit}');
+      print('Notlar: ${notes ?? 'Yok'}');
+      print('==========================');
       
       final analysis = await GeminiService.generateDetailedAnalysis(
         athleteName: athlete.name,
@@ -71,6 +105,29 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
       );
       
       if (mounted && analysis != null) {
+        print('=== ANALİZ TAMAMLANDI ===');
+        print('Sporcu: ${athlete.name} ${athlete.surname}');
+        print('Analiz Uzunluğu: ${analysis.length} karakter');
+        print('========================');
+        
+        // API aşırı yüklü hatası kontrolü
+        if (analysis.contains('API aşırı yüklü') || analysis.contains('overloaded')) {
+          setState(() {
+            _analysisResults[athlete.id] = 'API aşırı yüklü. Lütfen birkaç dakika sonra tekrar deneyin.';
+          });
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${athlete.name} ${athlete.surname} - API aşırı yüklü, daha sonra tekrar deneyin'),
+                backgroundColor: AppTheme.warningColor,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+          return;
+        }
+        
         setState(() {
           _analysisResults[athlete.id] = analysis;
           _analysisSections[athlete.id] = _parseAnalysis(analysis);
@@ -78,12 +135,34 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
         
         // Analiz tamamlandığında otomatik kaydet
         await _saveSingleResult(athlete, result, notes, analysis);
+      } else {
+        print('=== ANALİZ HATASI ===');
+        print('Sporcu: ${athlete.name} ${athlete.surname}');
+        print('Analiz null döndü!');
+        print('=====================');
+        
+        setState(() {
+          _analysisResults[athlete.id] = 'Analiz alınamadı. Lütfen tekrar deneyin.';
+        });
       }
     } catch (e) {
+      print('=== ANALİZ EXCEPTION ===');
+      print('Sporcu: ${athlete.name} ${athlete.surname}');
+      print('Hata: $e');
+      print('=======================');
+      
       if (mounted) {
         setState(() {
           _analysisResults[athlete.id] = 'Analiz sırasında hata oluştu: $e';
         });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${athlete.name} ${athlete.surname} - Analiz hatası: $e'),
+            backgroundColor: AppTheme.errorColor,
+            duration: const Duration(seconds: 4),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -97,7 +176,7 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
   Future<void> _saveSingleResult(AthleteModel athlete, double result, String? notes, String analysis) async {
     try {
       final database = AthleteDatabase();
-      final testDate = DateTime.now();
+      final testDate = _testSessionStartTime;
 
       final testResultModel = TestResultModel(
         id: _generateId(),
@@ -111,6 +190,7 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
         resultUnit: widget.selectedTest.resultUnit,
         notes: notes?.isNotEmpty == true ? notes : null,
         aiAnalysis: analysis.isNotEmpty ? analysis : null,
+        sessionId: _sessionId,
       );
 
       await database.insertTestResult(testResultModel);
@@ -119,7 +199,7 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${athlete.name} ${athlete.surname} - Analiz kaydedildi!'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppTheme.successColor,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -129,7 +209,7 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${athlete.name} ${athlete.surname} - Kaydetme hatası: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorColor,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -147,29 +227,32 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
         final athlete = result['athlete'] as AthleteModel;
         final testResult = result['result'] as double;
         final notes = result['notes'] as String?;
-        
+
         await _analyzeAthleteResult(athlete, testResult, notes);
         await Future.delayed(const Duration(milliseconds: 500));
       }
-      
-      // Tüm analizler tamamlandığında ana sayfaya dön
+
+      // Takım analizi - sadece birden fazla sporcu varsa
+      if (widget.results.length > 1) {
+        await _generateTeamAnalysis();
+      }
+
+      // Tüm analizler tamamlandığında sadece bilgi mesajı göster
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Tüm analizler tamamlandı ve kaydedildi!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
+            backgroundColor: AppTheme.successColor,
+            duration: const Duration(seconds: 3),
           ),
         );
-        
-        Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Analiz sırasında hata: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorColor,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -183,7 +266,84 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
     }
   }
 
+  Future<void> _generateTeamAnalysis() async {
+    try {
+      print('=== TAKIM ANALİZİ BAŞLATILIYOR ===');
+      print('Sporcu Sayısı: ${widget.results.length}');
+      print('Test: ${widget.selectedTest.name}');
+      print('===============================');
 
+      // Takım analizi için veri hazırla
+      final teamResults = widget.results.map((result) {
+        final athlete = result['athlete'] as AthleteModel;
+        final testResult = result['result'] as double;
+        final age = DateTime.now().year - athlete.birthDate.year;
+        
+        return {
+          'athlete': {
+            'name': athlete.name,
+            'surname': athlete.surname,
+            'age': age,
+            'gender': athlete.gender,
+          },
+          'result': testResult,
+          'unit': widget.selectedTest.resultUnit,
+        };
+      }).toList();
+
+      final teamAnalysis = await GeminiService.generateTeamAnalysis(
+        results: teamResults,
+        testName: widget.selectedTest.name,
+      );
+
+      if (teamAnalysis != null && teamAnalysis.isNotEmpty) {
+        print('=== TAKIM ANALİZİ TAMAMLANDI ===');
+        print('Analiz Uzunluğu: ${teamAnalysis.length} karakter');
+        print('==============================');
+
+        // Takım analizini veritabanına kaydet
+        final database = AthleteDatabase();
+        final teamAnalysisModel = TeamAnalysisModel(
+          id: null, // id null olabilir (otomatik artacak)
+          testSessionId: _generateId(), // String olarak
+          testName: widget.selectedTest.name,
+          analysis: teamAnalysis,
+          createdAt: DateTime.now(),
+          participantCount: widget.results.length,
+        );
+
+        await database.addTeamAnalysis(teamAnalysisModel);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Takım analizi tamamlandı ve kaydedildi!'),
+              backgroundColor: AppTheme.successColor,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } else {
+        print('=== TAKIM ANALİZİ HATASI ===');
+        print('Analiz null döndü!');
+        print('===========================');
+      }
+    } catch (e) {
+      print('=== TAKIM ANALİZİ EXCEPTION ===');
+      print('Hata: $e');
+      print('==============================');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Takım analizi sırasında hata: $e'),
+            backgroundColor: AppTheme.errorColor,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
+  }
 
   String _generateId() {
     return DateTime.now().millisecondsSinceEpoch.toString() + Random().nextInt(1000).toString();
@@ -191,39 +351,49 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
 
   Map<String, String> _parseAnalysis(String analysis) {
     final sections = <String, String>{};
-    
+
+    print('=== ANALİZ PARSE EDİLİYOR ===');
+    print('Ham Analiz Uzunluğu: ${analysis.length}');
+    print('Ham Analiz (İlk 200 karakter): ${analysis.substring(0, analysis.length > 200 ? 200 : analysis.length)}...');
+
     // Gereksiz çizgileri ve formatlamaları temizle
     String cleanAnalysis = analysis
-        .replaceAll(RegExp(r'-{3,}'), '') // Üç veya daha fazla tire
-        .replaceAll(RegExp(r'={3,}'), '') // Üç veya daha fazla eşittir
-        .replaceAll(RegExp(r'\*{3,}'), '') // Üç veya daha fazla yıldız
-        .replaceAll(RegExp(r'_{3,}'), '') // Üç veya daha fazla alt çizgi
-        .replaceAll(RegExp(r'\n\s*\n\s*\n'), '\n\n') // Fazla boş satırları
-        .replaceAll(RegExp(r'^\s+|\s+$', multiLine: true), '') // Satır başı/sonu boşlukları
+        .replaceAll(RegExp(r'-{3,}'), '')
+        .replaceAll(RegExp(r'={3,}'), '')
+        .replaceAll(RegExp(r'\*{3,}'), '')
+        .replaceAll(RegExp(r'_{3,}'), '')
+        .replaceAll(RegExp(r'\n\s*\n\s*\n'), '\n\n')
+        .replaceAll(RegExp(r'^\s+|\s+$', multiLine: true), '')
         .trim();
-    
-    // Bölümleri ayır - yeni detaylı format için
+
+    print('Temizlenmiş Analiz Uzunluğu: ${cleanAnalysis.length}');
+
+    // Bölümleri ayır - yeni basit format için
     final parts = cleanAnalysis.split(RegExp(r'\d+\.\s*'));
-    
-    if (parts.length >= 7) {
-      // Yeni detaylı format: 6 bölüm
+
+    print('Bölüm Sayısı: ${parts.length}');
+    for (int i = 0; i < parts.length; i++) {
+      print('Bölüm $i: ${parts[i].substring(0, parts[i].length > 50 ? 50 : parts[i].length)}...');
+    }
+
+    if (parts.length >= 4) {
+      // Yeni basit format: 3 bölüm
       sections['degerlendirme'] = _cleanSection(parts[1]);
       sections['eksik_guclu'] = _cleanSection(parts[2]);
       sections['genel_notlar'] = _cleanSection(parts[3]);
-      sections['haftalik_program'] = _cleanSection(parts[4]);
-      sections['beslenme_dinlenme'] = _cleanSection(parts[5]);
-      sections['uzun_vadeli'] = _cleanSection(parts[6]);
-    } else if (parts.length >= 5) {
-      // Eski format: 4 bölüm
-      sections['degerlendirme'] = _cleanSection(parts[1]);
-      sections['eksik_guclu'] = _cleanSection(parts[2]);
-      sections['genel_notlar'] = _cleanSection(parts[3]);
-      sections['haftalik_program'] = _cleanSection(parts[4]);
+      print('3 bölümlü format kullanıldı');
     } else {
       // Eğer bölümler ayrılamazsa, tüm metni genel notlara koy
       sections['genel_notlar'] = _cleanSection(cleanAnalysis);
+      print('Bölümler ayrılamadı, tüm metin genel notlara koyuldu');
     }
-    
+
+    print('=== PARSE SONUÇLARI ===');
+    sections.forEach((key, value) {
+      print('$key: ${value.length} karakter');
+    });
+    print('========================');
+
     return sections;
   }
 
@@ -241,75 +411,87 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
   Widget _buildAnalysisSection(String athleteId, String sectionKey, String title, IconData icon, Color color) {
     final sections = _analysisSections[athleteId];
     final content = sections?[sectionKey] ?? 'İçerik bulunamadı';
-    final isExpanded = _sectionExpanded[athleteId]?[sectionKey] ?? false;
-    
+
     return Container(
+      width: 350,
+      constraints: BoxConstraints(
+        minHeight: 120, // Minimum yükseklik
+        maxHeight: MediaQuery.of(context).size.height * 0.4, // Maksimum yükseklik
+      ),
+      margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
         color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: color.withOpacity(0.2),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min, // İçeriğe göre boyutlan
         children: [
-          InkWell(
-            onTap: () {
-              setState(() {
-                _sectionExpanded[athleteId]![sectionKey] = !isExpanded;
-              });
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Icon(
-                      icon,
-                      size: 16,
-                      color: color,
-                    ),
+          // Başlık ve icon - Sabit yükseklik
+          Container(
+            height: 60,
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: color,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    color: color,
+                  child: Icon(
+                    icon,
                     size: 20,
+                    color: color,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          if (isExpanded)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          
+          // Ayırıcı çizgi
+          Container(
+            height: 1,
+            color: color.withOpacity(0.2),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+          ),
+          
+          // İçerik - Dinamik yükseklik
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.all(16),
               child: Text(
                 content,
                 style: TextStyle(
-                  color: color.withOpacity(0.8),
-                  fontSize: 13,
-                  height: 1.4,
+                  color: AppTheme.primaryTextColor,
+                  fontSize: 14,
+                  height: 1.5,
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
@@ -319,524 +501,262 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Analizi'),
-        backgroundColor: const Color(0xFF6366F1),
-        foregroundColor: Colors.white,
-        elevation: 0,
+        title: const Text('AI Analiz'),
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: AppTheme.whiteTextColor,
+        elevation: 2,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.home,
+              color: AppTheme.whiteTextColor,
+              size: 24,
+            ),
+            tooltip: 'Ana Menüye Dön',
+            onPressed: () {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+          ),
+        ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Modern gradient header
+          // Arka plan degrade
           Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF6366F1),
-                  const Color(0xFF8B5CF6),
-                ],
-              ),
-            ),
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.auto_awesome,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.selectedTest.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '${widget.results.length} sporcu',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            decoration: AppTheme.gradientDecoration,
           ),
-          
-          // Modern analiz butonu
-          Container(
-            padding: const EdgeInsets.all(20),
-            child: ElevatedButton.icon(
-              onPressed: _isSaving ? null : _analyzeAllResults,
-              icon: _isSaving 
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          Column(
+            children: [
+              // Test bilgisi
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                color: AppTheme.primaryColor.withOpacity(0.1),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.selectedTest.name,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
                       ),
-                    )
-                  : const Icon(Icons.auto_awesome, size: 24),
-              label: Text(
-                _isSaving ? 'Analizler Yapılıyor...' : 'Tümünü Analiz Et ve Kaydet',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 32),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 4,
-              ),
-            ),
-          ),
-          
-          // Tamamla butonu (analizler tamamlandığında görünür)
-          if (_analysisResults.isNotEmpty && !_isSaving)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                icon: const Icon(Icons.check_circle, size: 24),
-                label: const Text(
-                  'Tamamla - Ana Menüye Dön',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF10B981),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 32),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 4,
-                ),
-              ),
-            ),
-          
-          // Analiz sonuçları
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: widget.results.length,
-              itemBuilder: (context, index) {
-                final result = widget.results[index];
-                final athlete = result['athlete'] as AthleteModel;
-                final testResult = result['result'] as double;
-                final notes = result['notes'] as String?;
-                final isAnalyzing = _isAnalyzing[athlete.id] ?? false;
-                final analysis = _analysisResults[athlete.id] ?? '';
-                
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${widget.results.length} sporcu için AI analizi yapılıyor...',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.secondaryTextColor,
                       ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Sporcu bilgileri
-                        Row(
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Analiz sonuçları
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: widget.results.length,
+                  itemBuilder: (context, index) {
+                    final result = widget.results[index];
+                    final athlete = result['athlete'] as AthleteModel;
+                    final testResult = result['result'] as double;
+                    final notes = result['notes'] as String?;
+                    final isAnalyzing = _isAnalyzing[athlete.id] ?? false;
+                    final hasAnalysis = _analysisResults[athlete.id]?.isNotEmpty == true;
+                    
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: AppTheme.cardDecoration,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    const Color(0xFF6366F1),
-                                    const Color(0xFF8B5CF6),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '${athlete.name[0]}${athlete.surname[0]}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                            // Sporcu bilgisi
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: athlete.gender == 'Kadın'
+                                      ? AppTheme.femaleColor.withOpacity(0.2)
+                                      : AppTheme.maleColor.withOpacity(0.2),
+                                  child: Icon(
+                                    athlete.gender == 'Kadın' ? Icons.female : Icons.male,
+                                    color: athlete.gender == 'Kadın'
+                                        ? AppTheme.femaleColor
+                                        : AppTheme.maleColor,
+                                    size: 24,
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${athlete.name} ${athlete.surname}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Color(0xFF1F2937),
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFE5E7EB),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          athlete.branch,
-                                          style: const TextStyle(
-                                            color: Color(0xFF6B7280),
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 12,
-                                          ),
+                                      Text(
+                                        '${athlete.name} ${athlete.surname}',
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.primaryTextColor,
                                         ),
                                       ),
-                                      const SizedBox(width: 6),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFDBEAFE),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          '${DateTime.now().year - athlete.birthDate.year} yaş',
-                                          style: const TextStyle(
-                                            color: Color(0xFF1E40AF),
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF3E8FF),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          athlete.gender,
-                                          style: const TextStyle(
-                                            color: Color(0xFF7C3AED),
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 12,
-                                          ),
+                                      Text(
+                                        'Sonuç: $testResult ${widget.selectedTest.resultUnit}',
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: AppTheme.primaryColor,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF10B981).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: const Color(0xFF10B981).withOpacity(0.3),
-                                  width: 1,
                                 ),
-                              ),
-                              child: Text(
-                                '$testResult ${widget.selectedTest.resultUnit}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF10B981),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        
-                        // Not varsa göster
-                        if (notes?.isNotEmpty == true) ...[
-                          const SizedBox(height: 12),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFEF3C7),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: const Color(0xFFF59E0B).withOpacity(0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.note,
-                                  size: 16,
-                                  color: Color(0xFF92400E),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    notes!,
-                                    style: const TextStyle(
-                                      color: Color(0xFF92400E),
-                                      fontStyle: FontStyle.italic,
-                                      fontSize: 13,
+                                if (isAnalyzing)
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primaryColor.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppTheme.primaryColor,
+                                      ),
+                                    ),
+                                  )
+                                else if (hasAnalysis)
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.successColor.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      Icons.check_circle,
+                                      color: AppTheme.successColor,
+                                      size: 20,
                                     ),
                                   ),
-                                ),
                               ],
                             ),
-                          ),
-                        ],
-                        
-                        const SizedBox(height: 16),
-                        
-                        // Analiz bölümü
-                        if (isAnalyzing)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFEF3C7),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFFF59E0B).withOpacity(0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF59E0B)),
-                                  ),
+                            
+                            if (hasAnalysis) ...[
+                              const SizedBox(height: 16),
+                              
+                              // Analiz kartları - Yatay scroll
+                              Container(
+                                height: MediaQuery.of(context).size.height * 0.4, // Maksimum yükseklik artırıldı
+                                child: ListView(
+                                  scrollDirection: Axis.horizontal,
+                                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                                  children: [
+                                    _buildAnalysisSection(
+                                      athlete.id,
+                                      'degerlendirme',
+                                      'Sonuç Değerlendirmesi',
+                                      Icons.insights,
+                                      AppTheme.successColor,
+                                    ),
+                                    _buildAnalysisSection(
+                                      athlete.id,
+                                      'eksik_guclu',
+                                      'Eksik Yönler',
+                                      Icons.trending_up,
+                                      AppTheme.warningColor,
+                                    ),
+                                    _buildAnalysisSection(
+                                      athlete.id,
+                                      'genel_notlar',
+                                      'Egzersiz Önerisi',
+                                      Icons.fitness_center,
+                                      AppTheme.accentColor,
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 12),
-                                const Text(
-                                  'AI analizi yapılıyor...',
-                                  style: TextStyle(
-                                    color: Color(0xFF92400E),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else if (analysis.isNotEmpty)
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF0F9FF),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFF3B82F6).withOpacity(0.3),
-                                width: 1,
                               ),
-                            ),
-                            child: Column(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      _isAnalysisExpanded[athlete.id] = !(_isAnalysisExpanded[athlete.id] ?? false);
-                                    });
-                                  },
+                            ] else if (_analysisResults[athlete.id]?.contains('API aşırı yüklü') == true || 
+                                       _analysisResults[athlete.id]?.contains('Analiz alınamadı') == true ||
+                                       _analysisResults[athlete.id]?.contains('Analiz sırasında hata') == true) ...[
+                              const SizedBox(height: 16),
+                              
+                              // Hata durumu kartı
+                              Container(
+                                width: double.infinity,
+                                height: MediaQuery.of(context).size.height * 0.15,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.errorColor.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(12),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF3B82F6).withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: AppTheme.errorColor.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Başlık
+                                    Container(
+                                      height: 50,
+                                      padding: const EdgeInsets.all(16),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.error_outline,
+                                            color: AppTheme.errorColor,
+                                            size: 24,
                                           ),
-                                          child: const Icon(
-                                            Icons.auto_awesome,
-                                            size: 20,
-                                            color: Color(0xFF3B82F6),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        const Expanded(
-                                          child: Text(
-                                            'AI Analizi',
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            'Analiz Hatası',
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              color: Color(0xFF1E40AF),
+                                              color: AppTheme.errorColor,
                                               fontSize: 16,
                                             ),
                                           ),
-                                        ),
-                                        Icon(
-                                          _isAnalysisExpanded[athlete.id] == true
-                                              ? Icons.keyboard_arrow_up
-                                              : Icons.keyboard_arrow_down,
-                                          color: const Color(0xFF3B82F6),
-                                          size: 24,
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                if (_isAnalysisExpanded[athlete.id] == true)
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      children: [
-                                        // Sonuç Değerlendirmesi
-                                        _buildAnalysisSection(
-                                          athlete.id,
-                                          'degerlendirme',
-                                          'Sonuç Değerlendirmesi',
-                                          Icons.analytics,
-                                          const Color(0xFF10B981),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        
-                                        // Eksik Yönler ve Güçlü Yanlar
-                                        _buildAnalysisSection(
-                                          athlete.id,
-                                          'eksik_guclu',
-                                          'Eksik Yönler ve Güçlü Yanlar',
-                                          Icons.trending_up,
-                                          const Color(0xFFF59E0B),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        
-                                        // Genel Notlar
-                                        _buildAnalysisSection(
-                                          athlete.id,
-                                          'genel_notlar',
-                                          'Genel Notlar',
-                                          Icons.note,
-                                          const Color(0xFF8B5CF6),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        
-                                        // Haftalık Program
-                                        _buildAnalysisSection(
-                                          athlete.id,
-                                          'haftalik_program',
-                                          'Haftalık Program',
-                                          Icons.calendar_today,
-                                          const Color(0xFFEF4444),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        
-                                        // Beslenme ve Dinlenme
-                                        _buildAnalysisSection(
-                                          athlete.id,
-                                          'beslenme_dinlenme',
-                                          'Beslenme ve Dinlenme',
-                                          Icons.restaurant,
-                                          const Color(0xFF06B6D4),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        
-                                        // Uzun Vadeli Gelişim
-                                        _buildAnalysisSection(
-                                          athlete.id,
-                                          'uzun_vadeli',
-                                          'Uzun Vadeli Gelişim',
-                                          Icons.timeline,
-                                          const Color(0xFF8B5CF6),
-                                        ),
-                                      ],
+                                    
+                                    // Ayırıcı çizgi
+                                    Container(
+                                      height: 1,
+                                      color: AppTheme.errorColor.withOpacity(0.3),
+                                      margin: const EdgeInsets.symmetric(horizontal: 16),
                                     ),
-                                  ),
-                              ],
-                            ),
-                          )
-                        else
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF3F4F6),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFF6B7280).withOpacity(0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: ElevatedButton.icon(
-                              onPressed: () => _analyzeAthleteResult(athlete, testResult, notes),
-                              icon: const Icon(Icons.auto_awesome, size: 18),
-                              label: const Text(
-                                'Bu Sporcuyu Analiz Et',
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF6366F1),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                    
+                                    // İçerik
+                                    Expanded(
+                                      child: Container(
+                                        padding: const EdgeInsets.all(16),
+                                        child: SingleChildScrollView(
+                                          physics: const BouncingScrollPhysics(),
+                                          child: Text(
+                                            _analysisResults[athlete.id] ?? 'Bilinmeyen hata',
+                                            style: TextStyle(
+                                              color: AppTheme.primaryTextColor,
+                                              fontSize: 14,
+                                              height: 1.5,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                elevation: 0,
                               ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),

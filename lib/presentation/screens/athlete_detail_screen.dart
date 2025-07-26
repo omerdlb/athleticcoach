@@ -1,6 +1,7 @@
 import 'package:athleticcoach/data/athlete_database.dart';
 import 'package:athleticcoach/data/models/athlete_model.dart';
 import 'package:athleticcoach/data/models/test_result_model.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:athleticcoach/services/gemini_service.dart';
 
@@ -64,7 +65,10 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Test sonuçları yüklenirken hata: $e')),
+          SnackBar(
+            content: Text('Test sonuçları yüklenirken hata: $e'),
+            backgroundColor: AppTheme.errorColor,
+          ),
         );
       }
     }
@@ -210,34 +214,23 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
   }
 
   Widget _buildGroupedTestResults() {
-    final colorScheme = Theme.of(context).colorScheme;
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
     }
     if (athleteResults.isEmpty) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
         padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.primary.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        decoration: AppTheme.cardDecoration,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.analytics_outlined, size: 48, color: colorScheme.primary),
+            Icon(Icons.analytics_outlined, size: 48, color: AppTheme.primaryColor),
             const SizedBox(height: 14),
             Text(
               'Henüz test sonucu yok',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: colorScheme.primary,
+                    color: AppTheme.primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
             ),
@@ -245,7 +238,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
             Text(
               'Bu sporcu için test oturumu başlatın ve sonuçları burada görüntüleyin.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.outline,
+                    color: AppTheme.secondaryTextColor,
                   ),
               textAlign: TextAlign.center,
             ),
@@ -279,17 +272,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
         final isExpanded = _testGroupExpanded[testName] ?? true;
         return Container(
           margin: const EdgeInsets.only(bottom: 22),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.primary.withOpacity(0.07),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
+          decoration: AppTheme.cardDecoration,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -305,32 +288,32 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.10),
+                    color: AppTheme.primaryColor.withOpacity(0.10),
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.fitness_center, color: colorScheme.primary, size: 22),
+                      Icon(Icons.fitness_center, color: AppTheme.primaryColor, size: 22),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           testName,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: colorScheme.primary,
+                                color: AppTheme.primaryColor,
                               ),
                         ),
                       ),
                       Text(
                         '${results.length} test',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.primary,
+                              color: AppTheme.primaryColor,
                             ),
                       ),
                       const SizedBox(width: 8),
                       Icon(
                         isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                        color: colorScheme.primary,
+                        color: AppTheme.primaryColor,
                         size: 26,
                       ),
                     ],
@@ -349,12 +332,12 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                     final hasAnalysis = result.aiAnalysis != null && result.aiAnalysis!.isNotEmpty;
                     // Dönüşümlü arka plan renkleri
                     final List<Color> bgColors = [
-                      const Color(0xFFE0E7FF), // Açık mor
-                      Colors.white,
-                      const Color(0xFFFFF7E0), // Açık sarı
-                      Colors.white,
-                      const Color(0xFFE0F7FA), // Açık mavi
-                      Colors.white,
+                      AppTheme.primaryColor.withOpacity(0.05), // Açık mor
+                      AppTheme.cardBackgroundColor,
+                      AppTheme.secondaryColor.withOpacity(0.05), // Açık sarı
+                      AppTheme.cardBackgroundColor,
+                      AppTheme.accentColor.withOpacity(0.05), // Açık mavi
+                      AppTheme.cardBackgroundColor,
                     ];
                     final bgColor = bgColors[resultIndex % bgColors.length];
                     return Dismissible(
@@ -363,13 +346,13 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                       background: Container(
                         alignment: Alignment.centerRight,
                         padding: const EdgeInsets.symmetric(horizontal: 24),
-                        color: Colors.redAccent.withOpacity(0.85),
-                        child: const Row(
+                        color: AppTheme.errorColor.withOpacity(0.85),
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Icon(Icons.delete_outline, color: Colors.white, size: 28),
-                            SizedBox(width: 8),
-                            Text('Sil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                            Icon(Icons.delete_outline, color: AppTheme.whiteTextColor, size: 28),
+                            const SizedBox(width: 8),
+                            Text('Sil', style: TextStyle(color: AppTheme.whiteTextColor, fontWeight: FontWeight.bold, fontSize: 16)),
                           ],
                         ),
                       ),
@@ -377,16 +360,16 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Test Sonucunu Sil'),
-                            content: const Text('Bu test sonucunu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'),
+                            title: Text('Test Sonucunu Sil', style: TextStyle(color: AppTheme.primaryTextColor)),
+                            content: Text('Bu test sonucunu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.', style: TextStyle(color: AppTheme.primaryTextColor)),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(false),
-                                child: const Text('Vazgeç'),
+                                child: Text('Vazgeç', style: TextStyle(color: AppTheme.primaryColor)),
                               ),
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(true),
-                                child: const Text('Sil', style: TextStyle(color: Colors.redAccent)),
+                                child: Text('Sil', style: TextStyle(color: AppTheme.errorColor)),
                               ),
                             ],
                           ),
@@ -399,7 +382,10 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                           athleteResults.removeWhere((r) => r.id == result.id);
                         });
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Test sonucu silindi.')),
+                          SnackBar(
+                            content: Text('Test sonucu silindi.'),
+                            backgroundColor: AppTheme.successColor,
+                          ),
                         );
                       },
                       child: Container(
@@ -410,7 +396,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
-                              color: colorScheme.primary.withOpacity(0.06),
+                              color: AppTheme.shadowColorWithOpacity,
                               blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
@@ -430,27 +416,27 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                                         '${result.result.toStringAsFixed(2)} ${result.resultUnit}',
                                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                               fontWeight: FontWeight.bold,
-                                              color: colorScheme.primary,
+                                              color: AppTheme.primaryColor,
                                             ),
                                       ),
                                       const SizedBox(height: 4),
                                       Row(
                                         children: [
-                                          Icon(Icons.calendar_today, size: 14, color: colorScheme.outline),
+                                          Icon(Icons.calendar_today, size: 14, color: AppTheme.secondaryTextColor),
                                           const SizedBox(width: 4),
                                           Text(
                                             _formatDate(result.testDate),
                                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                  color: colorScheme.outline,
+                                                  color: AppTheme.secondaryTextColor,
                                                 ),
                                           ),
                                           const SizedBox(width: 12),
-                                          Icon(Icons.access_time, size: 14, color: colorScheme.outline),
+                                          Icon(Icons.access_time, size: 14, color: AppTheme.secondaryTextColor),
                                           const SizedBox(width: 4),
                                           Text(
-                                            '${result.testDate.hour.toString().padLeft(2, '0')}:${result.testDate.minute.toString().padLeft(2, '0')}',
+                                            '${result.testDate.hour.toString().padLeft(2, '0')}:${result.testDate.minute.toString().padLeft(2, '0')}:${result.testDate.second.toString().padLeft(2, '0')}',
                                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                  color: colorScheme.outline,
+                                                  color: AppTheme.secondaryTextColor,
                                                 ),
                                           ),
                                         ],
@@ -460,7 +446,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                                         Text(
                                           'Not: ${result.notes}',
                                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                color: colorScheme.outline,
+                                                color: AppTheme.secondaryTextColor,
                                                 fontStyle: FontStyle.italic,
                                               ),
                                         ),
@@ -475,32 +461,32 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                       decoration: BoxDecoration(
-                                        color: colorScheme.primary.withOpacity(0.13),
+                                        color: AppTheme.primaryColor.withOpacity(0.13),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Row(
                                         children: [
-                                          Icon(Icons.auto_awesome, color: colorScheme.primary, size: 18),
+                                          Icon(Icons.auto_awesome, color: AppTheme.primaryColor, size: 18),
                                           const SizedBox(width: 6),
                                           Text(
                                             'AI Analizi',
                                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                                  color: colorScheme.primary,
+                                                  color: AppTheme.primaryColor,
                                                   fontWeight: FontWeight.w600,
                                                 ),
                                           ),
-                                          const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF6B7280)),
+                                          Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.secondaryTextColor),
                                         ],
                                       ),
                                     ),
                                   )
                                 else
                                   ElevatedButton.icon(
-                                    icon: const Icon(Icons.auto_awesome),
-                                    label: const Text('Analiz Et'),
+                                    icon: Icon(Icons.auto_awesome, color: AppTheme.whiteTextColor),
+                                    label: Text('Analiz Et', style: TextStyle(color: AppTheme.whiteTextColor)),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: colorScheme.primary,
-                                      foregroundColor: colorScheme.onPrimary,
+                                      backgroundColor: AppTheme.primaryColor,
+                                      foregroundColor: AppTheme.whiteTextColor,
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                       textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -536,17 +522,15 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final age = _calculateAge(widget.athlete.birthDate);
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.athlete.name} ${widget.athlete.surname}'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        elevation: 2,
+         backgroundColor: AppTheme.primaryColor,
+         foregroundColor: AppTheme.whiteTextColor,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: AppTheme.whiteTextColor),
             onPressed: _loadAthleteResults,
           ),
         ],
@@ -555,16 +539,10 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
         children: [
           // Arka plan degrade
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFF1F5FE), Color(0xFFFDF6E3)],
-              ),
-            ),
+            decoration: AppTheme.gradientDecoration,
           ),
           SingleChildScrollView(
-            padding: const EdgeInsets.all(18),
+            padding: AppTheme.getResponsivePadding(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -572,15 +550,15 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                 Container(
                   margin: const EdgeInsets.only(bottom: 18),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF6366F1), Color(0xFF818CF8), Colors.white],
+                    gradient: LinearGradient(
+                      colors: [AppTheme.primaryColor, AppTheme.primaryColor.withOpacity(0.8), AppTheme.cardBackgroundColor],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF6366F1).withOpacity(0.10),
+                        color: AppTheme.shadowColorWithOpacity,
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -592,11 +570,11 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                       children: [
                         CircleAvatar(
                           radius: 32,
-                          backgroundColor: Colors.white,
+                          backgroundColor: AppTheme.cardBackgroundColor,
                           child: Icon(
                             widget.athlete.gender == 'Kadın' ? Icons.female : Icons.male,
                             size: 32,
-                            color: colorScheme.primary,
+                            color: widget.athlete.gender == 'Kadın' ? AppTheme.femaleColor : AppTheme.maleColor,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -604,7 +582,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                           '${widget.athlete.name} ${widget.athlete.surname}',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: colorScheme.primary,
+                                color: AppTheme.primaryColor,
                               ),
                           textAlign: TextAlign.center,
                         ),
@@ -612,7 +590,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                         Text(
                           widget.athlete.branch,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.primary,
+                                color: AppTheme.primaryColor,
                                 fontWeight: FontWeight.w500,
                               ),
                         ),
@@ -649,18 +627,18 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                     'Test Sonuçları',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: colorScheme.primary,
+                          color: AppTheme.primaryColor,
                         ),
                   ),
                 ),
                 // Test Sonuçları
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.7),
+                    color: AppTheme.cardBackgroundWithOpacity,
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: colorScheme.primary.withOpacity(0.07),
+                        color: AppTheme.shadowColorWithOpacity,
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -685,11 +663,11 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
         horizontal: mini ? 8 : 14,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
+        color: AppTheme.cardBackgroundColor.withOpacity(0.85),
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.06),
+            color: AppTheme.shadowColorWithOpacity,
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),
@@ -698,21 +676,21 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: const Color(0xFF6366F1), size: mini ? 16 : 22),
+          Icon(icon, color: AppTheme.primaryColor, size: mini ? 16 : 22),
           const SizedBox(height: 2),
           Text(
             label,
-            style: TextStyle(fontSize: mini ? 10 : 12, color: const Color(0xFF6366F1), fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: mini ? 10 : 12, color: AppTheme.primaryColor, fontWeight: FontWeight.w600),
           ),
           Text(
             value,
-            style: TextStyle(fontSize: mini ? 12 : 15, fontWeight: FontWeight.bold, color: const Color(0xFF1F2937)),
+            style: TextStyle(fontSize: mini ? 12 : 15, fontWeight: FontWeight.bold, color: AppTheme.primaryTextColor),
           ),
         ],
       ),
     );
   }
-} 
+}
 
 class TestResultAnalysisScreen extends StatefulWidget {
   final AthleteModel athlete;
@@ -726,37 +704,30 @@ class TestResultAnalysisScreen extends StatefulWidget {
 class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final analysis = widget.result.aiAnalysis;
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI Analiz & Öneri'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: AppTheme.whiteTextColor,
       ),
       body: Stack(
         children: [
           // Arka plan degrade
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFF1F5FE), Color(0xFFFDF6E3)],
-              ),
-            ),
+            decoration: AppTheme.gradientDecoration,
           ),
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: AppTheme.getResponsivePadding(context),
             child: analysis == null || analysis.trim().isEmpty
-                ? Center(child: Text('Bu test için AI analizi bulunamadı.'))
+                ? Center(child: Text('Bu test için AI analizi bulunamadı.', style: TextStyle(color: AppTheme.primaryTextColor)))
                 : SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'AI Analiz & Kişisel Antrenman Planı',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary),
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
                         ),
                         const SizedBox(height: 16),
                         // Test ve sporcu bilgileri
@@ -770,27 +741,27 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    Icon(Icons.fitness_center, color: colorScheme.primary, size: 28),
+                                    Icon(Icons.fitness_center, color: AppTheme.primaryColor, size: 28),
                                     const SizedBox(width: 10),
                                     Text(
                                       widget.result.testName,
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary),
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
-                                    Icon(Icons.calendar_today, size: 18, color: Colors.grey[600]),
+                                    Icon(Icons.calendar_today, size: 18, color: AppTheme.secondaryTextColor),
                                     const SizedBox(width: 6),
-                                    Text('Tarih: ${widget.result.testDate.day.toString().padLeft(2, '0')}.${widget.result.testDate.month.toString().padLeft(2, '0')}.${widget.result.testDate.year}'),
+                                    Text('Tarih: ${widget.result.testDate.day.toString().padLeft(2, '0')}.${widget.result.testDate.month.toString().padLeft(2, '0')}.${widget.result.testDate.year}', style: TextStyle(color: AppTheme.primaryTextColor)),
                                   ],
                                 ),
                                 Row(
                                   children: [
-                                    Icon(Icons.analytics, size: 18, color: Colors.grey[600]),
+                                    Icon(Icons.analytics, size: 18, color: AppTheme.secondaryTextColor),
                                     const SizedBox(width: 6),
-                                    Text('Sonuç: ${widget.result.result} ${widget.result.resultUnit}'),
+                                    Text('Sonuç: ${widget.result.result} ${widget.result.resultUnit}', style: TextStyle(color: AppTheme.primaryTextColor)),
                                   ],
                                 ),
                                 if (widget.result.notes?.isNotEmpty == true)
@@ -798,9 +769,9 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
                                     padding: const EdgeInsets.only(top: 6),
                                     child: Row(
                                       children: [
-                                        Icon(Icons.note, size: 18, color: Colors.grey[600]),
+                                        Icon(Icons.note, size: 18, color: AppTheme.secondaryTextColor),
                                         const SizedBox(width: 6),
-                                        Expanded(child: Text('Not: ${widget.result.notes}', style: const TextStyle(fontStyle: FontStyle.italic))),
+                                        Expanded(child: Text('Not: ${widget.result.notes}', style: TextStyle(fontStyle: FontStyle.italic, color: AppTheme.primaryTextColor))),
                                       ],
                                     ),
                                   ),
@@ -832,10 +803,10 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
       Icons.calendar_month, // 4. Haftalık Program
     ];
     final List<Color> colors = [
-      const Color(0xFF10B981),
-      const Color(0xFFF59E0B),
-      const Color(0xFF8B5CF6),
-      const Color(0xFFEF4444),
+      AppTheme.successColor,
+      AppTheme.warningColor,
+      AppTheme.accentColor,
+      AppTheme.errorColor,
     ];
     int i = 0;
     for (final match in matches) {
@@ -846,7 +817,7 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
           margin: const EdgeInsets.only(bottom: 18),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [colors[i % colors.length].withOpacity(0.10), Colors.white],
+              colors: [colors[i % colors.length].withOpacity(0.10), AppTheme.cardBackgroundColor],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -876,7 +847,7 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
                 Expanded(
                   child: Text(
                     section,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, height: 1.5),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, height: 1.5, color: AppTheme.primaryTextColor),
                   ),
                 ),
               ],
@@ -892,17 +863,17 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
         Container(
           margin: const EdgeInsets.only(bottom: 18),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF6366F1), Colors.white],
+            gradient: LinearGradient(
+              colors: [AppTheme.primaryColor.withOpacity(0.1), AppTheme.cardBackgroundColor],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF6366F1).withOpacity(0.13),
+                color: AppTheme.shadowColorWithOpacity,
                 blurRadius: 12,
-                offset: Offset(0, 6),
+                offset: const Offset(0, 6),
               ),
             ],
           ),
@@ -910,7 +881,7 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
             padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
             child: Text(
               analysis,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, height: 1.5),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, height: 1.5, color: AppTheme.primaryTextColor),
             ),
           ),
         ),

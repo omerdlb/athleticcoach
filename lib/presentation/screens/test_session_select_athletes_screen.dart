@@ -2,6 +2,7 @@ import 'package:athleticcoach/data/athlete_database.dart';
 import 'package:athleticcoach/data/models/athlete_model.dart';
 import 'package:athleticcoach/data/models/test_definition_model.dart';
 import 'package:athleticcoach/presentation/screens/test_session_results_screen.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class TestSessionSelectAthletesScreen extends StatefulWidget {
@@ -40,7 +41,10 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sporcular yüklenirken hata: $e')),
+          SnackBar(
+            content: Text('Sporcular yüklenirken hata: $e'),
+            backgroundColor: AppTheme.errorColor,
+          ),
         );
       }
     }
@@ -59,7 +63,10 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
   void _continueToResults() {
     if (selectedAthletes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lütfen en az bir sporcu seçin')),
+        SnackBar(
+          content: Text('Lütfen en az bir sporcu seçin'),
+          backgroundColor: AppTheme.warningColor,
+        ),
       );
       return;
     }
@@ -76,13 +83,11 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sporcu Seç'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: AppTheme.whiteTextColor,
         elevation: 2,
       ),
       body: Column(
@@ -91,7 +96,7 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            color: colorScheme.primaryContainer,
+            color: AppTheme.primaryColor.withOpacity(0.1),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -99,22 +104,14 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
                   'Seçilen Test: ${widget.selectedTest.name}',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: colorScheme.onPrimaryContainer,
+                    color: AppTheme.primaryColor,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Kategori: ${widget.selectedTest.category}',
+                  '${selectedAthletes.length} sporcu seçildi',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Seçilen Sporcu Sayısı: ${selectedAthletes.length}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onPrimaryContainer,
+                    color: AppTheme.secondaryTextColor,
                   ),
                 ),
               ],
@@ -124,7 +121,7 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
           // Sporcu listesi
           Expanded(
             child: isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
                 : allAthletes.isEmpty
                     ? Center(
                         child: Column(
@@ -133,65 +130,86 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
                             Icon(
                               Icons.people_outline,
                               size: 64,
-                              color: colorScheme.outline,
+                              color: AppTheme.secondaryTextColor,
                             ),
                             const SizedBox(height: 16),
                             Text(
                               'Henüz sporcu eklenmemiş',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: colorScheme.outline,
+                                color: AppTheme.secondaryTextColor,
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Önce sporcu ekleyin',
+                              'Test oturumu başlatmak için önce sporcu ekleyin',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.outline,
+                                color: AppTheme.secondaryTextColor,
                               ),
+                              textAlign: TextAlign.center,
                             ),
                           ],
                         ),
                       )
                     : ListView.builder(
+                        padding: const EdgeInsets.all(16),
                         itemCount: allAthletes.length,
                         itemBuilder: (context, index) {
                           final athlete = allAthletes[index];
                           final isSelected = selectedAthletes.contains(athlete);
                           
                           return Card(
-                            elevation: 3,
+                            elevation: 2,
+                            margin: const EdgeInsets.only(bottom: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
-                              side: isSelected
-                                  ? BorderSide(color: colorScheme.primary, width: 2)
-                                  : BorderSide.none,
+                              side: BorderSide(
+                                color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+                                width: 2,
+                              ),
                             ),
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                             child: ListTile(
                               leading: CircleAvatar(
-                                backgroundColor: isSelected ? colorScheme.primary : colorScheme.outline,
+                                backgroundColor: athlete.gender == 'Kadın'
+                                    ? AppTheme.femaleColor.withOpacity(0.2)
+                                    : AppTheme.maleColor.withOpacity(0.2),
                                 child: Icon(
-                                  Icons.person,
-                                  color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+                                  athlete.gender == 'Kadın' ? Icons.female : Icons.male,
+                                  color: athlete.gender == 'Kadın'
+                                      ? AppTheme.femaleColor
+                                      : AppTheme.maleColor,
                                 ),
                               ),
                               title: Text(
                                 '${athlete.name} ${athlete.surname}',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryTextColor,
                                 ),
                               ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Branş: ${athlete.branch}'),
-                                  Text('Yaş: ${DateTime.now().year - athlete.birthDate.year}'),
-                                ],
+                              subtitle: Text(
+                                '${athlete.branch} • ${athlete.birthDate.year}',
+                                style: TextStyle(
+                                  color: AppTheme.secondaryTextColor,
+                                ),
                               ),
-                              trailing: Checkbox(
-                                value: isSelected,
-                                onChanged: (_) => _toggleAthleteSelection(athlete),
-                                activeColor: colorScheme.primary,
+                              trailing: Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+                                  border: Border.all(
+                                    color: isSelected ? AppTheme.primaryColor : AppTheme.secondaryTextColor,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: isSelected
+                                    ? Icon(
+                                        Icons.check,
+                                        size: 16,
+                                        color: AppTheme.whiteTextColor,
+                                      )
+                                    : null,
                               ),
                               onTap: () => _toggleAthleteSelection(athlete),
                             ),
@@ -199,42 +217,36 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
                         },
                       ),
           ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                '${selectedAthletes.length} sporcu seçildi',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+          
+          // Devam et butonu
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: selectedAthletes.isNotEmpty ? _continueToResults : null,
+                icon: Icon(Icons.arrow_forward, color: AppTheme.whiteTextColor),
+                label: Text(
+                  'Devam Et (${selectedAthletes.length})',
+                  style: TextStyle(
+                    color: AppTheme.whiteTextColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: AppTheme.whiteTextColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 4,
                 ),
               ),
             ),
-            ElevatedButton.icon(
-              onPressed: selectedAthletes.isNotEmpty ? _continueToResults : null,
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text('Devam Et'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

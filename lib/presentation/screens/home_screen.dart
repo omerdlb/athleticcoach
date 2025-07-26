@@ -1,287 +1,201 @@
 import 'dart:math';
-import 'package:athleticcoach/presentation/screens/test_library_screen.dart';
-import 'package:athleticcoach/presentation/screens/test_session_select_test_screen.dart';
-import 'package:athleticcoach/presentation/screens/athlete_list_screen.dart';
-import 'package:athleticcoach/presentation/screens/test_results_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:athleticcoach/data/athlete_database.dart';
+import 'package:athleticcoach/data/models/recent_test_model.dart';
+import 'package:athleticcoach/data/models/team_analysis_model.dart';
+import 'package:athleticcoach/core/app_theme.dart';
+import 'package:athleticcoach/presentation/widgets/onboarding_widget.dart';
+import 'package:athleticcoach/presentation/widgets/app_drawer_widget.dart';
+import 'package:athleticcoach/presentation/widgets/recent_tests_card_widget.dart';
+import 'package:athleticcoach/presentation/widgets/team_analysis_card_widget.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _isFirstLaunch = false;
+  bool _isLoading = true;
+  List<RecentTestModel> _recentTests = [];
+  bool _isLoadingRecentTests = true;
+  TeamAnalysisModel? _latestTeamAnalysis;
+  bool _isLoadingTeamAnalysis = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstLaunch();
+    _loadRecentTests();
+    _loadTeamAnalysis();
+  }
+
+  Future<void> _checkFirstLaunch() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
+    
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+      
+      if (_isFirstLaunch) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          OnboardingWidget.showOnboarding(context);
+        });
+      }
+    }
+  }
+
+  Future<void> _loadRecentTests() async {
+    try {
+      final database = AthleteDatabase();
+      final recentTests = await database.getRecentTests(limit: 3);
+      
+      if (mounted) {
+        setState(() {
+          _recentTests = recentTests;
+          _isLoadingRecentTests = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingRecentTests = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadTeamAnalysis() async {
+    try {
+      final database = AthleteDatabase();
+      final teamAnalysis = await database.getLatestTeamAnalysis();
+      
+      if (mounted) {
+        setState(() {
+          _latestTeamAnalysis = teamAnalysis;
+          _isLoadingTeamAnalysis = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingTeamAnalysis = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _refreshRecentTests() async {
+    await _loadRecentTests();
+  }
+
+  String _getTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    
+    if (difference.inDays > 0) {
+      if (difference.inDays == 1) {
+        return '1 gün önce';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays} gün önce';
+      } else if (difference.inDays < 30) {
+        final weeks = (difference.inDays / 7).floor();
+        return weeks == 1 ? '1 hafta önce' : '$weeks hafta önce';
+      } else {
+        final months = (difference.inDays / 30).floor();
+        return months == 1 ? '1 ay önce' : '$months ay önce';
+      }
+    } else if (difference.inHours > 0) {
+      return difference.inHours == 1 ? '1 saat önce' : '${difference.inHours} saat önce';
+    } else if (difference.inMinutes > 0) {
+      return difference.inMinutes == 1 ? '1 dakika önce' : '${difference.inMinutes} dakika önce';
+    } else {
+      return 'Az önce';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final userName = 'Hoş geldin!'; // İleride dinamik yapılabilir
+    if (_isLoading) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            color: AppTheme.primaryColor,
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppTheme.primaryColor,
         elevation: 0,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(
+              Icons.menu,
+              color: AppTheme.whiteTextColor,
+              size: 28,
+            ),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
         title: Text(
-          'Athletic Coach',
+          'Atletik Performans',
           style: TextStyle(
             fontWeight: FontWeight.w800,
-            fontSize: MediaQuery.of(context).size.width < 400 ? 20 : 22,
-            color: const Color(0xFF1F2937),
+            fontSize: AppTheme.getResponsiveFontSize(context, 22),
+            color: AppTheme.whiteTextColor,
             letterSpacing: -0.3,
             shadows: [
               Shadow(
                 offset: const Offset(0, 1),
                 blurRadius: 4,
-                color: const Color(0xFF1F2937).withOpacity(0.1),
+                color: Colors.black.withOpacity(0.2),
               ),
             ],
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          // Arka plan degrade
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFEEF2FF), Color(0xFFFDF6E3)],
-              ),
-            ),
+      drawer: AppDrawerWidget.buildDrawer(context),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: AppTheme.gradientDecoration,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            AppTheme.getResponsivePadding(context).left,
+            MediaQuery.of(context).padding.top + 80,
+            AppTheme.getResponsivePadding(context).right,
+            AppTheme.getResponsivePadding(context).bottom,
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 90, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Athletic Coach',
-                  style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width < 400 ? 28 : 32,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF6366F1),
-                    letterSpacing: -0.5,
-                    shadows: [
-                      Shadow(
-                        offset: const Offset(0, 2),
-                        blurRadius: 8,
-                        color: const Color(0xFF6366F1).withOpacity(0.2),
-                      ),
-                    ],
-                  ),
-                  textAlign: TextAlign.left,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Sporcularınızı ve testlerinizi kolayca yönetin.',
-                  style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width < 400 ? 16 : 18,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF4B5563),
-                    letterSpacing: 0.2,
-                    height: 1.4,
-                  ),
-                ),
-                SizedBox(height: MediaQuery.of(context).size.width < 400 ? 24 : 32),
-                Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: [
-                      _buildFeatureCard(
-                        context,
-                        title: 'Sporcular',
-                        icon: Icons.people,
-                        color: const Color(0xFFF3F4F6),
-                        iconColor: const Color(0xFF6366F1),
-                        onTap: () {
-                          debugPrint('Sporcular sayfasına geçiliyor...');
-                          try {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => const AthleteListScreen(),
-                              ),
-                            );
-                          } catch (e, s) {
-                            debugPrint('Sporcular sayfası hatası: $e\n$s');
-                          }
-                        },
-                      ),
-                      SizedBox(height: MediaQuery.of(context).size.width < 400 ? 16 : 20),
-                      _buildFeatureCard(
-                        context,
-                        title: 'Test Kütüphanesi',
-                        icon: Icons.library_books,
-                        color: const Color(0xFFFEF3C7),
-                        iconColor: const Color(0xFFF59E0B),
-                        onTap: () {
-                          debugPrint('Test Kütüphanesi sayfasına geçiliyor...');
-                          try {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => const TestLibraryScreen(),
-                              ),
-                            );
-                          } catch (e, s) {
-                            debugPrint('Test Kütüphanesi hatası: $e\n$s');
-                          }
-                        },
-                      ),
-                      SizedBox(height: MediaQuery.of(context).size.width < 400 ? 16 : 20),
-                      _buildFeatureCard(
-                        context,
-                        title: 'Test Sonuçları',
-                        icon: Icons.analytics,
-                        color: const Color(0xFFDBEAFE),
-                        iconColor: const Color(0xFF3B82F6),
-                        onTap: () {
-                          debugPrint('Test Sonuçları sayfasına geçiliyor...');
-                          try {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => const TestResultsScreen(),
-                              ),
-                            );
-                          } catch (e, s) {
-                            debugPrint('Test Sonuçları hatası: $e\n$s');
-                          }
-                        },
-                      ),
-                      SizedBox(height: MediaQuery.of(context).size.width < 400 ? 80 : 100),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Sabit buton
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: MediaQuery.of(context).size.width < 400 ? 24 : 32,
-            child: ElevatedButton.icon(
-              icon: Icon(
-                Icons.play_circle_fill, 
-                size: MediaQuery.of(context).size.width < 400 ? 28 : 32
+          child: Column(
+            children: [
+              // Son İncelenen Testler Kartı
+              RecentTestsCardWidget(
+                recentTests: _recentTests,
+                isLoading: _isLoadingRecentTests,
+                onRefresh: _refreshRecentTests,
+                getTimeAgo: _getTimeAgo,
               ),
-              label: Text(
-                'Yeni Test Oturumu Başlat',
-                style: TextStyle(
-                  fontSize: MediaQuery.of(context).size.width < 400 ? 16 : 18,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.2,
-                  shadows: [
-                    Shadow(
-                      offset: const Offset(0, 1),
-                      blurRadius: 3,
-                      color: Colors.black.withOpacity(0.2),
-                    ),
-                  ],
-                ),
+              
+              // Son Uygulanan Test Analizi Kartı
+              TeamAnalysisCardWidget(
+                latestTeamAnalysis: _latestTeamAnalysis,
+                isLoading: _isLoadingTeamAnalysis,
+                getTimeAgo: _getTimeAgo,
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(
-                  vertical: MediaQuery.of(context).size.width < 400 ? 18 : 22,
-                  horizontal: MediaQuery.of(context).size.width < 400 ? 16 : 20,
-                ),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 8,
-                shadowColor: const Color(0xFF6366F1).withOpacity(0.3),
-              ),
-              onPressed: () async {
-                debugPrint('Yeni Test Oturumu başlatılıyor...');
-                try {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const TestSessionSelectTestScreen(),
-                    ),
-                  );
-                } catch (e, s) {
-                  debugPrint('Test oturumu başlatma hatası: $e\n$s');
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureCard(BuildContext context,
-      {required String title, required IconData icon, required Color color, required Color iconColor, required VoidCallback onTap}) {
-    // Ekran boyutlarını al
-    final screenSize = MediaQuery.of(context).size;
-    final screenWidth = screenSize.width;
-    final screenHeight = screenSize.height;
-    
-    // Responsive boyutlar hesapla
-    final isSmallScreen = screenWidth < 400;
-    final isMediumScreen = screenWidth >= 400 && screenWidth < 600;
-    final isLargeScreen = screenWidth >= 600;
-    
-    // Responsive padding ve boyutlar
-    final cardPadding = isSmallScreen 
-        ? const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16)
-        : isMediumScreen 
-            ? const EdgeInsets.symmetric(vertical: 24.0, horizontal: 18)
-            : const EdgeInsets.symmetric(vertical: 28.0, horizontal: 20);
-    
-    final iconSize = isSmallScreen ? 40.0 : isMediumScreen ? 48.0 : 54.0;
-    final iconContainerPadding = isSmallScreen ? 12.0 : isMediumScreen ? 15.0 : 18.0;
-    final titleFontSize = isSmallScreen ? 18.0 : isMediumScreen ? 20.0 : 22.0;
-    final spacing = isSmallScreen ? 12.0 : isMediumScreen ? 15.0 : 18.0;
-    
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.96, end: 1),
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOutBack,
-      builder: (context, scale, child) {
-        return Transform.scale(
-          scale: scale,
-          child: child,
-        );
-      },
-      child: Card(
-        elevation: 6,
-        shadowColor: iconColor.withOpacity(0.18),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        color: color,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: onTap,
-          child: Container(
-            padding: cardPadding,
-            child: Column(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(iconContainerPadding),
-                  decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.13),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(icon, size: iconSize, color: iconColor),
-                ),
-                SizedBox(height: spacing),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: titleFontSize,
-                    color: color == const Color(0xFF6366F1)
-                        ? Colors.white
-                        : const Color(0xFF1F2937),
-                    letterSpacing: 0.3,
-                    height: 1.2,
-                    shadows: [
-                      Shadow(
-                        offset: const Offset(0, 1),
-                        blurRadius: 4,
-                        color: Colors.black.withOpacity(0.1),
-                      ),
-                    ],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+              
+              
+            ],
           ),
         ),
       ),

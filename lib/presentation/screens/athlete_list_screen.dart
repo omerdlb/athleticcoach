@@ -3,6 +3,7 @@ import 'package:athleticcoach/data/models/athlete_model.dart';
 import 'package:athleticcoach/presentation/screens/athlete_add_screen.dart';
 import 'package:athleticcoach/presentation/screens/athlete_detail_screen.dart';
 import 'package:athleticcoach/data/athlete_database.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 
 class AthleteListScreen extends StatefulWidget {
   const AthleteListScreen({super.key});
@@ -13,7 +14,10 @@ class AthleteListScreen extends StatefulWidget {
 
 class _AthleteListScreenState extends State<AthleteListScreen> {
   final List<AthleteModel> _athletes = [];
+  final List<AthleteModel> _filteredAthletes = [];
+  final TextEditingController _searchController = TextEditingController();
   bool _loading = true;
+  bool _isSearchVisible = false;
 
   @override
   void initState() {
@@ -21,12 +25,45 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
     _loadAthletes();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadAthletes() async {
     final athletes = await AthleteDatabase().getAllAthletes();
     setState(() {
       _athletes.clear();
       _athletes.addAll(athletes);
+      _filteredAthletes.clear();
+      _filteredAthletes.addAll(athletes);
       _loading = false;
+    });
+  }
+
+  void _filterAthletes(String query) {
+    setState(() {
+      _filteredAthletes.clear();
+      if (query.isEmpty) {
+        _filteredAthletes.addAll(_athletes);
+      } else {
+        _filteredAthletes.addAll(
+          _athletes.where((athlete) =>
+            '${athlete.name} ${athlete.surname}'.toLowerCase().contains(query.toLowerCase())
+          ),
+        );
+      }
+    });
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _isSearchVisible = !_isSearchVisible;
+      if (!_isSearchVisible) {
+        _searchController.clear();
+        _filterAthletes('');
+      }
     });
   }
 
@@ -40,6 +77,7 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
       await AthleteDatabase().insertAthlete(newAthlete);
       setState(() {
         _athletes.add(newAthlete);
+        _filteredAthletes.add(newAthlete);
       });
     }
   }
@@ -49,42 +87,70 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sporcular'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        elevation: 2,
+        title: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: _isSearchVisible
+              ? AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: MediaQuery.of(context).size.width - 120,
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: _filterAthletes,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: 'Sporcu ara...',
+                      border: InputBorder.none,
+                      hintStyle: TextStyle(color: AppTheme.whiteTextColor.withOpacity(0.7)),
+                    ),
+                    style: TextStyle(color: AppTheme.whiteTextColor, fontSize: 16),
+                  ),
+                )
+              : const Text('Sporcularım'),
+        ),
+        backgroundColor: AppTheme.primaryColor,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Sporcu Ekle',
-            onPressed: _addAthlete,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: _isSearchVisible
+                ? IconButton(
+                    key: const ValueKey('close'),
+                    icon: const Icon(Icons.close),
+                    onPressed: _toggleSearch,
+                  )
+                : IconButton(
+                    key: const ValueKey('search'),
+                    icon: const Icon(Icons.search),
+                    onPressed: _toggleSearch,
+                  ),
           ),
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _athletes.isEmpty
+          ? Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
+          : _filteredAthletes.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.people_outline,
+                        _isSearchVisible ? Icons.search_off : Icons.people_outline,
                         size: 64,
-                        color: colorScheme.outline,
+                        color: AppTheme.secondaryTextColor,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Henüz sporcu eklenmemiş',
+                        _isSearchVisible ? 'Arama sonucu bulunamadı' : 'Henüz sporcu eklenmemiş',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: colorScheme.outline,
+                          color: AppTheme.secondaryTextColor,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Sporcu eklemek için + butonuna tıklayın',
+                        _isSearchVisible 
+                            ? 'Farklı bir arama terimi deneyin'
+                            : 'Sporcu eklemek için + butonuna tıklayın',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.outline,
+                          color: AppTheme.secondaryTextColor,
                         ),
                       ),
                     ],
@@ -93,9 +159,9 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
               : RefreshIndicator(
                   onRefresh: _loadAthletes,
                   child: ListView.builder(
-                    itemCount: _athletes.length,
+                    itemCount: _filteredAthletes.length,
                     itemBuilder: (context, index) {
-                      final athlete = _athletes[index];
+                      final athlete = _filteredAthletes[index];
                       return InkWell(
                         borderRadius: BorderRadius.circular(18),
                         onTap: () {
@@ -110,15 +176,15 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: index % 2 == 0
-                                  ? [colorScheme.primary.withOpacity(0.08), Colors.white]
-                                  : [colorScheme.secondary.withOpacity(0.08), Colors.white],
+                                  ? [AppTheme.primaryColor.withOpacity(0.08), AppTheme.cardBackgroundColor]
+                                  : [AppTheme.secondaryColor.withOpacity(0.08), AppTheme.cardBackgroundColor],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
-                                color: colorScheme.primary.withOpacity(0.07),
+                                color: AppTheme.shadowColorWithOpacity,
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -131,13 +197,13 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
                                 CircleAvatar(
                                   radius: 28,
                                   backgroundColor: athlete.gender == 'Kadın'
-                                      ? colorScheme.secondaryContainer
-                                      : colorScheme.primaryContainer,
+                                      ? AppTheme.femaleColor.withOpacity(0.2)
+                                      : AppTheme.maleColor.withOpacity(0.2),
                                   child: Icon(
                                     athlete.gender == 'Kadın' ? Icons.female : Icons.male,
                                     color: athlete.gender == 'Kadın'
-                                        ? colorScheme.secondary
-                                        : colorScheme.primary,
+                                        ? AppTheme.femaleColor
+                                        : AppTheme.maleColor,
                                     size: 28,
                                   ),
                                 ),
@@ -151,40 +217,41 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
                                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 18,
+                                              color: AppTheme.primaryTextColor,
                                             ),
                                       ),
                                       const SizedBox(height: 4),
                                       Row(
                                         children: [
-                                          Icon(Icons.sports, size: 16, color: colorScheme.primary),
+                                          Icon(Icons.sports, size: 16, color: AppTheme.primaryColor),
                                           const SizedBox(width: 4),
                                           Text(
                                             athlete.branch,
                                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                                  color: colorScheme.primary,
+                                                  color: AppTheme.primaryColor,
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                           ),
                                           const SizedBox(width: 12),
-                                          Icon(Icons.cake, size: 15, color: colorScheme.outline),
+                                          Icon(Icons.cake, size: 15, color: AppTheme.secondaryTextColor),
                                           const SizedBox(width: 2),
                                           Text(
                                             '${athlete.birthDate.year}',
                                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                  color: colorScheme.outline,
+                                                  color: AppTheme.secondaryTextColor,
                                                 ),
                                           ),
                                           const SizedBox(width: 12),
                                           Icon(
                                             athlete.gender == 'Kadın' ? Icons.female : Icons.male,
                                             size: 15,
-                                            color: colorScheme.outline,
+                                            color: AppTheme.secondaryTextColor,
                                           ),
                                           const SizedBox(width: 2),
                                           Text(
                                             athlete.gender,
                                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                  color: colorScheme.outline,
+                                                  color: AppTheme.secondaryTextColor,
                                                 ),
                                           ),
                                         ],
@@ -193,7 +260,7 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.edit, size: 22),
+                                  icon: Icon(Icons.edit, size: 22, color: AppTheme.primaryColor),
                                   tooltip: 'Düzenle',
                                   onPressed: () async {
                                     final updatedAthlete = await Navigator.of(context).push<AthleteModel>(
@@ -204,12 +271,19 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
                                     if (updatedAthlete != null) {
                                       await AthleteDatabase().updateAthlete(updatedAthlete);
                                       setState(() {
-                                        _athletes[index] = updatedAthlete;
+                                        final originalIndex = _athletes.indexWhere((a) => a.id == athlete.id);
+                                        if (originalIndex != -1) {
+                                          _athletes[originalIndex] = updatedAthlete;
+                                        }
+                                        final filteredIndex = _filteredAthletes.indexWhere((a) => a.id == athlete.id);
+                                        if (filteredIndex != -1) {
+                                          _filteredAthletes[filteredIndex] = updatedAthlete;
+                                        }
                                       });
                                     }
                                   },
                                 ),
-                                const Icon(Icons.arrow_forward_ios, size: 18, color: Color(0xFF6366F1)),
+                                Icon(Icons.arrow_forward_ios, size: 18, color: AppTheme.primaryColor),
                               ],
                             ),
                           ),
@@ -218,6 +292,11 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
                     },
                   ),
                 ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addAthlete,
+        backgroundColor: AppTheme.primaryColor,
+        child: Icon(Icons.add, color: AppTheme.whiteTextColor),
+      ),
     );
   }
 } 

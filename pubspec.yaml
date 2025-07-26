@@ -41,6 +41,8 @@ dependencies:
   fl_chart: ^1.0.0
   pdf: ^3.10.7
   open_file: ^3.3.2
+  shared_preferences: ^2.2.2
+  uuid: ^4.2.2
  
 
 dev_dependencies:

@@ -10,6 +10,7 @@ class TestResultModel {
   final String resultUnit;
   final String? notes;
   final String? aiAnalysis;
+  final String sessionId;
 
   TestResultModel({
     required this.id,
@@ -23,6 +24,7 @@ class TestResultModel {
     required this.resultUnit,
     this.notes,
     this.aiAnalysis,
+    required this.sessionId,
   });
 
   Map<String, dynamic> toMap() {
@@ -38,6 +40,7 @@ class TestResultModel {
       'resultUnit': resultUnit,
       'notes': notes,
       'aiAnalysis': aiAnalysis,
+      'sessionId': sessionId,
     };
   }
 
@@ -60,8 +63,9 @@ class TestResultModel {
           : DateTime.tryParse(map['testDate'].toString()) ?? DateTime.now(),
       result: parseResult(map['result']),
       resultUnit: map['resultUnit'].toString(),
-      notes: map['notes']?.toString(),
-      aiAnalysis: map['aiAnalysis']?.toString(),
+      notes: map['notes'],
+      aiAnalysis: map['aiAnalysis'],
+      sessionId: map['sessionId']?.toString() ?? '',
     );
   }
 } 
