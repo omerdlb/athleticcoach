@@ -165,7 +165,7 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
                               side: BorderSide(
                                 color: isSelected ? AppTheme.primaryColor : Colors.transparent,
                                 width: 2,
-                              ),
+                            ),
                             ),
                             child: ListTile(
                               leading: CircleAvatar(
@@ -220,12 +220,12 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
           
           // Devam et butonu
           Container(
-            padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
             child: SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton.icon(
-                onPressed: selectedAthletes.isNotEmpty ? _continueToResults : null,
+              onPressed: selectedAthletes.isNotEmpty ? _continueToResults : null,
                 icon: Icon(Icons.arrow_forward, color: AppTheme.whiteTextColor),
                 label: Text(
                   'Devam Et (${selectedAthletes.length})',
@@ -235,7 +235,7 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
                     fontSize: 16,
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
+              style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
                   foregroundColor: AppTheme.whiteTextColor,
                   shape: RoundedRectangleBorder(
@@ -244,9 +244,9 @@ class _TestSessionSelectAthletesScreenState extends State<TestSessionSelectAthle
                   elevation: 4,
                 ),
               ),
+              ),
             ),
-          ),
-        ],
+          ],
       ),
     );
   }

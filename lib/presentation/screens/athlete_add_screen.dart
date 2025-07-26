@@ -84,7 +84,7 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
             color: AppTheme.whiteTextColor,
             fontWeight: FontWeight.w600,
           ),
-        ),
+      ),
         backgroundColor: AppTheme.primaryColor,
         elevation: 0,
         iconTheme: IconThemeData(color: AppTheme.whiteTextColor),
@@ -92,7 +92,7 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
       body: Container(
         decoration: AppTheme.gradientDecoration,
         child: SafeArea(
-          child: SingleChildScrollView(
+            child: SingleChildScrollView(
             padding: AppTheme.getResponsivePadding(context),
             child: Column(
               children: [
@@ -101,7 +101,7 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                   padding: const EdgeInsets.all(24),
                   decoration: AppTheme.cardDecoration,
                   child: Column(
-                    children: [
+            children: [
                       CircleAvatar(
                         radius: 40,
                         backgroundColor: _selectedGender == 'Kadın'
@@ -120,13 +120,13 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                         isEdit ? 'Sporcuyu Düzenle' : 'Yeni Sporcu Ekle',
                         style: TextStyle(
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                           color: AppTheme.primaryColor,
                         ),
                       ),
                     ],
-                  ),
-                ),
+                            ),
+                      ),
 
                 const SizedBox(height: 20),
 
@@ -139,10 +139,10 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                     child: Column(
                       children: [
                         // İsim
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: InputDecoration(
-                            labelText: 'İsim',
+              TextFormField(
+                controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'İsim',
                             labelStyle: TextStyle(color: AppTheme.primaryColor),
                             prefixIcon: Icon(Icons.person, color: AppTheme.primaryColor),
                             border: OutlineInputBorder(
@@ -165,22 +165,22 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
                             ),
-                          ),
+                        ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'İsim girin';
                             }
                             return null;
                           },
-                        ),
+              ),
                         
-                        const SizedBox(height: 16),
+              const SizedBox(height: 16),
                         
                         // Soyisim
-                        TextFormField(
-                          controller: _surnameController,
-                          decoration: InputDecoration(
-                            labelText: 'Soyisim',
+              TextFormField(
+                controller: _surnameController,
+                        decoration: InputDecoration(
+                          labelText: 'Soyisim',
                             labelStyle: TextStyle(color: AppTheme.primaryColor),
                             prefixIcon: Icon(Icons.person_outline, color: AppTheme.primaryColor),
                             border: OutlineInputBorder(
@@ -203,25 +203,25 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
                             ),
-                          ),
+                        ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Soyisim girin';
                             }
                             return null;
                           },
-                        ),
+              ),
                         
-                        const SizedBox(height: 16),
+              const SizedBox(height: 16),
                         
                         // Doğum Tarihi
                         InkWell(
                           onTap: () async {
                             final DateTime? picked = await showDatePicker(
-                              context: context,
+                        context: context,
                               initialDate: _selectedBirthDate ?? DateTime.now(),
                               firstDate: DateTime(1900),
-                              lastDate: DateTime.now(),
+                        lastDate: DateTime.now(),
                               builder: (context, child) {
                                 return Theme(
                                   data: Theme.of(context).copyWith(
@@ -232,13 +232,13 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                                   child: child!,
                                 );
                               },
-                            );
+                      );
                             if (picked != null && picked != _selectedBirthDate) {
-                              setState(() {
+                        setState(() {
                                 _selectedBirthDate = picked;
-                              });
-                            }
-                          },
+                        });
+                      }
+                    },
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
@@ -257,26 +257,26 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                                     color: _selectedBirthDate != null 
                                         ? AppTheme.primaryTextColor 
                                         : AppTheme.secondaryTextColor,
-                                  ),
+              ),
                                 ),
                               ],
                             ),
                           ),
                         ),
                         
-                        const SizedBox(height: 16),
+              const SizedBox(height: 16),
                         
                         // Cinsiyet
-                        DropdownButtonFormField<String>(
-                          value: _selectedGender,
-                          decoration: InputDecoration(
-                            labelText: 'Cinsiyet',
+              DropdownButtonFormField<String>(
+                value: _selectedGender,
+                        decoration: InputDecoration(
+                          labelText: 'Cinsiyet',
                             labelStyle: TextStyle(color: AppTheme.primaryColor),
                             prefixIcon: Icon(Icons.person_add, color: AppTheme.primaryColor),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: AppTheme.primaryColor),
-                            ),
+                        ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
@@ -301,32 +301,32 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                             );
                           }).toList(),
                           onChanged: (String? newValue) {
-                            setState(() {
+                  setState(() {
                               _selectedGender = newValue!;
-                            });
-                          },
+                  });
+                },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Cinsiyet seçin';
                             }
                             return null;
                           },
-                        ),
+              ),
                         
-                        const SizedBox(height: 16),
+              const SizedBox(height: 16),
                         
                         // Kilo
-                        TextFormField(
-                          controller: _weightController,
+              TextFormField(
+                controller: _weightController,
                           keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: 'Kilo (kg)',
+                        decoration: InputDecoration(
+                          labelText: 'Kilo (kg)',
                             labelStyle: TextStyle(color: AppTheme.primaryColor),
                             prefixIcon: Icon(Icons.monitor_weight, color: AppTheme.primaryColor),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: AppTheme.primaryColor),
-                            ),
+                        ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
@@ -357,22 +357,22 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                             }
                             return null;
                           },
-                        ),
+              ),
                         
-                        const SizedBox(height: 16),
+              const SizedBox(height: 16),
                         
                         // Boy
-                        TextFormField(
-                          controller: _heightController,
+              TextFormField(
+                controller: _heightController,
                           keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: 'Boy (cm)',
+                        decoration: InputDecoration(
+                          labelText: 'Boy (cm)',
                             labelStyle: TextStyle(color: AppTheme.primaryColor),
                             prefixIcon: Icon(Icons.height, color: AppTheme.primaryColor),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: AppTheme.primaryColor),
-                            ),
+                        ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
@@ -403,33 +403,33 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                             }
                             return null;
                           },
-                        ),
+              ),
                         
-                        const SizedBox(height: 16),
+              const SizedBox(height: 16),
                         
                         // Branş
-                        Autocomplete<String>(
-                          optionsBuilder: (TextEditingValue textEditingValue) {
-                            if (textEditingValue.text == '') {
-                              return _branches;
-                            }
-                            return _branches.where((String option) {
-                              return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
-                            });
-                          },
-                          initialValue: TextEditingValue(text: _selectedBranch ?? ''),
-                          onSelected: (String selection) {
-                            setState(() {
-                              _selectedBranch = selection;
-                            });
-                          },
-                          fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                            controller.text = _selectedBranch ?? '';
-                            return TextFormField(
-                              controller: controller,
-                              focusNode: focusNode,
-                              decoration: InputDecoration(
-                                labelText: 'Branş',
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text == '') {
+                    return _branches;
+                  }
+                  return _branches.where((String option) {
+                    return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                initialValue: TextEditingValue(text: _selectedBranch ?? ''),
+                onSelected: (String selection) {
+                  setState(() {
+                    _selectedBranch = selection;
+                  });
+                },
+                fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+                  controller.text = _selectedBranch ?? '';
+                  return TextFormField(
+                    controller: controller,
+                    focusNode: focusNode,
+                            decoration: InputDecoration(
+                              labelText: 'Branş',
                                 labelStyle: TextStyle(color: AppTheme.primaryColor),
                                 prefixIcon: Icon(Icons.sports, color: AppTheme.primaryColor),
                                 border: OutlineInputBorder(
@@ -452,7 +452,7 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
                                 ),
-                              ),
+                            ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Branş seçin';
@@ -463,41 +463,41 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                                 }
                                 return null;
                               },
-                            );
-                          },
-                          optionsViewBuilder: (context, onSelected, options) {
-                            return Align(
-                              alignment: Alignment.topLeft,
-                              child: Material(
-                                elevation: 4,
-                                borderRadius: BorderRadius.circular(12),
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxHeight: 260, minWidth: 200),
-                                  child: ListView.builder(
-                                    padding: EdgeInsets.zero,
-                                    shrinkWrap: true,
-                                    itemCount: options.length,
-                                    itemBuilder: (context, index) {
-                                      final option = options.elementAt(index);
-                                      return ListTile(
-                                        title: Text(option),
-                                        onTap: () => onSelected(option),
-                                      );
-                                    },
-                                  ),
+                  );
+                },
+                        optionsViewBuilder: (context, onSelected, options) {
+                          return Align(
+                            alignment: Alignment.topLeft,
+                            child: Material(
+                              elevation: 4,
+                              borderRadius: BorderRadius.circular(12),
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxHeight: 260, minWidth: 200),
+                                child: ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  shrinkWrap: true,
+                                  itemCount: options.length,
+                                  itemBuilder: (context, index) {
+                                    final option = options.elementAt(index);
+                                    return ListTile(
+                                      title: Text(option),
+                                      onTap: () => onSelected(option),
+                                    );
+                                  },
                                 ),
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
+                      ),
                         
                         const SizedBox(height: 24),
                         
                         // Kaydet Butonu
-                        SizedBox(
-                          width: double.infinity,
+                      SizedBox(
+                        width: double.infinity,
                           height: 50,
-                          child: ElevatedButton.icon(
+                        child: ElevatedButton.icon(
                             icon: Icon(Icons.save, color: AppTheme.whiteTextColor),
                             label: Text(
                               isEdit ? 'Kaydet' : 'Ekle',
@@ -507,17 +507,17 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            style: ElevatedButton.styleFrom(
+                          style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.primaryColor,
                               foregroundColor: AppTheme.whiteTextColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              elevation: 4,
-                            ),
-                            onPressed: () {
+                            elevation: 4,
+                          ),
+                          onPressed: () {
                               // Form validasyonu
-                              if (_formKey.currentState!.validate()) {
+                            if (_formKey.currentState!.validate()) {
                                 // Ek validasyonlar
                                 final weight = double.tryParse(_weightController.text);
                                 final height = double.tryParse(_heightController.text);
@@ -556,25 +556,25 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                                 }
                                 
                                 // Tüm validasyonlar geçti, sporcuyu kaydet
-                                final athlete = AthleteModel(
-                                  id: isEdit ? widget.athlete!.id : DateTime.now().toIso8601String(),
-                                  name: _nameController.text,
-                                  surname: _surnameController.text,
-                                  birthDate: _selectedBirthDate!,
-                                  gender: _selectedGender!,
+                              final athlete = AthleteModel(
+                                id: isEdit ? widget.athlete!.id : DateTime.now().toIso8601String(),
+                                name: _nameController.text,
+                                surname: _surnameController.text,
+                                birthDate: _selectedBirthDate!,
+                                gender: _selectedGender!,
                                   weight: weight,
                                   height: height,
-                                  branch: _selectedBranch!,
-                                );
-                                Navigator.of(context).pop(athlete);
-                              }
-                            },
-                          ),
+                                branch: _selectedBranch!,
+                              );
+                              Navigator.of(context).pop(athlete);
+                            }
+                          },
                         ),
-                      ],
-                    ),
-                  ),
-                ),
+              ),
+            ],
+          ),
+        ),
+              ),
                 const SizedBox(height: 100), // Added for keyboard spacing
               ],
             ),

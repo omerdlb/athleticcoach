@@ -197,14 +197,14 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                           GestureDetector(
                             onLongPress: () => _showActionSheet(context, results),
                             child: Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              margin: const EdgeInsets.only(bottom: 12),
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            margin: const EdgeInsets.only(bottom: 12),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(12),
-                                onTap: () => _showResultDetail(firstResult),
+                              onTap: () => _showResultDetail(firstResult),
                                 child: Padding(
                                   padding: const EdgeInsets.all(16),
                                   child: Column(
@@ -216,12 +216,12 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                           CircleAvatar(
                                             backgroundColor: AppTheme.primaryColor,
                                             radius: 20,
-                                            child: Icon(
-                                              Icons.analytics,
+                                child: Icon(
+                                  Icons.analytics,
                                               color: AppTheme.whiteTextColor,
                                               size: 20,
-                                            ),
-                                          ),
+                                ),
+                              ),
                                           const SizedBox(width: 12),
                                           Expanded(
                                             child: Column(
@@ -229,24 +229,24 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                               children: [
                                                 Text(
                                                   '${firstResult.testName} (Oturum ${index + 1})',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
                                                     fontSize: AppTheme.getResponsiveFontSize(context, 18),
                                                     color: AppTheme.primaryTextColor,
-                                                  ),
-                                                  maxLines: 2,
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Row(
-                                                  children: [
-                                                    Icon(
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
                                                       Icons.people,
-                                                      size: 16,
+                                        size: 16,
                                                       color: AppTheme.primaryColor,
-                                                    ),
-                                                    const SizedBox(width: 4),
-                                                    Text(
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
                                                       '${results.length} katılımcı',
                                                       style: TextStyle(
                                                         fontWeight: FontWeight.w600,
@@ -272,16 +272,16 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                                           color: AppTheme.secondaryColor,
                                                           fontWeight: FontWeight.w600,
                                                         ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                                           ),
-                                          Icon(
-                                            Icons.arrow_forward_ios,
-                                            size: 16,
+                                  Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 16,
                                             color: AppTheme.secondaryTextColor,
                                           ),
                                         ],
@@ -318,8 +318,8 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                               fontSize: AppTheme.getResponsiveFontSize(context, 14),
                                               color: AppTheme.secondaryTextColor,
                                             ),
-                                          ),
-                                        ],
+                                  ),
+                                ],
                                       ),
                                       
                                       const SizedBox(height: 8),

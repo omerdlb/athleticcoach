@@ -131,14 +131,14 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
-            child: Text(
-              content,
-              style: TextStyle(
+                  child: Text(
+                  content,
+                  style: TextStyle(
                 fontSize: MediaQuery.of(context).size.width < 400 ? 14 : 15,
-                color: const Color(0xFF374151),
+                    color: const Color(0xFF374151),
                 height: 1.6,
-                letterSpacing: 0.1,
-              ),
+                    letterSpacing: 0.1,
+                  ),
             ),
           ),
         ],

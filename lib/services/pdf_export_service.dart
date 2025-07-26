@@ -23,12 +23,12 @@ class PdfExportService {
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(25),
+          margin: const pw.EdgeInsets.all(20),
           build: (context) => [
             // Başlık sayfası
-            _buildHeaderPage(testResult, bebasFont, analysisSections),
-            // Analiz sayfaları
-            ..._buildAnalysisPages(testResult, analysisSections, bebasFont),
+            _buildHeaderPage(testResult, bebasFont),
+            // Analiz sayfası
+            _buildAnalysisPage(testResult, analysisSections, bebasFont),
           ],
         ),
       );
@@ -46,7 +46,7 @@ class PdfExportService {
     }
   }
   
-  static pw.Widget _buildHeaderPage(TestResultModel testResult, pw.Font bebasFont, Map<String, String> analysisSections) {
+  static pw.Widget _buildHeaderPage(TestResultModel testResult, pw.Font bebasFont) {
     return pw.Container(
       width: double.infinity,
       child: pw.Column(
@@ -55,10 +55,14 @@ class PdfExportService {
           // Ana başlık
           pw.Container(
             width: double.infinity,
-            padding: const pw.EdgeInsets.all(20),
+            padding: const pw.EdgeInsets.all(25),
             decoration: pw.BoxDecoration(
-              color: PdfColors.blue,
-              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(10)),
+              gradient: pw.LinearGradient(
+                colors: [PdfColors.blue, PdfColors.indigo],
+                begin: pw.Alignment.topLeft,
+                end: pw.Alignment.bottomRight,
+              ),
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(15)),
             ),
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -66,7 +70,7 @@ class PdfExportService {
                 pw.Text(
                   'ATHLETIC COACH',
                   style: pw.TextStyle(
-                    fontSize: 28,
+                    fontSize: 32,
                     fontWeight: pw.FontWeight.bold,
                     color: PdfColors.white,
                     font: bebasFont,
@@ -74,143 +78,209 @@ class PdfExportService {
                 ),
                 pw.SizedBox(height: 8),
                 pw.Text(
-                  'Test Sonucu Analizi',
+                  'AI Performans Analizi Raporu',
                   style: pw.TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     color: PdfColors.white,
                     font: bebasFont,
                   ),
                 ),
-              ],
-            ),
-          ),
-          
-          pw.SizedBox(height: 20),
-          
-          // Sporcu bilgileri
-          pw.Container(
-            width: double.infinity,
-            padding: const pw.EdgeInsets.all(15),
-            decoration: pw.BoxDecoration(
-              border: pw.Border.all(color: PdfColors.grey),
-              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-            ),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  'Sporcu Bilgileri',
-                  style: pw.TextStyle(
-                    fontSize: 16,
-                    fontWeight: pw.FontWeight.bold,
-                    font: bebasFont,
-                  ),
-                ),
-                pw.SizedBox(height: 10),
-                pw.Row(
-                  children: [
-                    pw.Text('Ad Soyad: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, font: bebasFont)),
-                    pw.Text('${testResult.athleteName} ${testResult.athleteSurname}', style: pw.TextStyle(font: bebasFont)),
-                  ],
-                ),
-                pw.SizedBox(height: 5),
-                pw.Row(
-                  children: [
-                    pw.Text('Test: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, font: bebasFont)),
-                    pw.Text(testResult.testName, style: pw.TextStyle(font: bebasFont)),
-                  ],
-                ),
-                pw.SizedBox(height: 5),
-                pw.Row(
-                  children: [
-                    pw.Text('Sonuç: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, font: bebasFont)),
-                    pw.Text('${testResult.result.toStringAsFixed(2)} ${testResult.resultUnit}', style: pw.TextStyle(font: bebasFont)),
-                  ],
-                ),
-                pw.SizedBox(height: 5),
-                pw.Row(
-                  children: [
-                    pw.Text('Tarih: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, font: bebasFont)),
-                    pw.Text('${testResult.testDate.day.toString().padLeft(2, '0')}.${testResult.testDate.month.toString().padLeft(2, '0')}.${testResult.testDate.year}', style: pw.TextStyle(font: bebasFont)),
-                  ],
-                ),
-                if (testResult.notes?.isNotEmpty == true) ...[
-                  pw.SizedBox(height: 5),
-                  pw.Row(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text('Notlar: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, font: bebasFont)),
-                      pw.Expanded(
-                        child: pw.Text(testResult.notes!, style: pw.TextStyle(font: bebasFont)),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-          
-          pw.SizedBox(height: 20),
-          
-          // AI Performans Analizi ve Sonuç Değerlendirmesi (aynı kart içinde)
-          pw.Container(
-            width: double.infinity,
-            decoration: pw.BoxDecoration(
-              border: pw.Border.all(color: PdfColors.green, width: 2),
-              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(10)),
-            ),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                // AI Analizi başlığı
+                pw.SizedBox(height: 15),
                 pw.Container(
-                  width: double.infinity,
-                  padding: const pw.EdgeInsets.all(15),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: pw.BoxDecoration(
-                    color: PdfColors.green,
-                    borderRadius: const pw.BorderRadius.only(
-                      topLeft: pw.Radius.circular(8),
-                      topRight: pw.Radius.circular(8),
-                    ),
+                    color: PdfColors.white,
+                    borderRadius: const pw.BorderRadius.all(pw.Radius.circular(20)),
                   ),
                   child: pw.Text(
-                  'AI Performans Analizi',
-                  style: pw.TextStyle(
-                    fontSize: 18,
-                    fontWeight: pw.FontWeight.bold,
+                    'Yapay Zeka Destekli Analiz',
+                    style: pw.TextStyle(
+                      fontSize: 14,
+                      color: PdfColors.blue,
+                      font: bebasFont,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          pw.SizedBox(height: 25),
+          
+          // Sporcu bilgileri kartı
+          pw.Container(
+            width: double.infinity,
+            padding: const pw.EdgeInsets.all(20),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.white,
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
+              border: pw.Border.all(color: PdfColors.grey, width: 1),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.blue,
+                    borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                  ),
+                  child: pw.Text(
+                    'Sporcu Bilgileri',
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
                       color: PdfColors.white,
                       font: bebasFont,
                     ),
                   ),
                 ),
-                
-                // Sonuç Değerlendirmesi içeriği
-                pw.Container(
-                  width: double.infinity,
-                  padding: const pw.EdgeInsets.all(15),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(
-                        'Sonuç Değerlendirmesi',
-                        style: pw.TextStyle(
-                          fontSize: 16,
-                          fontWeight: pw.FontWeight.bold,
-                          color: PdfColors.green,
-                          font: bebasFont,
-                        ),
-                      ),
-                      pw.SizedBox(height: 10),
-                      pw.Text(
-                        analysisSections['degerlendirme'] ?? 'Değerlendirme bulunamadı.',
-                        style: pw.TextStyle(
-                          fontSize: 12,
-                          height: 1.5,
+                pw.SizedBox(height: 15),
+                _buildInfoRow('Ad Soyad', '${testResult.athleteName} ${testResult.athleteSurname}', bebasFont),
+                _buildInfoRow('Test Adı', testResult.testName, bebasFont),
+                _buildInfoRow('Test Sonucu', '${testResult.result.toStringAsFixed(2)} ${testResult.resultUnit}', bebasFont),
+                _buildInfoRow('Test Tarihi', '${testResult.testDate.day.toString().padLeft(2, '0')}.${testResult.testDate.month.toString().padLeft(2, '0')}.${testResult.testDate.year}', bebasFont),
+                if (testResult.notes?.isNotEmpty == true) 
+                  _buildInfoRow('Notlar', testResult.notes!, bebasFont),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  static pw.Widget _buildInfoRow(String label, String value, pw.Font bebasFont) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(bottom: 8),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Container(
+            width: 80,
+            child: pw.Text(
+              '$label:',
+              style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 12,
+                color: PdfColors.grey,
+                font: bebasFont,
+              ),
+            ),
+          ),
+          pw.Expanded(
+            child: pw.Text(
+              value,
+              style: pw.TextStyle(
+                fontSize: 12,
+                color: PdfColors.black,
+                font: bebasFont,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  static pw.Widget _buildAnalysisPage(TestResultModel testResult, Map<String, String> sections, pw.Font bebasFont) {
+    return pw.Container(
+      width: double.infinity,
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          // Analiz başlığı
+          pw.Container(
+            width: double.infinity,
+            padding: const pw.EdgeInsets.all(20),
+            decoration: pw.BoxDecoration(
+              gradient: pw.LinearGradient(
+                colors: [PdfColors.green, PdfColors.teal],
+                begin: pw.Alignment.topLeft,
+                end: pw.Alignment.bottomRight,
+              ),
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
+            ),
+            child: pw.Text(
+              'AI Performans Analizi',
+              style: pw.TextStyle(
+                fontSize: 24,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.white,
+                font: bebasFont,
+              ),
+              textAlign: pw.TextAlign.center,
+            ),
+          ),
+          
+          pw.SizedBox(height: 20),
+          
+          // Analiz bölümleri
+          _buildAnalysisSection(
+            'Sonuç Değerlendirmesi',
+            sections['degerlendirme'] ?? 'Değerlendirme bulunamadı.',
+            PdfColors.blue,
+            bebasFont,
+          ),
+          
+          pw.SizedBox(height: 15),
+          
+          _buildAnalysisSection(
+            'Eksik Yönler',
+            sections['eksik_guclu'] ?? 'Eksik yönler bulunamadı.',
+            PdfColors.orange,
+            bebasFont,
+          ),
+          
+          pw.SizedBox(height: 15),
+          
+          _buildAnalysisSection(
+            'Egzersiz Önerisi',
+            sections['genel_notlar'] ?? 'Egzersiz önerisi bulunamadı.',
+            PdfColors.purple,
+            bebasFont,
+          ),
+          
+          pw.SizedBox(height: 25),
+          
+          // Alt bilgi
+          pw.Container(
+            width: double.infinity,
+            padding: const pw.EdgeInsets.all(15),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.grey,
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+              border: pw.Border.all(color: PdfColors.grey),
+            ),
+            child: pw.Column(
+              children: [
+                pw.Text(
+                  'Bu rapor Athletic Coach uygulaması tarafından',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    color: PdfColors.white,
                     font: bebasFont,
-                        ),
-                      ),
-                    ],
                   ),
+                  textAlign: pw.TextAlign.center,
+                ),
+                pw.Text(
+                  'yapay zeka ile hazırlanmıştır.',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    color: PdfColors.white,
+                    font: bebasFont,
+                  ),
+                  textAlign: pw.TextAlign.center,
+                ),
+                pw.SizedBox(height: 8),
+                pw.Text(
+                  'Rapor Tarihi: ${DateTime.now().day.toString().padLeft(2, '0')}.${DateTime.now().month.toString().padLeft(2, '0')}.${DateTime.now().year}',
+                  style: pw.TextStyle(
+                    fontSize: 10,
+                    color: PdfColors.white,
+                    font: bebasFont,
+                  ),
+                  textAlign: pw.TextAlign.center,
                 ),
               ],
             ),
@@ -220,140 +290,56 @@ class PdfExportService {
     );
   }
   
-  static List<pw.Widget> _buildAnalysisPages(TestResultModel testResult, Map<String, String> sections, pw.Font bebasFont) {
-    final pages = <pw.Widget>[];
-    
-    // Bölüm başlıkları (değerlendirme hariç, çünkü başlık sayfasında)
-    final sectionTitles = {
-      'eksik_guclu': 'Eksik Yönler ve Güçlü Yanlar',
-      'genel_notlar': 'Genel Notlar',
-      'haftalik_program': 'Haftalık Program',
-      'beslenme_dinlenme': 'Beslenme ve Dinlenme',
-      'uzun_vadeli': 'Uzun Vadeli Gelişim',
-    };
-    
-    final sectionColors = {
-      'eksik_guclu': PdfColors.orange,
-      'genel_notlar': PdfColors.purple,
-      'haftalik_program': PdfColors.red,
-      'beslenme_dinlenme': PdfColors.green,
-      'uzun_vadeli': PdfColors.indigo,
-    };
-    
-    // Bölümleri 2'li gruplar halinde düzenle
-    final sectionEntries = sectionTitles.entries.toList();
-    for (int i = 0; i < sectionEntries.length; i += 2) {
-      final widgets = <pw.Widget>[];
-      
-      // İlk bölüm
-      final firstEntry = sectionEntries[i];
-      widgets.add(_buildSectionCard(
-        firstEntry.key,
-        firstEntry.value,
-        sections[firstEntry.key] ?? 'Bu bölüm için içerik bulunamadı.',
-        sectionColors[firstEntry.key] ?? PdfColors.blue,
-        bebasFont,
-      ));
-      
-      // İkinci bölüm (varsa)
-      if (i + 1 < sectionEntries.length) {
-        final secondEntry = sectionEntries[i + 1];
-        widgets.add(_buildSectionCard(
-          secondEntry.key,
-          secondEntry.value,
-          sections[secondEntry.key] ?? 'Bu bölüm için içerik bulunamadı.',
-          sectionColors[secondEntry.key] ?? PdfColors.blue,
-          bebasFont,
-        ));
-      }
-      
-      // Yan yana yerleştir
-      pages.add(
-        pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: widgets.map((widget) => 
-            pw.Expanded(child: widget)
-          ).toList(),
-        ),
-      );
-      
-      // Sayfalar arası boşluk
-      if (i + 2 < sectionEntries.length) {
-        pages.add(pw.SizedBox(height: 20));
-      }
-    }
-    
-    // Son sayfaya AI bilgisi ekle
-    pages.add(
-              pw.Container(
-                width: double.infinity,
-                padding: const pw.EdgeInsets.all(15),
-                decoration: pw.BoxDecoration(
-                  color: PdfColors.grey,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-                ),
-        child: pw.Text(
-          'Bu rapor Athletic Coach uygulaması tarafından yapay zeka ile hazırlanmıştır.',
-          style: pw.TextStyle(
-            fontSize: 12,
-                        color: PdfColors.white,
-            font: bebasFont,
-          ),
-          textAlign: pw.TextAlign.center,
-        ),
-      ),
-    );
-    
-    return pages;
-  }
-  
-  static pw.Widget _buildSectionCard(String sectionKey, String title, String content, PdfColor color, pw.Font bebasFont) {
+  static pw.Widget _buildAnalysisSection(String title, String content, PdfColor color, pw.Font bebasFont) {
     return pw.Container(
-      margin: const pw.EdgeInsets.only(right: 10),
+      width: double.infinity,
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
+        border: pw.Border.all(color: color, width: 2),
+      ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           // Bölüm başlığı
           pw.Container(
             width: double.infinity,
-            padding: const pw.EdgeInsets.all(12),
+            padding: const pw.EdgeInsets.all(15),
             decoration: pw.BoxDecoration(
               color: color,
-              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+              borderRadius: const pw.BorderRadius.only(
+                topLeft: pw.Radius.circular(10),
+                topRight: pw.Radius.circular(10),
+              ),
             ),
             child: pw.Text(
-                      title,
-                      style: pw.TextStyle(
-                fontSize: 14,
-                        fontWeight: pw.FontWeight.bold,
+              title,
+              style: pw.TextStyle(
+                fontSize: 16,
+                fontWeight: pw.FontWeight.bold,
                 color: PdfColors.white,
-                        font: bebasFont,
-                      ),
-                ),
+                font: bebasFont,
               ),
-              
-          pw.SizedBox(height: 10),
-              
-              // İçerik
-              pw.Container(
-                width: double.infinity,
-            padding: const pw.EdgeInsets.all(12),
-                decoration: pw.BoxDecoration(
-                  border: pw.Border.all(color: PdfColors.grey),
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-                ),
-                child: pw.Text(
-                  content,
-                  style: pw.TextStyle(
-                fontSize: 11,
-                height: 1.4,
-                    font: bebasFont,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-      );
+          
+          // İçerik
+          pw.Container(
+            width: double.infinity,
+            padding: const pw.EdgeInsets.all(15),
+            child: pw.Text(
+              content,
+              style: pw.TextStyle(
+                fontSize: 12,
+                height: 1.6,
+                color: PdfColors.black,
+                font: bebasFont,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
   
   static Map<String, String> _parseAnalysis(String analysis) {
@@ -361,31 +347,22 @@ class PdfExportService {
     
     // Gereksiz çizgileri ve formatlamaları temizle
     String cleanAnalysis = analysis
-        .replaceAll(RegExp(r'-{3,}'), '') // Üç veya daha fazla tire
-        .replaceAll(RegExp(r'={3,}'), '') // Üç veya daha fazla eşittir
-        .replaceAll(RegExp(r'\*{3,}'), '') // Üç veya daha fazla yıldız
-        .replaceAll(RegExp(r'_{3,}'), '') // Üç veya daha fazla alt çizgi
-        .replaceAll(RegExp(r'\n\s*\n\s*\n'), '\n\n') // Fazla boş satırları
-        .replaceAll(RegExp(r'^\s+|\s+$', multiLine: true), '') // Satır başı/sonu boşlukları
+        .replaceAll(RegExp(r'-{3,}'), '')
+        .replaceAll(RegExp(r'={3,}'), '')
+        .replaceAll(RegExp(r'\*{3,}'), '')
+        .replaceAll(RegExp(r'_{3,}'), '')
+        .replaceAll(RegExp(r'\n\s*\n\s*\n'), '\n\n')
+        .replaceAll(RegExp(r'^\s+|\s+$', multiLine: true), '')
         .trim();
     
-    // Bölümleri ayır - yeni detaylı format için
+    // Yeni 3 bölümlü format için ayırma
     final parts = cleanAnalysis.split(RegExp(r'\d+\.\s*'));
     
-    if (parts.length >= 7) {
-      // Yeni detaylı format: 6 bölüm
+    if (parts.length >= 4) {
+      // Yeni format: 3 bölüm
       sections['degerlendirme'] = _cleanSection(parts[1]);
       sections['eksik_guclu'] = _cleanSection(parts[2]);
       sections['genel_notlar'] = _cleanSection(parts[3]);
-      sections['haftalik_program'] = _cleanSection(parts[4]);
-      sections['beslenme_dinlenme'] = _cleanSection(parts[5]);
-      sections['uzun_vadeli'] = _cleanSection(parts[6]);
-    } else if (parts.length >= 5) {
-      // Eski format: 4 bölüm
-      sections['degerlendirme'] = _cleanSection(parts[1]);
-      sections['eksik_guclu'] = _cleanSection(parts[2]);
-      sections['genel_notlar'] = _cleanSection(parts[3]);
-      sections['haftalik_program'] = _cleanSection(parts[4]);
     } else {
       // Eğer bölümler ayrılamazsa, tüm metni genel notlara koy
       sections['genel_notlar'] = _cleanSection(cleanAnalysis);
@@ -396,12 +373,12 @@ class PdfExportService {
   
   static String _cleanSection(String section) {
     return section
-        .replaceAll(RegExp(r'-{2,}'), '') // İki veya daha fazla tire
-        .replaceAll(RegExp(r'={2,}'), '') // İki veya daha fazla eşittir
-        .replaceAll(RegExp(r'\*{2,}'), '') // İki veya daha fazla yıldız
-        .replaceAll(RegExp(r'_{2,}'), '') // İki veya daha fazla alt çizgi
-        .replaceAll(RegExp(r'\n\s*\n'), '\n') // Fazla boş satırları
-        .replaceAll(RegExp(r'^\s+|\s+$', multiLine: true), '') // Satır başı/sonu boşlukları
+        .replaceAll(RegExp(r'-{2,}'), '')
+        .replaceAll(RegExp(r'={2,}'), '')
+        .replaceAll(RegExp(r'\*{2,}'), '')
+        .replaceAll(RegExp(r'_{2,}'), '')
+        .replaceAll(RegExp(r'\n\s*\n'), '\n')
+        .replaceAll(RegExp(r'^\s+|\s+$', multiLine: true), '')
         .trim();
   }
 } 

@@ -177,8 +177,8 @@ class _HomeScreenState extends State<HomeScreen> {
             AppTheme.getResponsivePadding(context).right,
             AppTheme.getResponsivePadding(context).bottom,
           ),
-          child: Column(
-            children: [
+            child: Column(
+              children: [
               // Son İncelenen Testler Kartı
               RecentTestsCardWidget(
                 recentTests: _recentTests,

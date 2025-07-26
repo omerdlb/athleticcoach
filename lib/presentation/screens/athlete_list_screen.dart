@@ -296,7 +296,7 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
         onPressed: _addAthlete,
         backgroundColor: AppTheme.primaryColor,
         child: Icon(Icons.add, color: AppTheme.whiteTextColor),
-      ),
+                ),
     );
   }
 } 

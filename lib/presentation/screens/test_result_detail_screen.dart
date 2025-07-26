@@ -307,13 +307,13 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
-              child: Text(
-                content,
-                style: TextStyle(
+                    child: Text(
+                    content,
+                    style: TextStyle(
                   color: AppTheme.primaryTextColor,
                   fontSize: 14,
                   height: 1.5,
-                ),
+                  ),
               ),
             ),
         ],
@@ -486,44 +486,20 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                         )
                       else if (hasAnalysis)
                         Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: AppTheme.cardBackgroundColor,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: AppTheme.borderColor,
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.shadowColorWithOpacity,
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
+                          margin: const EdgeInsets.only(top: 16),
+                          decoration: AppTheme.cardDecoration,
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Başlık
                               Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      AppTheme.primaryColor.withOpacity(0.1),
-                                      AppTheme.accentColor.withOpacity(0.1),
-                                    ],
-                                  ),
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                                ),
+                                padding: const EdgeInsets.all(16),
                                 child: Row(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.all(10),
+                                      padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: AppTheme.primaryColor.withOpacity(0.15),
+                                        color: AppTheme.primaryColor.withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Icon(
@@ -562,50 +538,81 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                 ),
                               ),
                               
-                              // AI Analizi Bölümü - Sadece Detayları Gör Butonu
+                              // AI Analizi İçeriği - Tek Kart
                               Container(
                                 padding: const EdgeInsets.all(16),
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => TestResultAnalysisScreen(
-                                          testResult: result,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Tam analiz metni
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryColor.withOpacity(0.05),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: AppTheme.primaryColor.withOpacity(0.2),
+                                          width: 1,
                                         ),
                                       ),
-                                    );
-                                  },
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.primaryColor.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: AppTheme.primaryColor.withOpacity(0.3),
-                                        width: 1,
+                                      child: Text(
+                                        result.aiAnalysis!,
+                                        style: TextStyle(
+                                          color: AppTheme.primaryTextColor,
+                                          fontSize: 14,
+                                          height: 1.6,
+                                          letterSpacing: 0.2,
+                                        ),
                                       ),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.arrow_forward,
-                                          color: AppTheme.primaryColor,
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          'Detayları Gör',
-                                          style: TextStyle(
-                                            color: AppTheme.primaryColor,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 14,
+                                    
+                                    const SizedBox(height: 16),
+                                    
+                                    // Detayları Gör Butonu
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => TestResultAnalysisScreen(
+                                              testResult: result,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primaryColor.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: AppTheme.primaryColor.withOpacity(0.3),
+                                            width: 1,
                                           ),
                                         ),
-                                      ],
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.arrow_forward,
+                                              color: AppTheme.primaryColor,
+                                              size: 18,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'Detayları Gör',
+                                              style: TextStyle(
+                                                color: AppTheme.primaryColor,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                             ],

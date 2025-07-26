@@ -113,6 +113,8 @@ class GeminiService {
     print('Boy: $height cm');
     print('Kilo: $weight kg');
     print('Test: $testName');
+    print('Ham Sonuç: $result');
+    print('Sonuç Birimi: $resultUnit');
     print('Sonuç: $result $resultUnit');
     print('Notlar: ${notes ?? 'Yok'}');
     print('========================');
@@ -120,79 +122,144 @@ class GeminiService {
     // Veri doğrulama
     if (height <= 0 || weight <= 0 || result <= 0) {
       print('HATA: Geçersiz veri değerleri!');
+      print('Height: $height, Weight: $weight, Result: $result');
       return 'Hata: Geçersiz veri değerleri. Boy, kilo ve test sonucu 0\'dan büyük olmalıdır.';
     }
 
     final bmi = weight / ((height / 100) * (height / 100));
     
+    // Test sonucunu daha anlaşılır formatta hazırla
+    String formattedResult = '';
+    if (resultUnit == 'Seviye.Mekik') {
+      // Yo-Yo testleri için seviye ve mekik ayrımı
+      final level = result.floor();
+      final shuttle = ((result - level) * 10).round();
+      formattedResult = 'Seviye $level, Mekik $shuttle';
+      print('Yo-Yo Formatı: $formattedResult (Ham: $result)');
+    } else if (resultUnit == 'Seviye') {
+      // Beep test gibi sadece seviye olan testler
+      formattedResult = 'Seviye ${result.toStringAsFixed(1)}';
+      print('Beep Test Formatı: $formattedResult (Ham: $result)');
+    } else {
+      // Diğer testler için normal format
+      formattedResult = '${result.toStringAsFixed(2)} $resultUnit';
+      print('Normal Format: $formattedResult (Ham: $result)');
+    }
+    
+    print('Final Formatlanmış Sonuç: $formattedResult');
+    
     final prompt = '''
-        Sen spor antrenörüsün. Sporcu test sonucunu analiz et.
+Sen deneyimli bir spor antrenörüsün. Aşağıdaki sporcu test verilerini analiz et.
 
-        SPORCU: $athleteName $athleteSurname ($age yaş, $gender, $branch)
-        BOY: ${height.toStringAsFixed(1)} cm, KİLO: ${weight.toStringAsFixed(1)} kg
-        TEST: $testName
-        SONUÇ: ${result.toStringAsFixed(2)} $resultUnit
-        NOT: ${notes ?? 'Yok'}
+SPORCU BİLGİLERİ:
+- Ad Soyad: $athleteName $athleteSurname
+- Yaş: $age
+- Cinsiyet: $gender
+- Branş: $branch
+- Boy: ${height.toStringAsFixed(1)} cm
+- Kilo: ${weight.toStringAsFixed(1)} kg
+- BMI: ${bmi.toStringAsFixed(1)}
 
-        Şu 3 bölümde kısa analiz yap:
+TEST BİLGİLERİ:
+- Test Adı: $testName
+- Test Sonucu: $formattedResult
+- Ham Sonuç Değeri: $result
+- Sonuç Birimi: $resultUnit
+- Ek Notlar: ${notes ?? 'Yok'}
 
-        1. SONUÇ DEĞERLENDİRMESİ:
-        Bu yaş grubu için sonucun seviyesi (zayıf/orta/iyi/çok iyi)
+KURALLAR:
+1. Her bölümü MUTLAKA tamamla
+2. Yarım cümle bırakma
+3. Her bölüm en az 30 kelime olsun
+4. Spesifik ve detaylı yaz
+5. Test sonucunu mutlaka değerlendir
+6. Test adını ve sonucunu tam olarak kullan
+7. Ham sonuç değerini ($result) doğru algıla
 
-        2. EKSİK YÖNLER:
-        Geliştirilmesi gereken 2-3 alan
+Aşağıdaki 3 bölümü tam olarak yaz:
 
-        3. EGZERSİZ ÖNERİSİ:
-        Bu kapasiteyi geliştirmek için 3-4 egzersiz
+1. SONUÇ DEĞERLENDİRMESİ:
+$testName testinde elde edilen $formattedResult sonucunu değerlendir. Ham sonuç değeri $result'tir. Bu yaş grubu ve cinsiyet için sonucun seviyesini belirt (zayıf/orta/iyi/çok iyi). $branch branşı için bu sonucun anlamını açıkla. Yaş grubuna göre performans seviyesini detaylı değerlendir.
 
-        Her bölüm maksimum 50 kelime olsun. Kısa ve öz yaz.
-        ''';
+2. EKSİK YÖNLER:
+Bu test alanında sporcunun geliştirilmesi gereken 2-3 spesifik eksik yönünü belirt. Her eksik yön için detaylı açıklama ver. Neden bu alanların zayıf olduğunu ve nasıl geliştirilebileceğini açıkla.
 
-            return await generateContent(prompt);
+3. EGZERSİZ ÖNERİSİ:
+Bu kapasiteyi geliştirmek için 3-4 spesifik egzersiz öner. Her egzersizin adını, nasıl yapılacağını ve süresini belirt. Egzersizlerin faydalarını ve bu test performansını nasıl artıracağını kısaca açıkla.
+
+ÖNEMLİ: Her bölümü tamamla ve yarım bırakma! Test adını ve sonucunu doğru kullan! Ham sonuç değeri $result'tir!
+''';
+
+    print('=== AI PROMPT GÖNDERİLİYOR ===');
+    print('Prompt uzunluğu: ${prompt.length} karakter');
+    print('Test adı: $testName');
+    print('Formatlanmış sonuç: $formattedResult');
+    print('Ham sonuç: $result');
+    print('==============================');
+
+    return await generateContent(prompt);
   }
 
   static Future<String?> generateComparativeAnalysis({
     required List<Map<String, dynamic>> results,
     required String testName,
   }) async {
+    // Test sonuçlarını formatla
     final resultsText = results.map((result) {
       final athlete = result['athlete'];
+      final testResult = result['result'];
+      final unit = result['unit'];
+      
+      String formattedResult = '';
+      if (unit == 'Seviye.Mekik') {
+        final level = testResult.floor();
+        final shuttle = ((testResult - level) * 10).round();
+        formattedResult = 'Seviye $level, Mekik $shuttle';
+      } else if (unit == 'Seviye') {
+        formattedResult = 'Seviye ${testResult.toStringAsFixed(1)}';
+      } else {
+        formattedResult = '${testResult.toStringAsFixed(2)} $unit';
+      }
+      
       return '''
-- ${athlete['name']} ${athlete['surname']} (${athlete['age']} yaş, ${athlete['gender']}): ${result['result']} ${result['unit']}
+- ${athlete['name']} ${athlete['surname']} (${athlete['age']} yaş, ${athlete['gender']}): $formattedResult
 ''';
     }).join('\n');
 
     final prompt = '''
-Sen deneyimli bir spor antrenörü olarak, aynı test için birden fazla sporcunun sonuçlarını karşılaştırmalı olarak analiz et.
+Sen deneyimli bir spor antrenörüsün. Aşağıdaki sporcu test verilerini karşılaştırmalı olarak analiz et.
 
-TEST: $testName
+TEST BİLGİLERİ:
+- Test Adı: $testName
+- Katılımcı Sayısı: ${results.length}
 
 SPORCU SONUÇLARI:
 $resultsText
 
-Lütfen aşağıdaki başlıklar altında karşılaştırmalı analiz yap:
+KURALLAR:
+1. Her bölümü MUTLAKA tamamla
+2. Yarım cümle bırakma
+3. Her bölüm en az 40 kelime olsun
+4. Spesifik ve detaylı yaz
+5. Sporcu isimlerini kullan
+6. Karşılaştırmalı analiz yap
+7. Test adını ve sonuçları doğru kullan
+
+Aşağıdaki 4 bölümü tam olarak yaz:
 
 1. GENEL DEĞERLENDİRME:
-- En iyi performans gösteren sporcu
-- En çok gelişim potansiyeli olan sporcu
-- Grup ortalaması ve standart sapma analizi
+$testName testinde en iyi performans gösteren sporcuyu ve sonucunu belirt. En çok gelişim potansiyeli olan sporcuyu belirt. Grup ortalaması hakkında detaylı değerlendirme yap. Performans dağılımını açıkla.
 
 2. YAŞ VE CİNSİYET FAKTÖRLERİ:
-- Yaş gruplarına göre performans dağılımı
-- Cinsiyet bazlı performans farklılıkları
-- Yaş-cinsiyet etkileşimi analizi
+$testName testinde yaş gruplarına göre performans dağılımını değerlendir. Cinsiyet bazlı performans farklılıklarını belirt. Yaş-cinsiyet etkileşimini detaylı açıkla. Hangi yaş ve cinsiyet gruplarının daha iyi performans gösterdiğini belirt.
 
 3. BİREYSEL GELİŞİM ÖNERİLERİ:
-- Her sporcu için özel gelişim alanları
-- Grup içi rekabet avantajları
-- Bireysel antrenman ihtiyaçları
+$testName testi için her sporcu için 1-2 spesifik gelişim alanı belirt. Grup içi rekabet avantajlarını detaylı açıkla. Bireysel antrenman ihtiyaçlarını belirt. Her sporcunun güçlü yönlerini vurgula.
 
 4. TAKIM STRATEJİSİ:
-- Takım performansını artıracak öneriler
-- Sporcu eşleştirme önerileri
-- Grup antrenmanı fırsatları
+$testName testi performansını artıracak 2-3 spesifik öneri ver. Sporcu eşleştirme önerilerini detaylı açıkla. Grup antrenmanı fırsatlarını belirt. Uzun vadeli gelişim planı önerilerini kısaca açıkla.
 
-Türkçe olarak, kısa ve öz paragraflar halinde yanıtla. Her bölüm maksimum 120 kelime olsun.
+ÖNEMLİ: Her bölümü tamamla ve yarım bırakma! Test adını ve sonuçları doğru kullan!
 ''';
 
     return await generateContent(prompt);
@@ -202,35 +269,77 @@ Türkçe olarak, kısa ve öz paragraflar halinde yanıtla. Her bölüm maksimum
     required List<Map<String, dynamic>> results,
     required String testName,
   }) async {
+    // Debug bilgileri
+    print('=== TAKIM ANALİZ VERİLERİ ===');
+    print('Test: $testName');
+    print('Sporcu sayısı: ${results.length}');
+    
+    // Test sonuçlarını formatla
     final resultsText = results.map((result) {
       final athlete = result['athlete'];
+      final testResult = result['result'];
+      final unit = result['unit'];
+      
+      print('Sporcu: ${athlete['name']} ${athlete['surname']} - Ham sonuç: $testResult $unit');
+      
+      String formattedResult = '';
+      if (unit == 'Seviye.Mekik') {
+        final level = testResult.floor();
+        final shuttle = ((testResult - level) * 10).round();
+        formattedResult = 'Seviye $level, Mekik $shuttle';
+        print('  Yo-Yo Formatı: $formattedResult');
+      } else if (unit == 'Seviye') {
+        formattedResult = 'Seviye ${testResult.toStringAsFixed(1)}';
+        print('  Beep Test Formatı: $formattedResult');
+      } else {
+        formattedResult = '${testResult.toStringAsFixed(2)} $unit';
+        print('  Normal Format: $formattedResult');
+      }
+      
       return '''
-        - ${athlete['name']} ${athlete['surname']} (${athlete['age']} yaş, ${athlete['gender']}): ${result['result']} ${result['unit']}
+        - ${athlete['name']} ${athlete['surname']} (${athlete['age']} yaş, ${athlete['gender']}): $formattedResult
         ''';
     }).join('\n');
 
+    print('==============================');
+
     final prompt = '''
-        Sen spor antrenörüsün. Takım test sonuçlarını analiz et.
+Sen deneyimli bir spor antrenörüsün. Aşağıdaki takım test verilerini analiz et.
 
-        TEST: $testName
-        SPORCU SAYISI: ${results.length}
+TEST BİLGİLERİ:
+- Test Adı: $testName
+- Katılımcı Sayısı: ${results.length}
 
-        SONUÇLAR:
-        $resultsText
+SPORCU SONUÇLARI:
+$resultsText
 
-        Şu 3 bölümde kısa analiz yap:
+KURALLAR:
+1. Her bölümü MUTLAKA tamamla
+2. Yarım cümle bırakma
+3. Her bölüm en az 30 kelime olsun
+4. Spesifik ve detaylı yaz
+5. Sporcu isimlerini kullan
+6. Test adını ve sonuçları doğru kullan
+7. Ham sonuç değerlerini doğru algıla
 
-        1. GENEL DEĞERLENDİRME:
-        En iyi ve en zayıf performans gösteren sporcular
+Aşağıdaki 3 bölümü tam olarak yaz:
 
-        2. TAKIM SEVİYESİ:
-        Genel takım performansı ve seviyesi
+1. GENEL DEĞERLENDİRME:
+$testName testinde en iyi performans gösteren sporcuyu ve sonucunu belirt. En zayıf performans gösteren sporcuyu ve sonucunu belirt. Genel grup performansını değerlendir. Ortalama seviyeyi kısaca açıkla.
 
-        3. GELİŞİM ÖNERİSİ:
-        Takım için 2-3 genel öneri
+2. TAKIM SEVİYESİ:
+Takımın $testName testindeki genel seviyesini değerlendir. Ortalama performans seviyesini belirt. Takımın güçlü yönlerini açıkla. Takımın zayıf yönlerini belirt. Genel takım potansiyelini değerlendir.
 
-        Her bölüm maksimum 40 kelime olsun. Kısa ve öz yaz.
-        ''';
+3. GELİŞİM ÖNERİSİ:
+$testName testi performansını artırmak için 2-3 spesifik öneri ver. Her öneriyi detaylı açıkla. Bu önerilerin nasıl uygulanacağını belirt. Beklenen faydaları kısaca açıkla.
+
+ÖNEMLİ: Her bölümü tamamla ve yarım bırakma! Test adını ve sonuçları doğru kullan!
+''';
+
+    print('=== TAKIM AI PROMPT GÖNDERİLİYOR ===');
+    print('Prompt uzunluğu: ${prompt.length} karakter');
+    print('Test adı: $testName');
+    print('==============================');
 
     return await generateContent(prompt);
   }

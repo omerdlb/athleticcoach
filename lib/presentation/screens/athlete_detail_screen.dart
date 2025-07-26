@@ -690,7 +690,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
       ),
     );
   }
-}
+} 
 
 class TestResultAnalysisScreen extends StatefulWidget {
   final AthleteModel athlete;
