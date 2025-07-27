@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:athleticcoach/data/models/team_analysis_model.dart';
 import 'package:athleticcoach/data/athlete_database.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 
 class TeamAnalysisCardWidget extends StatelessWidget {
   final TeamAnalysisModel? latestTeamAnalysis;
@@ -59,7 +60,7 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF10B981),
+                    color: AppTheme.primaryColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -80,9 +81,9 @@ class TeamAnalysisCardWidget extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF10B981).withOpacity(0.3),
-                  const Color(0xFF10B981),
-                  const Color(0xFF10B981).withOpacity(0.3),
+                  AppTheme.primaryColor.withOpacity(0.3),
+                  AppTheme.primaryColor,
+                  AppTheme.primaryColor.withOpacity(0.3),
                 ],
               ),
             ),
@@ -95,7 +96,7 @@ class TeamAnalysisCardWidget extends StatelessWidget {
             child: isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFF10B981),
+                      color: AppTheme.primaryColor,
                       strokeWidth: 2,
                     ),
                   )
@@ -117,7 +118,7 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                               Icon(
                                 Icons.psychology,
                                 size: 32,
-                                color: const Color(0xFF10B981),
+                                color: AppTheme.primaryColor,
                               ),
                               const SizedBox(height: 12),
                               Text(
@@ -125,7 +126,7 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: MediaQuery.of(context).size.width < 400 ? 14 : 16,
                                   fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF065F46),
+                                  color: AppTheme.accentColor,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -134,7 +135,7 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: MediaQuery.of(context).size.width < 400 ? 11 : 12,
-                                  color: const Color(0xFF047857),
+                                  color: AppTheme.accentColor,
                                 ),
                               ),
                             ],
@@ -151,12 +152,12 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF10B981).withOpacity(0.1),
+                                    color: AppTheme.primaryColor.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: const Icon(
                                     Icons.psychology,
-                                    color: Color(0xFF10B981),
+                                    color: AppTheme.primaryColor,
                                     size: 16,
                                   ),
                                 ),
@@ -182,14 +183,14 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                                           Icon(
                                             Icons.people,
                                             size: 12,
-                                            color: const Color(0xFF10B981).withOpacity(0.7),
+                                            color: AppTheme.primaryColor.withOpacity(0.7),
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
                                             '${latestTeamAnalysis!.participantCount} katılımcı',
                                             style: TextStyle(
                                               fontSize: MediaQuery.of(context).size.width < 400 ? 11 : 12,
-                                              color: const Color(0xFF10B981),
+                                              color: AppTheme.primaryColor,
                                             ),
                                           ),
                                           const SizedBox(width: 12),
@@ -233,7 +234,7 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: MediaQuery.of(context).size.width < 400 ? 12 : 14,
                                   height: 1.5,
-                                  color: const Color(0xFF065F46),
+                                  color: AppTheme.accentColor,
                                 ),
                               ),
                             ),
@@ -260,7 +261,7 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF10B981),
+                    color: AppTheme.primaryColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.history, color: Colors.white, size: 20),
@@ -304,7 +305,7 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                                 children: [
                                   Icon(
                                     Icons.psychology,
-                                    color: const Color(0xFF10B981),
+                                    color: AppTheme.primaryColor,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
@@ -314,7 +315,7 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
-                                        color: Color(0xFF065F46),
+                                        color: AppTheme.accentColor,
                                       ),
                                     ),
                                   ),
@@ -326,14 +327,14 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                                   Icon(
                                     Icons.people,
                                     size: 14,
-                                    color: const Color(0xFF10B981),
+                                    color: AppTheme.primaryColor,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     '${analysis.participantCount} katılımcı',
                                     style: const TextStyle(
                                       fontSize: 12,
-                                      color: Color(0xFF10B981),
+                                      color: AppTheme.primaryColor,
                                     ),
                                   ),
                                   const SizedBox(width: 16),
@@ -358,7 +359,7 @@ class TeamAnalysisCardWidget extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 14,
                                   height: 1.4,
-                                  color: Color(0xFF065F46),
+                                  color: AppTheme.accentColor,
                                 ),
                                 maxLines: 4,
                                 overflow: TextOverflow.ellipsis,

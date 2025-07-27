@@ -78,16 +78,40 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
   }
 
   String _formatDate(DateTime date) {
+    // Türkçe tarih formatı: DD.MM.YYYY
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+  }
+
+  String _formatTime(DateTime date) {
+    // Türkçe saat formatı: HH:MM
+    return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _formatDateTime(DateTime date) {
+    // Tam tarih ve saat formatı: DD.MM.YYYY HH:MM
+    return '${_formatDate(date)} ${_formatTime(date)}';
+  }
+
+  String _getDayName(DateTime date) {
+    // Türkçe gün adları
+    const List<String> dayNames = [
+      'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 
+      'Cuma', 'Cumartesi', 'Pazar'
+    ];
+    return dayNames[date.weekday - 1];
   }
 
   DateTime _parseDate(String dateString) {
     final parts = dateString.split('.');
-    return DateTime(
-      int.parse(parts[2]), // year
-      int.parse(parts[1]), // month
-      int.parse(parts[0]), // day
-    );
+    if (parts.length == 3) {
+      return DateTime(
+        int.parse(parts[2]), // year
+        int.parse(parts[1]), // month
+        int.parse(parts[0]), // day
+      );
+    }
+    // Eğer format farklıysa, varsayılan olarak bugünün tarihini döndür
+    return DateTime.now();
   }
 
   @override
@@ -101,9 +125,14 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
       }
       testSessions[sessionKey]!.add(result);
     }
-    // Test oturumlarını tarihe göre sırala (en yeni en üstte)
+    // Oturumları test tarihine göre sırala (en yeni en üstte)
     final sortedTestSessions = testSessions.entries.toList()
-      ..sort((a, b) => b.value.first.testDate.compareTo(a.value.first.testDate));
+      ..sort((a, b) {
+        final diff = b.value.first.testDate.compareTo(a.value.first.testDate);
+        if (diff != 0) return diff;
+        // Eşitse, sessionId'e göre sırala
+        return b.key.compareTo(a.key);
+      });
     return Scaffold(
       appBar: AppBar(
         title: const Text('Test Sonuçları'),
@@ -157,7 +186,7 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                       final firstResult = results.first;
                       final currentDate = _formatDate(firstResult.testDate);
                       
-                      // Önceki test oturumunun tarihini kontrol et
+                      // Önceki test oturumunun tarihini kontrol et (sadece gün bazında)
                       final previousDate = index > 0 
                           ? _formatDate(sortedTestSessions[index - 1].value.first.testDate)
                           : null;
@@ -165,40 +194,50 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Tarih başlığı (sadece farklı tarihlerde göster)
+                          // Tarih başlığı (sadece farklı günlerde göster)
                           if (previousDate != currentDate) ...[
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                              margin: const EdgeInsets.only(bottom: 8),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primaryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: AppTheme.primaryColor.withOpacity(0.3),
-                                  width: 1,
+                                                          Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                margin: const EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: AppTheme.primaryColor.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_today,
+                                      size: 18,
+                                      color: AppTheme.primaryColor,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      currentDate,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: AppTheme.getResponsiveFontSize(context, 18),
+                                        color: AppTheme.primaryColor,
+                                        letterSpacing: 0.2,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      _getDayName(firstResult.testDate),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: AppTheme.getResponsiveFontSize(context, 14),
+                                        color: AppTheme.primaryColor.withOpacity(0.8),
+                                        letterSpacing: 0.1,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.calendar_today,
-                                    size: 16,
-                                    color: AppTheme.primaryColor,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    currentDate,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: AppTheme.getResponsiveFontSize(context, 18),
-                                      color: AppTheme.primaryColor,
-                                      letterSpacing: 0.2,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                             const SizedBox(height: 4),
                           ],
                           
@@ -299,36 +338,50 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                       const SizedBox(height: 12),
                                       
                                       // Tarih ve saat bilgisi
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.calendar_today,
-                                            size: 16,
-                                            color: AppTheme.secondaryTextColor,
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.secondaryColor.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(
+                                            color: AppTheme.secondaryColor.withOpacity(0.3),
+                                            width: 1,
                                           ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            _formatDate(firstResult.testDate),
-                                            style: TextStyle(
-                                              fontSize: AppTheme.getResponsiveFontSize(context, 14),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.calendar_today,
+                                              size: 14,
                                               color: AppTheme.secondaryTextColor,
                                             ),
-                                          ),
-                                          const SizedBox(width: 16),
-                                          Icon(
-                                            Icons.access_time,
-                                            size: 16,
-                                            color: AppTheme.secondaryTextColor,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '${firstResult.testDate.hour.toString().padLeft(2, '0')}:${firstResult.testDate.minute.toString().padLeft(2, '0')}',
-                                            style: TextStyle(
-                                              fontSize: AppTheme.getResponsiveFontSize(context, 14),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              _formatDate(firstResult.testDate),
+                                              style: TextStyle(
+                                                fontSize: AppTheme.getResponsiveFontSize(context, 12),
+                                                color: AppTheme.secondaryTextColor,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Icon(
+                                              Icons.access_time,
+                                              size: 14,
                                               color: AppTheme.secondaryTextColor,
                                             ),
-                                  ),
-                                ],
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              _formatTime(firstResult.testDate),
+                                              style: TextStyle(
+                                                fontSize: AppTheme.getResponsiveFontSize(context, 12),
+                                                color: AppTheme.secondaryTextColor,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                       
                                       const SizedBox(height: 8),
@@ -465,7 +518,7 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
       final recentTest = RecentTestModel(
         testName: result.testName,
         athleteName: '', // Sporcu ismi artık kullanılmıyor
-        testDate: _formatDate(result.testDate),
+        testDate: _formatDateTime(result.testDate),
         viewedAt: DateTime.now(),
       );
       
@@ -711,7 +764,7 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                     ),
                   ),
                   Text(
-                    '• ${_formatDate(results.first.testDate)} ${results.first.testDate.hour.toString().padLeft(2, '0')}:${results.first.testDate.minute.toString().padLeft(2, '0')}:${results.first.testDate.second.toString().padLeft(2, '0')}.${results.first.testDate.millisecond.toString().padLeft(3, '0')}',
+                    '• ${_formatDateTime(results.first.testDate)}',
                     style: TextStyle(
                       color: AppTheme.primaryTextColor,
                       fontSize: 14,

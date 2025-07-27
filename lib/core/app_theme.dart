@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Ana Renkler
-  static const Color primaryColor = Color(0xFF6366F1);
-  static const Color secondaryColor = Color(0xFF10B981);
-  static const Color accentColor = Color(0xFFEC4899);
+  static const Color primaryColor = Color(0xFF4CAF50);        // Orta yeşil
+  static const Color secondaryColor = Color(0xFF81C784);      // Açık yeşil
+  static const Color accentColor = Color(0xFF2E7D32);         // Koyu yeşil
   
   // Gradyan Renkler
-  static const Color gradientStart = Color(0xFFEEF2FF);
-  static const Color gradientEnd = Color(0xFFFDF6E3);
-  static const Color drawerGradientStart = Color(0xFF6366F1);
-  static const Color drawerGradientEnd = Color(0xFF4F46E5);
+  static const Color gradientStart = Color(0xFFE8F5E9);       // Çok açık mint
+  static const Color gradientEnd = Color(0xFFF1FAF0);         // Neredeyse beyaz yeşil
+  static const Color drawerGradientStart = primaryColor;
+  static const Color drawerGradientEnd = accentColor;
   
   // Arka Plan Renkleri
   static const Color backgroundColor = Color(0xFFF8FAFC);
@@ -24,22 +24,22 @@ class AppTheme {
   static const Color whiteTextColor = Color(0xFFFFFFFF);
   
   // Durum Renkleri
-  static const Color successColor = Color(0xFF10B981);
+  static const Color successColor = primaryColor;
   static const Color errorColor = Color(0xFFEF4444);
   static const Color warningColor = Color(0xFFF59E0B);
-  static const Color infoColor = Color(0xFF3B82F6);
+  static const Color infoColor = secondaryColor;
   
   // Cinsiyet Renkleri
-  static const Color maleColor = Color(0xFF6366F1);
-  static const Color femaleColor = Color(0xFFEC4899);
+  static const Color maleColor = primaryColor;
+  static const Color femaleColor = Color(0xFFEF6C9E);
   
   // Gölge Renkleri
-  static const Color shadowColor = Color(0xFF6366F1);
-  static const Color shadowColorWithOpacity = Color(0x1A6366F1); // 10% opacity
+  static const Color shadowColor = primaryColor;
+  static const Color shadowColorWithOpacity = Color(0x1A4CAF50); // 10% opacity yeşil
   
   // Border Renkleri
   static const Color borderColor = Color(0xFFE5E7EB);
-  static const Color focusedBorderColor = Color(0xFF6366F1);
+  static const Color focusedBorderColor = primaryColor;
   static const Color errorBorderColor = Color(0xFFEF4444);
   
   // App Bar Tema

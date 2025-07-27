@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:athleticcoach/presentation/screens/athlete_add_screen.dart';
 import 'package:athleticcoach/presentation/screens/test_library_screen.dart';
 import 'package:athleticcoach/data/athlete_database.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 
 class OnboardingWidget {
   static Future<void> showOnboarding(BuildContext context) async {
@@ -27,7 +28,7 @@ class OnboardingWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF6366F1),
+                color: AppTheme.primaryColor,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.waving_hand, color: Colors.white, size: 24),
@@ -75,7 +76,7 @@ class OnboardingWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF6366F1),
+                color: AppTheme.primaryColor,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.person_add, color: Colors.white, size: 24),
@@ -193,7 +194,7 @@ class OnboardingWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF10B981),
+                color: AppTheme.secondaryColor,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.check_circle, color: Colors.white, size: 24),

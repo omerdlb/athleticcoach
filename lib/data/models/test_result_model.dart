@@ -62,23 +62,35 @@ class TestResultModel {
       
       DateTime result;
       if (testDateValue is int) {
-        result = DateTime.fromMillisecondsSinceEpoch(testDateValue);
-        print('Parsed as int (milliseconds): $result');
+        // Eğer değer milisaniye cinsindeyse doğrudan kullan, mikro saniye ise /1000
+        final int millis = testDateValue > 10000000000000
+            ? (testDateValue ~/ 1000) // microseconds -> milliseconds
+            : testDateValue;
+        result = DateTime.fromMillisecondsSinceEpoch(millis);
+      } else if (testDateValue is double) {
+        // double gelirse int'e çevir
+        final int millis = testDateValue > 10000000000000
+            ? (testDateValue ~/ 1000)
+            : testDateValue.toInt();
+        result = DateTime.fromMillisecondsSinceEpoch(millis);
       } else if (testDateValue is String) {
-        final parsed = DateTime.tryParse(testDateValue);
-        if (parsed != null) {
-          result = parsed;
-          print('Parsed as string: $result');
+        // String sadece rakamlardan oluşuyorsa milisaniye olarak kabul et
+        if (RegExp(r'^\d+$').hasMatch(testDateValue)) {
+          final intMillis = int.tryParse(testDateValue) ?? 0;
+          final int millis = intMillis > 10000000000000
+              ? (intMillis ~/ 1000)
+              : intMillis;
+          result = DateTime.fromMillisecondsSinceEpoch(millis);
         } else {
-          // Eğer parse edilemezse, bugünün tarihi yerine epoch time kullan
-          print('ERROR: Could not parse testDate string: $testDateValue');
-          result = DateTime.fromMillisecondsSinceEpoch(0); // 1970-01-01
-          print('Using epoch time as fallback: $result');
+          final parsed = DateTime.tryParse(testDateValue);
+          if (parsed != null) {
+            result = parsed;
+          } else {
+            result = DateTime.fromMillisecondsSinceEpoch(0); // fallback
+          }
         }
       } else {
-        print('ERROR: Unknown testDate type: ${testDateValue.runtimeType}');
-        result = DateTime.fromMillisecondsSinceEpoch(0); // 1970-01-01
-        print('Using epoch time as fallback: $result');
+        result = DateTime.fromMillisecondsSinceEpoch(0);
       }
       
       print('Final result: $result');

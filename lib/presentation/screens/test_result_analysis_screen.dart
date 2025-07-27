@@ -191,15 +191,7 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
                           width: 1,
                         ),
                       ),
-                      child: Text(
-                        widget.testResult.aiAnalysis!,
-                        style: TextStyle(
-                          color: AppTheme.primaryTextColor,
-                          fontSize: 15,
-                          height: 1.6,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
+                      child: _buildFormattedAnalysis(widget.testResult.aiAnalysis!),
                     ),
                   ],
                 ),
@@ -240,6 +232,49 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFormattedAnalysis(String analysis) {
+    final lines = analysis.split('\n');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: lines.map((line) {
+        final trimmed = line.trim();
+        if (trimmed.startsWith('•')) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('• ', style: TextStyle(fontSize: 16, height: 1.6)),
+                Expanded(
+                  child: Text(trimmed.substring(1).trim(),
+                      style: const TextStyle(fontSize: 16, height: 1.6, color: Colors.black87)),
+                ),
+              ],
+            ),
+          );
+        } else if (RegExp(r'^[0-9]+\.').hasMatch(trimmed)) {
+          // Başlık
+          final title = trimmed.replaceFirst(RegExp(r'^[0-9]+\.'), '').trim();
+          return Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 8),
+            child: Text(title,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primaryColor,
+                )),
+          );
+        } else {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Text(trimmed,
+                style: const TextStyle(fontSize: 16, height: 1.6, color: Colors.black87)),
+          );
+        }
+      }).toList(),
     );
   }
 } 

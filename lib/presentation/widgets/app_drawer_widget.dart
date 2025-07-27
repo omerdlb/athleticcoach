@@ -2,19 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:athleticcoach/presentation/screens/athlete_list_screen.dart';
 import 'package:athleticcoach/presentation/screens/test_library_screen.dart';
 import 'package:athleticcoach/presentation/screens/test_results_screen.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 
 class AppDrawerWidget {
   static Widget buildDrawer(BuildContext context) {
     return Drawer(
       width: 280,
       child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
-          ),
-        ),
+        decoration: AppTheme.drawerGradientDecoration,
         child: Column(
           children: [
             // Drawer header

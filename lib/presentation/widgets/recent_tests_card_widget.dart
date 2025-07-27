@@ -4,6 +4,7 @@ import 'package:athleticcoach/data/models/test_definition_model.dart';
 import 'package:athleticcoach/data/predefined_data.dart';
 import 'package:athleticcoach/presentation/screens/test_library_screen.dart';
 import 'package:athleticcoach/presentation/screens/test_protocol_screen.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 
 class RecentTestsCardWidget extends StatelessWidget {
   final List<RecentTestModel> recentTests;
@@ -68,7 +69,7 @@ class RecentTestsCardWidget extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF6366F1),
+                    color: AppTheme.primaryColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -89,9 +90,9 @@ class RecentTestsCardWidget extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF6366F1).withOpacity(0.3),
-                  const Color(0xFF6366F1),
-                  const Color(0xFF6366F1).withOpacity(0.3),
+                  AppTheme.primaryColor.withOpacity(0.3),
+                  AppTheme.primaryColor,
+                  AppTheme.primaryColor.withOpacity(0.3),
                 ],
               ),
             ),
@@ -104,7 +105,7 @@ class RecentTestsCardWidget extends StatelessWidget {
             child: isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFF6366F1),
+                      color: AppTheme.primaryColor,
                       strokeWidth: 2,
                     ),
                   )
@@ -126,7 +127,7 @@ class RecentTestsCardWidget extends StatelessWidget {
                               Icon(
                                 Icons.analytics_outlined,
                                 size: 32,
-                                color: const Color(0xFF9CA3AF),
+                                color: AppTheme.secondaryTextColor,
                               ),
                               const SizedBox(height: 12),
                               Text(
@@ -202,12 +203,12 @@ class RecentTestsCardWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF6366F1).withOpacity(0.1),
+                color: AppTheme.primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: const Icon(
                 Icons.analytics,
-                color: Color(0xFF6366F1),
+                color: AppTheme.primaryColor,
                 size: 16,
               ),
             ),

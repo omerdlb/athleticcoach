@@ -2,6 +2,7 @@ import 'package:athleticcoach/data/predefined_data.dart';
 import 'package:athleticcoach/data/models/test_definition_model.dart';
 import 'package:athleticcoach/presentation/screens/test_session_select_athletes_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:athleticcoach/core/app_theme.dart';
 
 class TestSessionSelectTestScreen extends StatefulWidget {
   const TestSessionSelectTestScreen({super.key});
@@ -157,7 +158,7 @@ class _TestSessionSelectTestScreenState extends State<TestSessionSelectTestScree
               ),
                           ),
                           const SizedBox(width: 10),
-                          const Icon(Icons.arrow_forward_ios, size: 20, color: Color(0xFF6366F1)),
+                          Icon(Icons.arrow_forward_ios, size: 20, color: AppTheme.primaryColor),
                         ],
                       ),
                     ),

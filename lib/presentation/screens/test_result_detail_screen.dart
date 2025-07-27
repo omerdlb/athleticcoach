@@ -167,16 +167,26 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    // Türkçe tarih formatı: DD.MM.YYYY
+    return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+  }
+
+  String _formatTime(DateTime date) {
+    // Türkçe saat formatı: HH:MM
+    return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
   DateTime _parseDate(String dateString) {
-    final parts = dateString.split('/');
-    return DateTime(
-      int.parse(parts[2]), // year
-      int.parse(parts[1]), // month
-      int.parse(parts[0]), // day
-    );
+    final parts = dateString.split('.');
+    if (parts.length == 3) {
+      return DateTime(
+        int.parse(parts[2]), // year
+        int.parse(parts[1]), // month
+        int.parse(parts[0]), // day
+      );
+    }
+    // Eğer format farklıysa, varsayılan olarak bugünün tarihini döndür
+    return DateTime.now();
   }
 
   Map<String, String> _parseAnalysis(String analysis) {

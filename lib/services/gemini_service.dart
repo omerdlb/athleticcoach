@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import '../data/models/athlete_model.dart';
+import '../data/models/test_result_model.dart';
 
 class GeminiService {
   static final String _apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
@@ -146,45 +148,14 @@ class GeminiService {
     print('Final Formatlanmış Sonuç: $formattedResult');
     
     final prompt = '''
-Sen deneyimli bir spor antrenörüsün. Aşağıdaki sporcu test verilerini analiz et.
+Sporcu: $athleteName $athleteSurname | Yaş: $age | Cinsiyet: $gender | Branş: $branch | Boy: ${height.toStringAsFixed(1)} cm | Kilo: ${weight.toStringAsFixed(1)} kg (BMI ${bmi.toStringAsFixed(1)})
+Test: $testName – Sonuç: $formattedResult (ham: $result $resultUnit) | Not: ${notes ?? 'Yok'}
 
-SPORCU BİLGİLERİ:
-- Ad Soyad: $athleteName $athleteSurname
-- Yaş: $age
-- Cinsiyet: $gender
-- Branş: $branch
-- Boy: ${height.toStringAsFixed(1)} cm
-- Kilo: ${weight.toStringAsFixed(1)} kg
-- BMI: ${bmi.toStringAsFixed(1)}
-
-TEST BİLGİLERİ:
-- Test Adı: $testName
-- Test Sonucu: $formattedResult
-- Ham Sonuç Değeri: $result
-- Sonuç Birimi: $resultUnit
-- Ek Notlar: ${notes ?? 'Yok'}
-
-KURALLAR:
-1. Her bölümü MUTLAKA tamamla
-2. Yarım cümle bırakma
-3. Her bölüm en az 30 kelime olsun
-4. Spesifik ve detaylı yaz
-5. Test sonucunu mutlaka değerlendir
-6. Test adını ve sonucunu tam olarak kullan
-7. Ham sonuç değerini ($result) doğru algıla
-
-Aşağıdaki 3 bölümü tam olarak yaz:
-
-1. SONUÇ DEĞERLENDİRMESİ:
-$testName testinde elde edilen $formattedResult sonucunu değerlendir. Ham sonuç değeri $result'tir. Bu yaş grubu ve cinsiyet için sonucun seviyesini belirt (zayıf/orta/iyi/çok iyi). $branch branşı için bu sonucun anlamını açıkla. Yaş grubuna göre performans seviyesini detaylı değerlendir.
-
-2. EKSİK YÖNLER:
-Bu test alanında sporcunun geliştirilmesi gereken 2-3 spesifik eksik yönünü belirt. Her eksik yön için detaylı açıklama ver. Neden bu alanların zayıf olduğunu ve nasıl geliştirilebileceğini açıkla.
-
-3. EGZERSİZ ÖNERİSİ:
-Bu kapasiteyi geliştirmek için 3-4 spesifik egzersiz öner. Her egzersizin adını, nasıl yapılacağını ve süresini belirt. Egzersizlerin faydalarını ve bu test performansını nasıl artıracağını kısaca açıkla.
-
-ÖNEMLİ: Her bölümü tamamla ve yarım bırakma! Test adını ve sonucunu doğru kullan! Ham sonuç değeri $result'tir!
+Aşağıdaki net formatta, anlaşılır Türkçe ile cevap ver (gereksiz süslü kelimelerden kaçın):
+1. Değerlendirme (≤3 cümle; sonucu kısaca açıkla, iyi/kötü derecelendir)
+2. Güçlü Yönler (• 2 madde)
+3. Geliştirilecek Yönler (• 2 madde)
+4. Önerilen Egzersizler (• 3 madde; her madde 1 satırı geçmesin)
 ''';
 
     print('=== AI PROMPT GÖNDERİLİYOR ===');
@@ -329,6 +300,42 @@ $testName testi performansını artırmak için 2-3 spesifik öneri ver. Her ön
     print('Prompt uzunluğu: ${prompt.length} karakter');
     print('Test adı: $testName');
     print('==============================');
+
+    return await generateContent(prompt);
+  }
+
+  // SPORCU TREND ANALİZİ (Zaman içindeki gelişim)
+  static Future<String?> generateTrendAnalysis({
+    required AthleteModel athlete,
+    required String testName,
+    required List<TestResultModel> results,
+  }) async {
+    if (results.isEmpty) return 'Yeterli veri bulunamadı.';
+
+    // Sonuçları tarih sırasına göre sırala
+    results.sort((a, b) => a.testDate.compareTo(b.testDate));
+
+    final resultsText = results.map((r) {
+      final dateStr = '${r.testDate.day.toString().padLeft(2, '0')}.${r.testDate.month.toString().padLeft(2, '0')}.${r.testDate.year}';
+      return '- $dateStr: ${r.result.toStringAsFixed(2)} ${r.resultUnit}';
+    }).join('\n');
+
+    final prompt = '''
+Sadece aşağıdaki verilere bakarak, kısa ve net bir değerlendirme yap.
+
+Sporcu: ${athlete.name} ${athlete.surname} | Yaş: ${DateTime.now().year - athlete.birthDate.year} | Cinsiyet: ${athlete.gender} | Branş: ${athlete.branch}
+Test: $testName
+
+Ölçümler (tarih – değer):
+$resultsText
+
+Cevap formatı (Türkçe):
+1. Genel Eğilim (en fazla 2 cümle)
+2. Öne Çıkan Noktalar (• 2-3 madde)
+3. Gelişim Önerileri (• 2-3 madde)
+
+Tarih ve değerleri gerektiği yerde kısaca kullan. Uzun paragraflardan kaçın, sade ve anlaşılır yaz.
+''';
 
     return await generateContent(prompt);
   }

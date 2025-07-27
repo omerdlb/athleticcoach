@@ -4,6 +4,7 @@ import 'package:athleticcoach/data/models/test_result_model.dart';
 import 'package:athleticcoach/core/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:athleticcoach/services/gemini_service.dart';
+import 'test_results_graph_screen.dart'; // grafik ekranı
 
 class AthleteDetailScreen extends StatefulWidget {
   final AthleteModel athlete;
@@ -565,6 +566,20 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
             icon: Icon(Icons.refresh, color: AppTheme.whiteTextColor),
             onPressed: _loadAthleteResults,
           ),
+          if (athleteResults.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.show_chart, color: AppTheme.whiteTextColor),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => TestResultsGraphScreen(
+                      athlete: widget.athlete,
+                      results: athleteResults,
+                    ),
+                  ),
+                );
+              },
+            ),
         ],
       ),
       body: Stack(
@@ -614,7 +629,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                           '${widget.athlete.name} ${widget.athlete.surname}',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryColor,
+                                color: AppTheme.whiteTextColor,
                               ),
                           textAlign: TextAlign.center,
                         ),
@@ -622,7 +637,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                         Text(
                           widget.athlete.branch,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppTheme.primaryColor,
+                                color: AppTheme.whiteTextColor,
                                 fontWeight: FontWeight.w500,
                               ),
                         ),
