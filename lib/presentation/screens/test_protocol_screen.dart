@@ -1,6 +1,7 @@
 import 'package:athleticcoach/data/models/test_definition_model.dart';
 import 'package:athleticcoach/core/app_theme.dart';
 import 'package:athleticcoach/presentation/screens/test_session_select_athletes_screen.dart';
+import 'package:athleticcoach/presentation/screens/yo_yo_test_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
@@ -20,6 +21,14 @@ class TestProtocolScreen extends StatelessWidget {
     );
   }
 
+  void _startYoYoTest(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const YoYoTestScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,6 +38,16 @@ class TestProtocolScreen extends StatelessWidget {
         foregroundColor: AppTheme.whiteTextColor,
         elevation: 2,
         actions: [
+          if (test.id == 'yo-yo-ir1')
+            IconButton(
+              icon: Icon(
+                Icons.sports_soccer,
+                color: AppTheme.whiteTextColor,
+                size: 28,
+              ),
+              tooltip: 'Yo-Yo Test Başlat',
+              onPressed: () => _startYoYoTest(context),
+            ),
           IconButton(
             icon: Icon(
               Icons.play_arrow,

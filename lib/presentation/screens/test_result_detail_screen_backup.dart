@@ -562,147 +562,71 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                 ),
                               ),
                               
-                              // AI Analizi Bölümü - Tek Kart
-                              if (hasAnalysis || isAnalyzing)
-                                Container(
-                                  width: double.infinity,
-                                  margin: const EdgeInsets.only(top: 16),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.cardBackgroundColor,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: AppTheme.primaryColor.withOpacity(0.3),
-                                      width: 1,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppTheme.shadowColorWithOpacity,
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
+                              // AI Analizi İçeriği
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      existingAnalysis!,
+                                      style: TextStyle(
+                                        color: AppTheme.primaryTextColor,
+                                        fontSize: 14,
+                                        height: 1.6,
                                       ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // AI Analizi Başlığı
-                                      Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.all(16),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    // Detayları Gör Butonu
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => TestResultAnalysisScreen(
+                                              testResult: result,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.primaryColor.withOpacity(0.05),
-                                          borderRadius: const BorderRadius.vertical(
-                                            top: Radius.circular(12),
+                                          color: AppTheme.primaryColor.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: AppTheme.primaryColor.withOpacity(0.3),
+                                            width: 1,
                                           ),
                                         ),
                                         child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(8),
-                                              decoration: BoxDecoration(
-                                                color: AppTheme.primaryColor.withOpacity(0.15),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: Icon(
-                                                Icons.psychology,
-                                                size: 18,
+                                            Icon(
+                                              Icons.arrow_forward,
+                                              color: AppTheme.primaryColor,
+                                              size: 18,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'Detayları Gör',
+                                              style: TextStyle(
                                                 color: AppTheme.primaryColor,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
                                               ),
                                             ),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Text(
-                                                'AI Performans Analizi',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppTheme.primaryTextColor,
-                                                  fontSize: AppTheme.getResponsiveFontSize(context, 16),
-                                                  letterSpacing: 0.2,
-                                                ),
-                                              ),
-                                            ),
-                                            if (isAnalyzing)
-                                              Container(
-                                                padding: const EdgeInsets.all(8),
-                                                child: SizedBox(
-                                                  width: 16,
-                                                  height: 16,
-                                                  child: CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                    color: AppTheme.primaryColor,
-                                                  ),
-                                                ),
-                                              ),
                                           ],
                                         ),
                                       ),
-                                      
-                                      // AI Analizi İçeriği
-                                      if (hasAnalysis && !isAnalyzing)
-                                        Container(
-                                          width: double.infinity,
-                                          padding: const EdgeInsets.all(16),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                existingAnalysis!,
-                                                style: TextStyle(
-                                                  color: AppTheme.primaryTextColor,
-                                                  fontSize: 14,
-                                                  height: 1.6,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 16),
-                                              // Detayları Gör Butonu
-                                              InkWell(
-                                                onTap: () {
-                                                  Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                      builder: (context) => TestResultAnalysisScreen(
-                                                        testResult: result,
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                                borderRadius: BorderRadius.circular(8),
-                                                child: Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                                  decoration: BoxDecoration(
-                                                    color: AppTheme.primaryColor.withOpacity(0.1),
-                                                    borderRadius: BorderRadius.circular(8),
-                                                    border: Border.all(
-                                                      color: AppTheme.primaryColor.withOpacity(0.3),
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                    children: [
-                                                      Icon(
-                                                        Icons.arrow_forward,
-                                                        color: AppTheme.primaryColor,
-                                                        size: 18,
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Text(
-                                                        'Detayları Gör',
-                                                        style: TextStyle(
-                                                          color: AppTheme.primaryColor,
-                                                          fontWeight: FontWeight.w600,
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                )
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
                       else
                         ElevatedButton.icon(
                           onPressed: () => _analyzeResult(result),
