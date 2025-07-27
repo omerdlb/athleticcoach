@@ -35,7 +35,7 @@ class _TestSessionAnalysisScreenState extends State<TestSessionAnalysisScreen> {
   @override
   void initState() {
     super.initState();
-    _testSessionStartTime = DateTime.now();
+    _testSessionStartTime = widget.testSessionStartTime; // Widget'dan al, DateTime.now() kullanma
     
     // Her sporcu için analiz durumunu başlat
     for (final result in widget.results) {

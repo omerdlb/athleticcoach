@@ -8,8 +8,8 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Aerobik',
     description: 'Yo-Yo IR1, 20 metrelik parkurda, artan hızda gidip gelmeler ve her 40 metrede 10 saniye aktif dinlenme içeren, aralıklı egzersiz kapasitesini ölçen bir saha testidir. Özellikle futbol, basketbol gibi takım sporlarında yaygın olarak uygulanır.',
     purpose: 'Sporcunun hem aerobik dayanıklılığını hem de yüksek şiddetli tekrarlar arası toparlanma kapasitesini ölçer. Takım sporcularında maç temposuna uyum, antrenman programı değerlendirmesi ve VO2max tahmini için kullanılır.',
-    protocol: 'Parkur Hazırlığı:\n1. 20 metrelik düz bir parkur hazırlanır, iki uca işaret konur.\n2. Sinyal ses kaydı ve kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı, sinyal sesiyle bir uçtan diğer uca koşar.\n2. Her mekik sonrası 10 saniye aktif dinlenme (yavaş yürüyüş) yapılır.\n3. Sinyale yetişilemezse uyarı verilir, üst üste iki kez yetişilemezse test biter.\n4. Test boyunca sesli sinyal kaydı ve kronometre kullanılır.\n\nSonuç ve Puanlama:\n- Son tamamlanan seviye ve mekik sayısı kaydedilir.\n- Toplam koşulan mesafe = (mekik sayısı) x 20 metre.\n- VO2max tahmini için: VO2max = (mesafe x 0.0084) + 36.4',
-    resultUnit: 'Seviye.Mekik',
+    protocol: 'Parkur Hazırlığı:\n1. 20 metrelik düz bir parkur hazırlanır, iki uca işaret konur.\n2. Sinyal ses kaydı ve kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı, sinyal sesiyle bir uçtan diğer uca koşar.\n2. Her mekik sonrası 10 saniye aktif dinlenme (yavaş yürüyüş) yapılır.\n3. Sinyale yetişilemezse uyarı verilir, üst üste iki kez yetişilemezse test biter.\n4. Test boyunca sesli sinyal kaydı ve kronometre kullanılır.\n\nSonuç ve Puanlama:\n- Son tamamlanan seviye kaydedilir (her seviye 8 mekik içerir).\n- Toplam koşulan mesafe = (seviye sayısı) × 8 × 20 metre.\n- VO2max tahmini için: VO2max = (mesafe × 0.0084) + 36.4\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=YoYoIR1Test',
+    resultUnit: 'Seviye',
   ),
   TestDefinitionModel(
     id: 'yo-yo-ir2',
@@ -17,8 +17,8 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Aerobik',
     description: 'Daha yüksek tempoda tekrarlı sprint ve aerobik kapasiteyi ölçer.',
     purpose: 'Sporcunun yüksek şiddetli tekrarlar arası toparlanma kapasitesini ölçer. Takım sporlarında maç performansını öngörmede ve antrenman programlarını değerlendirmede kullanılır.',
-    protocol: 'Parkur Hazırlığı:\n1. 20 metrelik düz bir parkur hazırlanır, iki uca işaret konur.\n2. Sinyal ses kaydı ve kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı, sinyal sesiyle bir uçtan diğer uca koşar.\n2. Her mekik sonrası 10 saniye aktif dinlenme (yavaş yürüyüş) yapılır.\n3. Başlangıç hızı ve artışlar Level 1\'e göre daha yüksektir.\n4. Sinyale yetişilemezse uyarı verilir, üst üste iki kez yetişilemezse test biter.\n\nSonuç ve Puanlama:\n- Son tamamlanan seviye ve mekik sayısı kaydedilir.\n- Toplam koşulan mesafe = (mekik sayısı) x 20 metre.\n- VO2max tahmini için: VO2max = (mesafe x 0.0136) + 45.3',
-    resultUnit: 'Seviye.Mekik',
+    protocol: 'Parkur Hazırlığı:\n1. 20 metrelik düz bir parkur hazırlanır, iki uca işaret konur.\n2. Sinyal ses kaydı ve kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı, sinyal sesiyle bir uçtan diğer uca koşar.\n2. Her mekik sonrası 10 saniye aktif dinlenme (yavaş yürüyüş) yapılır.\n3. Başlangıç hızı ve artışlar Level 1\'e göre daha yüksektir.\n4. Sinyale yetişilemezse uyarı verilir, üst üste iki kez yetişilemezse test biter.\n\nSonuç ve Puanlama:\n- Son tamamlanan seviye kaydedilir (her seviye 8 mekik içerir).\n- Toplam koşulan mesafe = (seviye sayısı) × 8 × 20 metre.\n- VO2max tahmini için: VO2max = (mesafe × 0.0136) + 45.3\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=YoYoIR2Test',
+    resultUnit: 'Seviye',
   ),
   TestDefinitionModel(
     id: 'beep-test',
@@ -26,7 +26,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Aerobik',
     description: 'VO2max tahmini için en yaygın saha testlerinden.',
     purpose: 'VO2max tahmini için en yaygın saha testlerinden.',
-    protocol: 'Parkur Hazırlığı:\n1. 20 metrelik düz bir parkur hazırlanır, iki uca işaret konur.\n2. Sinyal ses kaydı ve kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı, sinyal sesiyle bir uçtan diğer uca koşar.\n2. Her sinyalde bir uçtan diğer uca ulaşmak zorundadır.\n3. Başlangıçta tempo yavaştır, her dakika hız artar (sinyaller arasındaki süre kısalır).\n4. Katılımcı sinyale yetişemezse uyarılır, üst üste iki kez yetişemezse test sonlanır.\n\nSonuç ve Puanlama:\n- Son tamamlanan seviye ve mekik sayısı kaydedilir (ör: 8.5).\n- Toplam mesafe = (mekik sayısı) x 20m.\n- VO2max tahmini için: VO2max = (mesafe x 0.0268) - 11.3',
+    protocol: 'Parkur Hazırlığı:\n1. 20 metrelik düz bir parkur hazırlanır, iki uca işaret konur.\n2. Sinyal ses kaydı ve kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı, sinyal sesiyle bir uçtan diğer uca koşar.\n2. Her sinyalde bir uçtan diğer uca ulaşmak zorundadır.\n3. Başlangıçta tempo yavaştır, her dakika hız artar (sinyaller arasındaki süre kısalır).\n4. Katılımcı sinyale yetişemezse uyarılır, üst üste iki kez yetişemezse test sonlanır.\n\nSonuç ve Puanlama:\n- Son tamamlanan seviye kaydedilir (ör: 8.5 = Seviye 8\'de 5. mekikte bitti).\n- Toplam mesafe = (seviye × 20m).\n- VO2max tahmini için: VO2max = (seviye × 3.5) - 3.5 (ml/kg/dk)\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=BeepTestGuide',
     resultUnit: 'Seviye',
   ),
   TestDefinitionModel(
@@ -35,7 +35,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Aerobik',
     description: 'Cooper testi, 12 dakika boyunca düz bir pistte veya ölçülü bir alanda mümkün olan en uzun mesafeyi koşmaya dayalı klasik bir saha dayanıklılık testidir.',
     purpose: 'Aerobik kapasiteyi (VO2max) pratik ve hızlı şekilde tahmin etmek, sporcuların genel dayanıklılığını ve antrenman düzeyini değerlendirmek için kullanılır.',
-    protocol: 'Parkur Hazırlığı:\n1. Düz bir atletizm pisti veya ölçülü bir alan hazırlanır.\n2. Kronometre ve ölçüm bandı hazır edilir.\n\nUygulama:\n1. Katılımcı 12 dakika boyunca mümkün olan en uzun mesafeyi koşar.\n2. Süre dolduğunda koşulan toplam mesafe ölçülür.\n3. Katılımcı istediği tempoda koşabilir, gerekirse yürüyebilir.\n\nSonuç ve Puanlama:\n- Sonuç, 12 dakikada koşulan toplam mesafe (metre) olarak kaydedilir.\n- VO2max tahmini için: VO2max = (koşulan mesafe (metre) - 504.9) / 44.73',
+    protocol: 'Parkur Hazırlığı:\n1. Düz bir atletizm pisti veya ölçülü bir alan hazırlanır.\n2. Kronometre ve ölçüm bandı hazır edilir.\n\nUygulama:\n1. Katılımcı 12 dakika boyunca mümkün olan en uzun mesafeyi koşar.\n2. Süre dolduğunda koşulan toplam mesafe ölçülür.\n3. Katılımcı istediği tempoda koşabilir, gerekirse yürüyebilir.\n\nSonuç ve Puanlama:\n- Sonuç, 12 dakikada koşulan toplam mesafe (metre) olarak kaydedilir.\n- VO2max tahmini için: VO2max = (koşulan mesafe - 504.9) / 44.73 (ml/kg/dk)\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=CooperTestGuide',
     resultUnit: 'metre',
   ),
   TestDefinitionModel(
@@ -44,7 +44,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Aerobik',
     description: 'Submaksimal aerobik kapasiteyi ölçer.',
     purpose: 'Submaksimal aerobik kapasiteyi ölçer.',
-    protocol: 'Parkur Hazırlığı:\n1. Düz bir parkurda 30m veya 50m\'lik bir alan belirlenir.\n2. Kronometre ve ölçüm bandı hazır edilir.\n\nUygulama:\n1. Katılımcı 6 dakika boyunca mümkün olan en uzun mesafeyi yürür.\n2. Süre dolduğunda yürüyüş durdurulur ve toplam mesafe ölçülür.\n\nSonuç ve Puanlama:\n- Sonuç, 6 dakikada yürüyerek kat edilen toplam mesafe (metre) olarak kaydedilir.\n- Klinik değerlendirmelerde referans tablolara bakılır.',
+    protocol: 'Parkur Hazırlığı:\n1. Düz bir parkurda 30m veya 50m\'lik bir alan belirlenir.\n2. Kronometre ve ölçüm bandı hazır edilir.\n\nUygulama:\n1. Katılımcı 6 dakika boyunca mümkün olan en uzun mesafeyi yürür.\n2. Süre dolduğunda yürüyüş durdurulur ve toplam mesafe ölçülür.\n\nSonuç ve Puanlama:\n- Sonuç, 6 dakikada yürüyerek kat edilen toplam mesafe (metre) olarak kaydedilir.\n- Klinik değerlendirmelerde referans tablolara bakılır.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=6MinWalkTest',
     resultUnit: 'metre',
   ),
   TestDefinitionModel(
@@ -53,7 +53,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Aerobik',
     description: 'VO2max tahmini için kullanılır.',
     purpose: 'VO2max tahmini için kullanılır.',
-    protocol: 'Parkur Hazırlığı:\n1. 400m pistte 6 tur veya düz bir 2.4 km parkur hazırlanır.\n2. Kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı 2.4 km mesafeyi en kısa sürede koşar.\n2. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, 2.4 km\'yi tamamlama süresi (saniye) olarak kaydedilir.\n- VO2max tahmini için: VO2max = 483 / süre (dakika) + 3.5',
+    protocol: 'Parkur Hazırlığı:\n1. 400m pistte 6 tur veya düz bir 2.4 km parkur hazırlanır.\n2. Kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı 2.4 km mesafeyi en kısa sürede koşar.\n2. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, 2.4 km\'yi tamamlama süresi (saniye) olarak kaydedilir.\n- VO2max tahmini için: VO2max = 483 / süre (dakika) + 3.5 (ml/kg/dk)\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=2.4kmRunTest',
     resultUnit: 'saniye',
   ),
   // Anaerobik Testler
@@ -63,8 +63,8 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Anaerobik',
     description: 'RAST testi, 35 metrelik parkurda 6 kez maksimum hızda sprint ve aralarda kısa dinlenme ile yapılan, saha ortamında anaerobik güç ve yorgunluk ölçümü sağlayan bir testtir.',
     purpose: 'Sporcunun anaerobik güç, patlayıcı kuvvet ve yorgunluk indeksini değerlendirmek için kullanılır. Özellikle sprint, futbol, basketbol gibi sporlarda kısa süreli yüksek şiddetli performans kapasitesini ölçer.',
-    protocol: 'Parkur Hazırlığı:\n1. 35 metrelik düz bir parkur hazırlanır.\n2. Kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı 6 kez 35 metreyi maksimum hızda koşar.\n2. Her koşu arası 10 saniye dinlenir.\n3. Her koşunun süresi kronometreyle ölçülür.\n\nSonuç ve Puanlama:\n- Her sprintin süresi kaydedilir.\n- En yüksek, en düşük ve ortalama güç hesaplanır: Güç (Watt) = (Vücut ağırlığı x mesafe²) / süre³\n- Yorgunluk indeksi de hesaplanabilir.',
-    resultUnit: 'saniye',
+    protocol: 'Parkur Hazırlığı:\n1. 35 metrelik düz bir parkur hazırlanır.\n2. Kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı 6 kez 35 metreyi maksimum hızda koşar.\n2. Her koşu arası 10 saniye dinlenir.\n3. Her koşunun süresi kronometreyle ölçülür.\n\nSonuç ve Puanlama:\n- Her sprintin süresi kaydedilir.\n- En yüksek güç hesaplanır: Güç (Watt) = (Vücut ağırlığı × 35²) / süre³\n- Ortalama güç ve yorgunluk indeksi de hesaplanabilir.\n- En yüksek güç değeri kaydedilir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=RASTTestGuide',
+    resultUnit: 'Watt',
   ),
   TestDefinitionModel(
     id: 'wingate',
@@ -72,7 +72,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Anaerobik',
     description: '30 sn bisiklet ergometresinde maksimum güç ve yorgunluk ölçümü.',
     purpose: '30 sn bisiklet ergometresinde maksimum güç ve yorgunluk ölçümü.',
-    protocol: 'Ekipman:\n- Bisiklet ergometresi, kronometre, ağırlıklar.\n\nUygulama:\n1. Katılımcı 30 saniye boyunca maksimum hızda pedal çevirir.\n2. Sabit direnç uygulanır (genellikle vücut ağırlığının %7.5\'i).\n3. Her 5 saniyede bir devir sayısı kaydedilir.\n\nSonuç ve Puanlama:\n- En yüksek güç, ortalama güç ve yorgunluk indeksi hesaplanır.\n- Güç (Watt) = (Ağırlık x toplam devir x pedal çevresi) / süre',
+    protocol: 'Ekipman:\n- Bisiklet ergometresi, kronometre, ağırlıklar.\n\nUygulama:\n1. Katılımcı 30 saniye boyunca maksimum hızda pedal çevirir.\n2. Sabit direnç uygulanır (genellikle vücut ağırlığının %7.5\'i).\n3. Her 5 saniyede bir devir sayısı kaydedilir.\n\nSonuç ve Puanlama:\n- En yüksek güç, ortalama güç ve yorgunluk indeksi hesaplanır.\n- Güç (Watt) = (Ağırlık × pedal çevresi × devir sayısı) / süre\n- En yüksek güç değeri kaydedilir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=WingateTestGuide',
     resultUnit: 'Watt',
   ),
   TestDefinitionModel(
@@ -81,7 +81,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Anaerobik',
     description: 'Basamak çıkma ile anaerobik gücü ölçer.',
     purpose: 'Basamak çıkma ile anaerobik gücü ölçer.',
-    protocol: 'Parkur Hazırlığı:\n1. 9 basamaklı bir merdiven hazırlanır, 3. ve 9. basamaklar işaretlenir.\n2. Kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı 6m mesafeden koşarak gelir, 3. basamaktan 9. basamağa en kısa sürede çıkar.\n2. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Güç (Watt) = (Ağırlık x 9.81 x yükseklik) / süre\n- En iyi deneme kaydedilir.',
+    protocol: 'Parkur Hazırlığı:\n1. 9 basamaklı bir merdiven hazırlanır, 3. ve 9. basamaklar işaretlenir.\n2. Kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı 6m mesafeden koşarak gelir, 3. basamaktan 9. basamağa en kısa sürede çıkar.\n2. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Yükseklik = 6 basamak × basamak yüksekliği (genellikle 15-20 cm)\n- Güç (Watt) = (Ağırlık × 9.81 × yükseklik) / süre\n- En iyi deneme kaydedilir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=MargariaTestGuide',
     resultUnit: 'Watt',
   ),
   // Güç/Patlayıcı Güç
@@ -91,7 +91,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Patlayıcı Güç',
     description: 'Dikey sıçrama testi, sporcunun ayakta durduğu yerden maksimum yükseklikte sıçrayarak alt vücut patlayıcı gücünü ölçen basit ve pratik bir testtir.',
     purpose: 'Alt ekstremite patlayıcı gücünü, kas kuvvetini ve hızlı kasılma kapasitesini değerlendirmek için kullanılır. Basketbol, voleybol, atletizm gibi branşlarda sıçrama performansını izlemek için idealdir.',
-    protocol: 'Parkur Hazırlığı:\n1. Düz bir duvar ve tebeşir veya özel ölçüm cihazı hazırlanır.\n\nUygulama:\n1. Katılımcı duvara yan döner, kollar yukarıda uzanabildiği en yüksek noktayı işaretler.\n2. Sonra hızlıca çömelip maksimum yükseklikte sıçrar ve tekrar işaret bırakır.\n3. 3 deneme yapılır, en iyi sonuç alınır.\n\nSonuç ve Puanlama:\n- Sıçrama yüksekliği = Sıçrama sonrası işaret - başlangıç işareti (cm).\n- En iyi değer kaydedilir.',
+    protocol: 'Parkur Hazırlığı:\n1. Düz bir duvar ve tebeşir veya özel ölçüm cihazı hazırlanır.\n\nUygulama:\n1. Katılımcı duvara yan döner, kollar yukarıda uzanabildiği en yüksek noktayı işaretler.\n2. Sonra hızlıca çömelip maksimum yükseklikte sıçrar ve tekrar işaret bırakır.\n3. 3 deneme yapılır, en iyi sonuç alınır.\n\nSonuç ve Puanlama:\n- Sıçrama yüksekliği = Sıçrama sonrası işaret - başlangıç işareti (cm).\n- En iyi değer kaydedilir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=VerticalJumpTest',
     resultUnit: 'cm',
   ),
   TestDefinitionModel(
@@ -100,7 +100,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Patlayıcı Güç',
     description: 'Diz bükülerek yapılan sıçrama ile patlayıcı güç ölçümü.',
     purpose: 'Diz bükülerek yapılan sıçrama ile patlayıcı güç ölçümü.',
-    protocol: 'Parkur Hazırlığı:\n1. Düz bir zemin ve ölçüm cihazı hazırlanır.\n\nUygulama:\n1. Eller kalçada, dizler bükülüp hızla yukarı sıçranır.\n2. Sıçrama yüksekliği ölçülür.\n3. 3 deneme yapılır, en iyi sonuç alınır.\n\nSonuç ve Puanlama:\n- Sıçrama yüksekliği (cm) olarak kaydedilir.\n- En iyi değer alınır.',
+    protocol: 'Parkur Hazırlığı:\n1. Düz bir zemin ve ölçüm cihazı hazırlanır.\n\nUygulama:\n1. Eller kalçada, dizler bükülüp hızla yukarı sıçranır.\n2. Sıçrama yüksekliği ölçülür.\n3. 3 deneme yapılır, en iyi sonuç alınır.\n\nSonuç ve Puanlama:\n- Sıçrama yüksekliği (cm) olarak kaydedilir.\n- En iyi değer alınır.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=CMJTestGuide',
     resultUnit: 'cm',
   ),
   TestDefinitionModel(
@@ -109,7 +109,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Patlayıcı Güç',
     description: 'Üst vücut patlayıcı gücünü ölçer.',
     purpose: 'Üst vücut patlayıcı gücünü ölçer.',
-    protocol: 'Parkur Hazırlığı:\n1. 2-3 kg\'lık bir sağlık topu ve ölçüm bandı hazırlanır.\n\nUygulama:\n1. Katılımcı oturur pozisyonda, göğüsten topu maksimum mesafeye fırlatır.\n2. 3 deneme yapılır, en iyi sonuç alınır.\n\nSonuç ve Puanlama:\n- Fırlatılan mesafe (metre) olarak kaydedilir.\n- En iyi değer alınır.',
+    protocol: 'Parkur Hazırlığı:\n1. 2-3 kg\'lık bir sağlık topu ve ölçüm bandı hazırlanır.\n\nUygulama:\n1. Katılımcı oturur pozisyonda, göğüsten topu maksimum mesafeye fırlatır.\n2. 3 deneme yapılır, en iyi sonuç alınır.\n\nSonuç ve Puanlama:\n- Fırlatılan mesafe (metre) olarak kaydedilir.\n- En iyi değer alınır.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=MedicineBallTest',
     resultUnit: 'metre',
   ),
   // Çeviklik
@@ -119,7 +119,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Çeviklik',
     description: 'Illinois çeviklik testi, 10x5 metrelik parkurda koniler arasında belirli bir rotada koşarak çeviklik ve yön değiştirme kabiliyetini ölçen klasik bir saha testidir.',
     purpose: 'Sporcunun kısa sürede yön değiştirme, hızlanma ve yavaşlama yeteneğini ölçer. Futbol, basketbol, hentbol gibi sporlarda çeviklik ve reaksiyon performansını değerlendirmek için kullanılır.',
-    protocol: 'Parkur Hazırlığı:\n1. 10m uzunluğunda ve 5m genişliğinde bir parkur hazırlanır.\n2. 4 koni ortada, 4 koni köşelerde olacak şekilde dizilir.\n3. Kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı yere yatar pozisyonda başlar.\n2. Başla komutuyla kalkıp parkuru belirlenen sırayla en kısa sürede tamamlar.\n3. Her deneme için kronometre kullanılır.\n\nSonuç ve Puanlama:\n- Sonuç, parkuru tamamlama süresi (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi çeviklik anlamına gelir.',
+    protocol: 'Parkur Hazırlığı:\n1. 10m uzunluğunda ve 5m genişliğinde bir parkur hazırlanır.\n2. 4 koni ortada, 4 koni köşelerde olacak şekilde dizilir.\n3. Kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı yere yatar pozisyonda başlar.\n2. Başla komutuyla kalkıp parkuru belirlenen sırayla en kısa sürede tamamlar.\n3. Her deneme için kronometre kullanılır.\n\nSonuç ve Puanlama:\n- Sonuç, parkuru tamamlama süresi (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi çeviklik anlamına gelir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=IllinoisAgilityTest',
     resultUnit: 'saniye',
   ),
   TestDefinitionModel(
@@ -128,7 +128,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Çeviklik',
     description: 'T şeklinde parkurda ileri, yan ve geri koşu ile çeviklik ölçümü.',
     purpose: 'T şeklinde parkurda ileri, yan ve geri koşu ile çeviklik ölçümü.',
-    protocol: 'Parkur Hazırlığı:\n1. T şeklinde dizilmiş 4 koni ve kronometre hazırlanır.\n\nUygulama:\n1. Katılımcı başlangıç konisinden başlar.\n2. Belirlenen sırayla ileri, yan ve geri koşu yapar.\n3. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, parkuru tamamlama süresi (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi çeviklik anlamına gelir.',
+    protocol: 'Parkur Hazırlığı:\n1. T şeklinde dizilmiş 4 koni ve kronometre hazırlanır.\n\nUygulama:\n1. Katılımcı başlangıç konisinden başlar.\n2. Belirlenen sırayla ileri, yan ve geri koşu yapar.\n3. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, parkuru tamamlama süresi (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi çeviklik anlamına gelir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=TTestGuide',
     resultUnit: 'saniye',
   ),
   TestDefinitionModel(
@@ -137,7 +137,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Çeviklik',
     description: 'Kısa mesafede yön değiştirme çevikliğini ölçer.',
     purpose: 'Kısa mesafede yön değiştirme çevikliğini ölçer.',
-    protocol: 'Parkur Hazırlığı:\n1. 5-10-5 yard arası işaretlenir, kronometre hazırlanır.\n\nUygulama:\n1. Katılımcı ortadaki çizgiden başlar.\n2. Bir yana 5 yard, diğer yana 10 yard, tekrar 5 yard koşar.\n3. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, toplam süre (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi çeviklik anlamına gelir.',
+    protocol: 'Parkur Hazırlığı:\n1. 5-10-5 yard arası işaretlenir, kronometre hazırlanır.\n\nUygulama:\n1. Katılımcı ortadaki çizgiden başlar.\n2. Bir yana 5 yard, diğer yana 10 yard, tekrar 5 yard koşar.\n3. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, toplam süre (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi çeviklik anlamına gelir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=ProAgilityTest',
     resultUnit: 'saniye',
   ),
   // Sürat
@@ -147,7 +147,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Sürat',
     description: '10 metre sprint testi, sporcunun kısa mesafede maksimum hızlanma ve sürat kapasitesini ölçen basit bir hız testidir.',
     purpose: 'Kısa mesafede patlayıcı hız ve reaksiyon süresini değerlendirmek için kullanılır. Özellikle futbol, atletizm, basketbol gibi branşlarda ilk adım ve hızlanma performansını izlemek için uygundur.',
-    protocol: 'Parkur Hazırlığı:\n1. 10 metrelik düz bir parkur hazırlanır.\n2. Kronometre veya fotosel sistemi kurulur.\n\nUygulama:\n1. Katılımcı başlangıç çizgisinden başlar.\n2. 10 metreyi en kısa sürede koşar.\n3. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, 10 metreyi tamamlama süresi (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi sürat anlamına gelir.',
+    protocol: 'Parkur Hazırlığı:\n1. 10 metrelik düz bir parkur hazırlanır.\n2. Kronometre veya fotosel sistemi kurulur.\n\nUygulama:\n1. Katılımcı başlangıç çizgisinden başlar.\n2. 10 metreyi en kısa sürede koşar.\n3. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, 10 metreyi tamamlama süresi (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi sürat anlamına gelir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=10mSprintTest',
     resultUnit: 'saniye',
   ),
   TestDefinitionModel(
@@ -156,7 +156,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Sürat',
     description: 'Kısa mesafede hız ölçümü.',
     purpose: 'Kısa mesafede hız ölçümü.',
-    protocol: 'Parkur Hazırlığı:\n1. 20 metrelik düz bir parkur hazırlanır.\n2. Kronometre veya fotosel sistemi kurulur.\n\nUygulama:\n1. Katılımcı başlangıç çizgisinden başlar.\n2. 20 metreyi en kısa sürede koşar.\n3. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, 20 metreyi tamamlama süresi (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi sürat anlamına gelir.',
+    protocol: 'Parkur Hazırlığı:\n1. 20 metrelik düz bir parkur hazırlanır.\n2. Kronometre veya fotosel sistemi kurulur.\n\nUygulama:\n1. Katılımcı başlangıç çizgisinden başlar.\n2. 20 metreyi en kısa sürede koşar.\n3. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, 20 metreyi tamamlama süresi (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi sürat anlamına gelir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=20mSprintTest',
     resultUnit: 'saniye',
   ),
   TestDefinitionModel(
@@ -165,7 +165,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Sürat',
     description: 'Kısa mesafede hız ölçümü.',
     purpose: 'Kısa mesafede hız ölçümü.',
-    protocol: 'Parkur Hazırlığı:\n1. 30 metrelik düz bir parkur hazırlanır.\n2. Kronometre veya fotosel sistemi kurulur.\n\nUygulama:\n1. Katılımcı başlangıç çizgisinden başlar.\n2. 30 metreyi en kısa sürede koşar.\n3. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, 30 metreyi tamamlama süresi (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi sürat anlamına gelir.',
+    protocol: 'Parkur Hazırlığı:\n1. 30 metrelik düz bir parkur hazırlanır.\n2. Kronometre veya fotosel sistemi kurulur.\n\nUygulama:\n1. Katılımcı başlangıç çizgisinden başlar.\n2. 30 metreyi en kısa sürede koşar.\n3. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, 30 metreyi tamamlama süresi (saniye) olarak kaydedilir.\n- Daha kısa süre, daha iyi sürat anlamına gelir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=30mSprintTest',
     resultUnit: 'saniye',
   ),
   // Esneklik
@@ -175,7 +175,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Esneklik',
     description: 'Sit and Reach testi, katılımcının oturur pozisyonda öne doğru uzanabildiği maksimum mesafeyi ölçerek bel ve hamstring esnekliğini değerlendiren yaygın bir esneklik testidir.',
     purpose: 'Bel ve hamstring kaslarının esnekliğini, sakatlık riskini ve genel hareket kabiliyetini değerlendirmek için kullanılır. Özellikle jimnastik, dans, atletizm gibi branşlarda önemlidir.',
-    protocol: 'Parkur Hazırlığı:\n1. Otur-uzan kutusu veya cetvel hazırlanır.\n\nUygulama:\n1. Katılımcı ayak tabanları kutuya dayalı şekilde oturur.\n2. Eller üst üste, öne doğru en uzağa uzanır.\n3. Uzanılan mesafe kutu veya cetvel üzerinden okunur.\n\nSonuç ve Puanlama:\n- Sonuç, uzanılan mesafe (cm) olarak kaydedilir.\n- Daha uzun mesafe, daha iyi esneklik anlamına gelir.',
+    protocol: 'Parkur Hazırlığı:\n1. Otur-uzan kutusu veya cetvel hazırlanır.\n\nUygulama:\n1. Katılımcı ayak tabanları kutuya dayalı şekilde oturur.\n2. Eller üst üste, öne doğru en uzağa uzanır.\n3. Uzanılan mesafe kutu veya cetvel üzerinden okunur.\n\nSonuç ve Puanlama:\n- Sonuç, uzanılan mesafe (cm) olarak kaydedilir.\n- Daha uzun mesafe, daha iyi esneklik anlamına gelir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=SitAndReachTest',
     resultUnit: 'cm',
   ),
   TestDefinitionModel(
@@ -184,7 +184,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Esneklik',
     description: 'Omuz eklemi esnekliğini ölçer.',
     purpose: 'Omuz eklemi esnekliğini ölçer.',
-    protocol: 'Parkur Hazırlığı:\n1. 1 metre uzunluğunda bir çubuk hazırlanır.\n\nUygulama:\n1. Katılımcı çubuğu iki el ile tutar.\n2. Kollar düz, çubuk baş üzerinden arkaya doğru götürülür.\n3. Eller arası mesafe ölçülür.\n\nSonuç ve Puanlama:\n- Sonuç, eller arası mesafe (cm) olarak kaydedilir.\n- Daha kısa mesafe, daha iyi omuz esnekliği anlamına gelir.',
+    protocol: 'Parkur Hazırlığı:\n1. 1 metre uzunluğunda bir çubuk hazırlanır.\n\nUygulama:\n1. Katılımcı çubuğu iki el ile tutar.\n2. Kollar düz, çubuk baş üzerinden arkaya doğru götürülür.\n3. Eller arası mesafe ölçülür.\n\nSonuç ve Puanlama:\n- Sonuç, eller arası mesafe (cm) olarak kaydedilir.\n- Daha kısa mesafe, daha iyi omuz esnekliği anlamına gelir.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=ShoulderFlexibilityTest',
     resultUnit: 'cm',
   ),
   // Dayanıklılık
@@ -194,7 +194,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Dayanıklılık',
     description: 'Uzun süreli tekrarlı koşu ile dayanıklılık ölçümü.',
     purpose: 'Uzun süreli tekrarlı koşu ile dayanıklılık ölçümü.',
-    protocol: 'Parkur Hazırlığı:\n1. 20 metrelik düz bir parkur hazırlanır.\n2. Sinyal ses kaydı ve kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı, sinyal sesiyle bir uçtan diğer uca koşar.\n2. Dinlenme yoktur, tempo giderek artar.\n3. Sinyale yetişilemezse test biter.\n\nSonuç ve Puanlama:\n- Son tamamlanan seviye ve mekik sayısı kaydedilir.\n- Toplam mesafe = (mekik sayısı) x 20m.',
+    protocol: 'Parkur Hazırlığı:\n1. 20 metrelik düz bir parkur hazırlanır.\n2. Sinyal ses kaydı ve kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı, sinyal sesiyle bir uçtan diğer uca koşar.\n2. Dinlenme yoktur, tempo giderek artar.\n3. Sinyale yetişilemezse test biter.\n\nSonuç ve Puanlama:\n- Son tamamlanan seviye kaydedilir.\n- Toplam mesafe = (seviye × 20m).\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=YoYoEnduranceTest',
     resultUnit: 'Seviye',
   ),
   TestDefinitionModel(
@@ -203,7 +203,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'Dayanıklılık',
     description: 'Harvard Step Test, 45 cm yüksekliğinde bir basamağa belirli tempoda çıkıp inerek kardiyovasküler dayanıklılığı ölçen klasik bir testtir.',
     purpose: 'Kardiyovasküler dayanıklılığı, kalp-dolaşım sisteminin egzersize verdiği yanıtı ve toparlanma hızını değerlendirmek için kullanılır. Özellikle genel sağlık taramaları ve sporcu dayanıklılık testlerinde tercih edilir.',
-    protocol: 'Ekipman:\n- 45 cm yüksekliğinde basamak, kronometre.\n\nUygulama:\n1. Katılımcı 5 dakika boyunca belirli tempoda basamağa çıkar ve iner (erkek: dakikada 30, kadın: 22).\n2. Test bitince nabız 1., 2. ve 3. dakikalarda ölçülür.\n\nSonuç ve Puanlama:\n- Harvard Step Test Puanı = (Test süresi (sn) x 100) / (toplam nabız x 2)\n- Daha yüksek puan, daha iyi dayanıklılık.',
+    protocol: 'Ekipman:\n- 45 cm yüksekliğinde basamak, kronometre, nabız ölçer.\n\nUygulama:\n1. Katılımcı 5 dakika boyunca belirli tempoda basamağa çıkar ve iner.\n2. Erkek: dakikada 30 adım (2 saniyede bir adım)\n3. Kadın: dakikada 22 adım (2.7 saniyede bir adım)\n4. Test bitince nabız 1., 2. ve 3. dakikalarda ölçülür.\n\nSonuç ve Puanlama:\n- Harvard Step Test Puanı = (Test süresi (sn) × 100) / (toplam nabız × 2)\n- Daha yüksek puan, daha iyi dayanıklılık.\n- 90+ üstün, 80-89 iyi, 65-79 orta, 55-64 düşük, <55 çok düşük.\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=HarvardStepTest',
     resultUnit: 'puan',
   ),
   // Saha/İndirekt Testler
@@ -213,7 +213,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'İndirekt (Submaksimal)',
     description: 'Bisiklet ergometresi ile submaksimal VO2max tahmini.',
     purpose: 'Bisiklet ergometresi ile submaksimal VO2max tahmini.',
-    protocol: 'Ekipman:\n- Bisiklet ergometresi, nabız ölçer, kronometre.\n\nUygulama:\n1. Katılımcı 6 dakika sabit tempoda bisiklet çevirir (erkek: 600 kgm/dk, kadın: 450 kgm/dk).\n2. Son 2 dakikada nabız sabitlenmiş olmalı.\n\nSonuç ve Puanlama:\n- VO2max, yük ve nabız değerlerine göre özel tablo veya formülle hesaplanır.',
+    protocol: 'Ekipman:\n- Bisiklet ergometresi, nabız ölçer, kronometre.\n\nUygulama:\n1. Katılımcı 6 dakika sabit tempoda bisiklet çevirir.\n2. Erkek: 600 kgm/dk (100 Watt)\n3. Kadın: 450 kgm/dk (75 Watt)\n4. Son 2 dakikada nabız sabitlenmiş olmalı (fark < 5 bpm).\n\nSonuç ve Puanlama:\n- VO2max, yük ve nabız değerlerine göre özel tablo veya formülle hesaplanır.\n- VO2max = (Yük × 1000) / (Nabız × 6.3) × 1.1 (ml/kg/dk)\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=AstrandTest',
     resultUnit: 'ml/kg/dk',
   ),
   TestDefinitionModel(
@@ -222,8 +222,8 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'İndirekt (Submaksimal)',
     description: 'Koşu bandında submaksimal dayanıklılık testi.',
     purpose: 'Koşu bandında submaksimal dayanıklılık testi.',
-    protocol: 'Ekipman:\n- Koşu bandı, kronometre.\n\nUygulama:\n1. Katılımcı koşu bandında sabit hızda (5.3 km/s) koşar.\n2. Her dakika eğim %1 artırılır.\n3. Katılımcı yorulana kadar devam eder.\n\nSonuç ve Puanlama:\n- Toplam süre (saniye) kaydedilir.\n- VO2max, süre ve eğime göre hesaplanır.',
-    resultUnit: 'saniye',
+    protocol: 'Ekipman:\n- Koşu bandı, kronometre, nabız ölçer.\n\nUygulama:\n1. Katılımcı koşu bandında sabit hızda (5.3 km/s) koşar.\n2. Her dakika eğim %1 artırılır.\n3. Katılımcı yorulana kadar devam eder.\n4. Nabız sürekli ölçülür.\n\nSonuç ve Puanlama:\n- Toplam süre (dakika) kaydedilir.\n- VO2max = (Süre × 1.444) + 14.99 (ml/kg/dk)\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=BalkeTest',
+    resultUnit: 'dk',
   ),
   TestDefinitionModel(
     id: 'bruce',
@@ -231,7 +231,7 @@ final List<TestDefinitionModel> predefinedTests = [
     category: 'İndirekt (Submaksimal)',
     description: 'Koşu bandında artan hız ve eğimle yapılan submaksimal test.',
     purpose: 'Koşu bandında artan hız ve eğimle yapılan submaksimal test.',
-    protocol: 'Ekipman:\n- Koşu bandı, kronometre.\n\nUygulama:\n1. Her 3 dakikada bir koşu bandının hızı ve eğimi artırılır.\n2. Katılımcı yorulana kadar devam eder.\n\nSonuç ve Puanlama:\n- Toplam süre (dakika) kaydedilir.\n- VO2max, süreye göre özel formülle hesaplanır.',
+    protocol: 'Ekipman:\n- Koşu bandı, kronometre, nabız ölçer.\n\nUygulama:\n1. Her 3 dakikada bir koşu bandının hızı ve eğimi artırılır.\n2. Başlangıç: 2.7 km/s, %10 eğim\n3. Katılımcı yorulana kadar devam eder.\n4. Nabız sürekli ölçülür.\n\nSonuç ve Puanlama:\n- Toplam süre (dakika) kaydedilir.\n- VO2max = (4.38 × süre) - 3.9 (ml/kg/dk)\n\n📹 Video Rehberi:\nhttps://www.youtube.com/watch?v=BruceProtocol',
     resultUnit: 'dk',
   ),
 ]; 

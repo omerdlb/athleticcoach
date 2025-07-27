@@ -2,6 +2,8 @@ import 'package:athleticcoach/data/models/test_definition_model.dart';
 import 'package:athleticcoach/core/app_theme.dart';
 import 'package:athleticcoach/presentation/screens/test_session_select_athletes_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 
 class TestProtocolScreen extends StatelessWidget {
   final TestDefinitionModel test;
@@ -73,7 +75,7 @@ class TestProtocolScreen extends StatelessWidget {
                   icon: Icons.rule,
                   title: 'Protokol',
                   color: AppTheme.accentColor,
-                  child: Text(test.protocol, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryTextColor)),
+                  child: _buildProtocolWithLinks(context, test.protocol),
                 ),
                 const SizedBox(height: 24),
             Row(
@@ -231,5 +233,43 @@ class TestProtocolScreen extends StatelessWidget {
     }
     // Diğer testler için de benzer şekilde eklenebilir...
     return tables;
+  }
+
+  Widget _buildProtocolWithLinks(BuildContext context, String protocol) {
+    final urlRegex = RegExp(r'(https?://[^\s]+)');
+    final spans = <TextSpan>[];
+    final lines = protocol.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      final match = urlRegex.firstMatch(line);
+      if (match != null) {
+        final url = match.group(0)!;
+        final before = line.substring(0, match.start);
+        final after = line.substring(match.end);
+        if (before.isNotEmpty) {
+          spans.add(TextSpan(text: before, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryTextColor)));
+        }
+        spans.add(
+          TextSpan(
+            text: url,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.blue, decoration: TextDecoration.underline),
+            recognizer: (TapGestureRecognizer()
+              ..onTap = () async {
+                final uri = Uri.parse(url);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              }),
+          ),
+        );
+        if (after.isNotEmpty) {
+          spans.add(TextSpan(text: after, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryTextColor)));
+        }
+      } else {
+        spans.add(TextSpan(text: line, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryTextColor)));
+      }
+      if (i != lines.length - 1) spans.add(const TextSpan(text: '\n'));
+    }
+    return SelectableText.rich(TextSpan(children: spans));
   }
 } 

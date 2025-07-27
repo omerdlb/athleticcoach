@@ -246,41 +246,61 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
         ),
       );
     }
-    // Test sonuçlarını test adına göre grupla
-    final Map<String, List<TestResultModel>> testGroups = {};
+
+    // Test sonuçlarını sessionId'ye göre grupla (her test oturumu ayrı)
+    final Map<String, List<TestResultModel>> sessionGroups = {};
     for (final result in athleteResults) {
-      if (!testGroups.containsKey(result.testName)) {
-        testGroups[result.testName] = [];
+      // Eğer sessionId yoksa, testName + tarih + id kombinasyonu kullan
+      final sessionKey = result.sessionId ?? '${result.testName}_${result.testDate.millisecondsSinceEpoch}_${result.id}';
+      if (!sessionGroups.containsKey(sessionKey)) {
+        sessionGroups[sessionKey] = [];
       }
-      testGroups[result.testName]!.add(result);
+      sessionGroups[sessionKey]!.add(result);
     }
-    // Her test grubundaki sonuçları tarihe göre sırala (yeniden eskiye)
-    for (final group in testGroups.values) {
-      group.sort((a, b) => b.testDate.compareTo(a.testDate));
-    }
-    // Test gruplarını alfabetik sırala
-    final sortedTestNames = testGroups.keys.toList()..sort();
+
+    // Session gruplarını tarihe göre sırala (yeniden eskiye)
+    final sortedSessions = sessionGroups.entries.toList()
+      ..sort((a, b) {
+        final dateA = a.value.first.testDate;
+        final dateB = b.value.first.testDate;
+        return dateB.compareTo(dateA);
+      });
+
     // Expand/collapse state'i tut
-    _testGroupExpanded.addEntries(sortedTestNames.where((k) => !_testGroupExpanded.containsKey(k)).map((k) => MapEntry(k, true)));
+    for (final session in sortedSessions) {
+      if (!_testGroupExpanded.containsKey(session.key)) {
+        _testGroupExpanded[session.key] = true;
+      }
+    }
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: sortedTestNames.length,
+      itemCount: sortedSessions.length,
       itemBuilder: (context, index) {
-        final testName = sortedTestNames[index];
-        final results = testGroups[testName]!;
-        final isExpanded = _testGroupExpanded[testName] ?? true;
+        final sessionEntry = sortedSessions[index];
+        final sessionKey = sessionEntry.key;
+        final results = sessionEntry.value;
+        final isExpanded = _testGroupExpanded[sessionKey] ?? true;
+        
+        // İlk sonucun bilgilerini al
+        final firstResult = results.first;
+        
+        // Oturum başlığı için test adı ve tarih
+        final sessionTitle = '${firstResult.testName} - Oturum ${index + 1}';
+        final sessionDate = '${firstResult.testDate.day.toString().padLeft(2, '0')}.${firstResult.testDate.month.toString().padLeft(2, '0')}.${firstResult.testDate.year} ${firstResult.testDate.hour.toString().padLeft(2, '0')}:${firstResult.testDate.minute.toString().padLeft(2, '0')}';
+
         return Container(
           margin: const EdgeInsets.only(bottom: 22),
           decoration: AppTheme.cardDecoration,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Test başlığı (expand/collapse)
+              // Test oturumu başlığı (expand/collapse)
               InkWell(
                 onTap: () {
                   setState(() {
-                    _testGroupExpanded[testName] = !(isExpanded);
+                    _testGroupExpanded[sessionKey] = !(isExpanded);
                   });
                 },
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
@@ -296,16 +316,28 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                       Icon(Icons.fitness_center, color: AppTheme.primaryColor, size: 22),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text(
-                          testName,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryColor,
-                              ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              sessionTitle,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.primaryColor,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              sessionDate,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppTheme.secondaryTextColor,
+                                  ),
+                            ),
+                          ],
                         ),
                       ),
                       Text(
-                        '${results.length} test',
+                        '${results.length} sonuç',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppTheme.primaryColor,
                             ),
@@ -730,6 +762,7 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
                         ),
                         const SizedBox(height: 16),
+                        
                         // Test ve sporcu bilgileri
                         Card(
                           elevation: 5,
@@ -779,9 +812,57 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
                             ),
                           ),
                         ),
+                        
                         const SizedBox(height: 22),
-                        // Analiz metnini bölümlere ayır ve şık kartlar halinde göster
-                        ..._buildAnalysisCards(analysis, context),
+                        
+                        // AI Analizi - Tek Kart
+                        Card(
+                          elevation: 5,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Başlık
+                                Row(
+                                  children: [
+                                    Icon(Icons.auto_awesome, color: AppTheme.primaryColor, size: 28),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'AI Performans Analizi',
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                
+                                // Tam analiz metni
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primaryColor.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: AppTheme.primaryColor.withOpacity(0.2),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    analysis,
+                                    style: TextStyle(
+                                      color: AppTheme.primaryTextColor,
+                                      fontSize: 15,
+                                      height: 1.6,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -789,104 +870,5 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
         ],
       ),
     );
-  }
-
-  List<Widget> _buildAnalysisCards(String analysis, BuildContext context) {
-    // Bölümleri başlıklara göre ayır (ör: 1. Sonuç Değerlendirmesi, 2. Eksik Yönler ...)
-    final RegExp sectionExp = RegExp(r'(\d+\.\s+)([\s\S]*?)(?=(\d+\.\s+|\$))');
-    final matches = sectionExp.allMatches(analysis);
-    final List<Widget> cards = [];
-    final List<IconData> icons = [
-      Icons.insights, // 1. Sonuç Değerlendirmesi
-      Icons.trending_up, // 2. Eksik Yönler ve Güçlü Yanlar
-      Icons.note_alt, // 3. Genel Notlar
-      Icons.calendar_month, // 4. Haftalık Program
-    ];
-    final List<Color> colors = [
-      AppTheme.successColor,
-      AppTheme.warningColor,
-      AppTheme.accentColor,
-      AppTheme.errorColor,
-    ];
-    int i = 0;
-    for (final match in matches) {
-      final section = match.group(0)?.trim() ?? '';
-      if (section.isEmpty) continue;
-      cards.add(
-        Container(
-          margin: const EdgeInsets.only(bottom: 18),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [colors[i % colors.length].withOpacity(0.10), AppTheme.cardBackgroundColor],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: colors[i % colors.length].withOpacity(0.13),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: colors[i % colors.length].withOpacity(0.18),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Icon(icons[i % icons.length], color: colors[i % colors.length], size: 28),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    section,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, height: 1.5, color: AppTheme.primaryTextColor),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      i++;
-    }
-    // Eğer hiç bölüm bulunamazsa tüm metni tek kartta göster
-    if (cards.isEmpty && analysis.trim().isNotEmpty) {
-      cards.add(
-        Container(
-          margin: const EdgeInsets.only(bottom: 18),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppTheme.primaryColor.withOpacity(0.1), AppTheme.cardBackgroundColor],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.shadowColorWithOpacity,
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
-            child: Text(
-              analysis,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, height: 1.5, color: AppTheme.primaryTextColor),
-            ),
-          ),
-        ),
-      );
-    }
-    return cards;
   }
 } 

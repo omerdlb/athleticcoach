@@ -24,7 +24,16 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
 
   Future<void> _loadResults() async {
     try {
+      print('=== TEST SONUÇLARI YÜKLENİYOR ===');
       final results = await AthleteDatabase().getAllTestResults();
+      print('Toplam ${results.length} test sonucu yüklendi');
+      
+      // Her sonucun tarih bilgisini kontrol et
+      for (final result in results) {
+        print('Test: ${result.testName} | Sporcu: ${result.athleteName} | Tarih: ${result.testDate}');
+      }
+      print('==================================');
+      
       setState(() {
         allResults = results;
         isLoading = false;
@@ -313,7 +322,7 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
-                                            '${firstResult.testDate.hour.toString().padLeft(2, '0')}:${firstResult.testDate.minute.toString().padLeft(2, '0')}:${firstResult.testDate.second.toString().padLeft(2, '0')}.${firstResult.testDate.millisecond.toString().padLeft(3, '0')}',
+                                            '${firstResult.testDate.hour.toString().padLeft(2, '0')}:${firstResult.testDate.minute.toString().padLeft(2, '0')}',
                                             style: TextStyle(
                                               fontSize: AppTheme.getResponsiveFontSize(context, 14),
                                               color: AppTheme.secondaryTextColor,

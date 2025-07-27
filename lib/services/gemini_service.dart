@@ -130,16 +130,13 @@ class GeminiService {
     
     // Test sonucunu daha anlaşılır formatta hazırla
     String formattedResult = '';
-    if (resultUnit == 'Seviye.Mekik') {
-      // Yo-Yo testleri için seviye ve mekik ayrımı
-      final level = result.floor();
-      final shuttle = ((result - level) * 10).round();
-      formattedResult = 'Seviye $level, Mekik $shuttle';
-      print('Yo-Yo Formatı: $formattedResult (Ham: $result)');
-    } else if (resultUnit == 'Seviye') {
-      // Beep test gibi sadece seviye olan testler
+    if (resultUnit == 'Seviye') {
+      // Yo-Yo testleri ve Beep test için seviye formatı
       formattedResult = 'Seviye ${result.toStringAsFixed(1)}';
-      print('Beep Test Formatı: $formattedResult (Ham: $result)');
+      print('=== SEVİYE TEST FORMATLAMA ===');
+      print('Ham Sonuç: $result');
+      print('Formatlanmış: $formattedResult');
+      print('=============================');
     } else {
       // Diğer testler için normal format
       formattedResult = '${result.toStringAsFixed(2)} $resultUnit';
@@ -211,12 +208,9 @@ Bu kapasiteyi geliştirmek için 3-4 spesifik egzersiz öner. Her egzersizin ad�
       final unit = result['unit'];
       
       String formattedResult = '';
-      if (unit == 'Seviye.Mekik') {
-        final level = testResult.floor();
-        final shuttle = ((testResult - level) * 10).round();
-        formattedResult = 'Seviye $level, Mekik $shuttle';
-      } else if (unit == 'Seviye') {
+      if (unit == 'Seviye') {
         formattedResult = 'Seviye ${testResult.toStringAsFixed(1)}';
+        print('Comparative Analysis - Seviye Format: ${athlete['name']} → $formattedResult (Ham: $testResult)');
       } else {
         formattedResult = '${testResult.toStringAsFixed(2)} $unit';
       }
@@ -283,14 +277,9 @@ $testName testi performansını artıracak 2-3 spesifik öneri ver. Sporcu eşle
       print('Sporcu: ${athlete['name']} ${athlete['surname']} - Ham sonuç: $testResult $unit');
       
       String formattedResult = '';
-      if (unit == 'Seviye.Mekik') {
-        final level = testResult.floor();
-        final shuttle = ((testResult - level) * 10).round();
-        formattedResult = 'Seviye $level, Mekik $shuttle';
-        print('  Yo-Yo Formatı: $formattedResult');
-      } else if (unit == 'Seviye') {
+      if (unit == 'Seviye') {
         formattedResult = 'Seviye ${testResult.toStringAsFixed(1)}';
-        print('  Beep Test Formatı: $formattedResult');
+        print('Team Analysis - Seviye Format: ${athlete.name} → $formattedResult (Ham: $testResult)');
       } else {
         formattedResult = '${testResult.toStringAsFixed(2)} $unit';
         print('  Normal Format: $formattedResult');
