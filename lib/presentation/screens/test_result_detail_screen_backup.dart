@@ -167,16 +167,49 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    // Türkçe ay isimleri
+    const List<String> months = [
+      'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+    ];
+    
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  String _formatTime(DateTime date) {
+    return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _formatDateTime(DateTime date) {
+    return '${_formatDate(date)} - ${_formatTime(date)}';
   }
 
   DateTime _parseDate(String dateString) {
-    final parts = dateString.split('/');
-    return DateTime(
-      int.parse(parts[2]), // year
-      int.parse(parts[1]), // month
-      int.parse(parts[0]), // day
-    );
+    // Türkçe ay isimlerini sayıya çevir
+    const Map<String, int> monthMap = {
+      'Ocak': 1, 'Şubat': 2, 'Mart': 3, 'Nisan': 4, 'Mayıs': 5, 'Haziran': 6,
+      'Temmuz': 7, 'Ağustos': 8, 'Eylül': 9, 'Ekim': 10, 'Kasım': 11, 'Aralık': 12
+    };
+    
+    final parts = dateString.split(' ');
+    if (parts.length == 3) {
+      final day = int.parse(parts[0]);
+      final month = monthMap[parts[1]] ?? 1;
+      final year = int.parse(parts[2]);
+      return DateTime(year, month, day);
+    }
+    
+    // Fallback için eski format
+    final oldParts = dateString.split('/');
+    if (oldParts.length == 3) {
+      return DateTime(
+        int.parse(oldParts[2]), // year
+        int.parse(oldParts[1]), // month
+        int.parse(oldParts[0]), // day
+      );
+    }
+    
+    return DateTime.now();
   }
 
   Map<String, String> _parseAnalysis(String analysis) {
@@ -353,29 +386,68 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
             // Tarih başlığı
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              margin: const EdgeInsets.only(bottom: 16, top: 8),
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppTheme.primaryColor.withOpacity(0.08),
+                    AppTheme.accentColor.withOpacity(0.08),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppTheme.primaryColor.withOpacity(0.3),
+                  color: AppTheme.primaryColor.withOpacity(0.2),
                   width: 1,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.shadowColorWithOpacity,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 16,
-                    color: AppTheme.primaryColor,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    date,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.calendar_today,
+                      size: 18,
                       color: AppTheme.primaryColor,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          date,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: AppTheme.getResponsiveFontSize(context, 16),
+                            color: AppTheme.primaryTextColor,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${resultsForDate.length} test sonucu',
+                          style: TextStyle(
+                            fontSize: AppTheme.getResponsiveFontSize(context, 13),
+                            color: AppTheme.secondaryTextColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -388,47 +460,95 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
               final existingAnalysis = result.aiAnalysis;
               final hasAnalysis = existingAnalysis != null && existingAnalysis.isNotEmpty;
               
-              return Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+              return Container(
                 margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: AppTheme.cardBackgroundColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppTheme.borderColor,
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.shadowColorWithOpacity,
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Sporcu bilgisi ve sonuç
                       Row(
                         children: [
-                          CircleAvatar(
-                            backgroundColor: AppTheme.primaryColor,
-                            child: Text(
-                              '${result.athleteName[0]}${result.athleteSurname[0]}',
-                              style: TextStyle(
-                                color: AppTheme.whiteTextColor,
-                                fontWeight: FontWeight.bold,
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  AppTheme.primaryColor,
+                                  AppTheme.accentColor,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.primaryColor.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${result.athleteName[0]}${result.athleteSurname[0]}',
+                                style: TextStyle(
+                                  color: AppTheme.whiteTextColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   '${result.athleteName} ${result.athleteSurname}',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: AppTheme.getResponsiveFontSize(context, 16),
                                     color: AppTheme.primaryTextColor,
+                                    letterSpacing: 0.2,
                                   ),
                                 ),
-                                Text(
-                                  'Saat: ${result.testDate.hour.toString().padLeft(2, '0')}:${result.testDate.minute.toString().padLeft(2, '0')}:${result.testDate.second.toString().padLeft(2, '0')}',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppTheme.secondaryTextColor,
-                                  ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.access_time,
+                                      size: 14,
+                                      color: AppTheme.secondaryTextColor,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _formatTime(result.testDate),
+                                      style: TextStyle(
+                                        fontSize: AppTheme.getResponsiveFontSize(context, 13),
+                                        color: AppTheme.secondaryTextColor,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -436,21 +556,56 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(
-                                '${result.result.toStringAsFixed(2)} ${result.resultUnit}',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primaryColor,
-                                ),
-                              ),
-                              if (result.notes?.isNotEmpty == true)
-                                Text(
-                                  'Not: ${result.notes}',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppTheme.secondaryTextColor,
-                                    fontStyle: FontStyle.italic,
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppTheme.primaryColor.withOpacity(0.1),
+                                      AppTheme.accentColor.withOpacity(0.1),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: AppTheme.primaryColor.withOpacity(0.3),
+                                    width: 1,
                                   ),
                                 ),
+                                child: Text(
+                                  '${result.result.toStringAsFixed(2)} ${result.resultUnit}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: AppTheme.getResponsiveFontSize(context, 16),
+                                    color: AppTheme.primaryColor,
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ),
+                              if (result.notes?.isNotEmpty == true) ...[
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.secondaryColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppTheme.secondaryColor.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    result.notes!,
+                                    style: TextStyle(
+                                      fontSize: AppTheme.getResponsiveFontSize(context, 11),
+                                      color: AppTheme.secondaryTextColor,
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ],
@@ -462,23 +617,62 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                       if (isAnalyzing)
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.only(top: 16),
                           decoration: BoxDecoration(
-                            color: AppTheme.secondaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppTheme.secondaryColor.withOpacity(0.08),
+                                AppTheme.accentColor.withOpacity(0.08),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppTheme.secondaryColor.withOpacity(0.3),
+                              width: 1,
+                            ),
                           ),
                           child: Row(
                             children: [
-                              SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.secondaryColor),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.secondaryColor.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2, 
+                                    color: AppTheme.secondaryColor,
+                                  ),
+                                ),
                               ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'AI analizi yapılıyor...',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppTheme.secondaryColor,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'AI Analizi Yapılıyor',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: AppTheme.getResponsiveFontSize(context, 14),
+                                        color: AppTheme.secondaryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Performans değerlendirmesi hazırlanıyor...',
+                                      style: TextStyle(
+                                        fontSize: AppTheme.getResponsiveFontSize(context, 12),
+                                        color: AppTheme.secondaryTextColor,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -628,14 +822,30 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                           ),
                         )
                       else
-                        ElevatedButton.icon(
-                          onPressed: () => _analyzeResult(result),
-                          icon: Icon(Icons.auto_awesome, color: AppTheme.whiteTextColor),
-                          label: Text('Bu Sonucu Analiz Et', style: TextStyle(color: AppTheme.whiteTextColor)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primaryColor,
-                            foregroundColor: AppTheme.whiteTextColor,
-                            elevation: 2,
+                        Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(top: 16),
+                          child: ElevatedButton.icon(
+                            onPressed: () => _analyzeResult(result),
+                            icon: Icon(Icons.auto_awesome, color: AppTheme.whiteTextColor),
+                            label: Text(
+                              'Bu Sonucu Analiz Et', 
+                              style: TextStyle(
+                                color: AppTheme.whiteTextColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: AppTheme.getResponsiveFontSize(context, 14),
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryColor,
+                              foregroundColor: AppTheme.whiteTextColor,
+                              elevation: 4,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              shadowColor: AppTheme.primaryColor.withOpacity(0.3),
+                            ),
                           ),
                         ),
                     ],
@@ -711,7 +921,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        _formatDate(widget.results.first.testDate),
+                        _formatDateTime(widget.results.first.testDate),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppTheme.whiteTextColor,
                           fontWeight: FontWeight.w500,
@@ -727,16 +937,27 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
           // Analiz butonları
           if (!hasExistingAnalyses)
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: ElevatedButton.icon(
                 onPressed: _analyzeAllResults,
-                icon: Icon(Icons.auto_awesome, color: AppTheme.whiteTextColor),
-                label: Text('Tümünü Analiz Et', style: TextStyle(color: AppTheme.whiteTextColor)),
+                icon: Icon(Icons.auto_awesome, color: AppTheme.whiteTextColor, size: 20),
+                label: Text(
+                  'Tümünü Analiz Et', 
+                  style: TextStyle(
+                    color: AppTheme.whiteTextColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: AppTheme.getResponsiveFontSize(context, 16),
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
                   foregroundColor: AppTheme.whiteTextColor,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  elevation: 2,
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                  elevation: 6,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  shadowColor: AppTheme.primaryColor.withOpacity(0.4),
                 ),
               ),
             ),

@@ -2,9 +2,12 @@ import 'package:athleticcoach/data/models/test_definition_model.dart';
 import 'package:athleticcoach/core/app_theme.dart';
 import 'package:athleticcoach/presentation/screens/test_session_select_athletes_screen.dart';
 import 'package:athleticcoach/presentation/screens/yo_yo_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/yo_yo_test_level2_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
+import 'package:athleticcoach/presentation/screens/beep_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/cooper_test_screen.dart';
 
 class TestProtocolScreen extends StatelessWidget {
   final TestDefinitionModel test;
@@ -29,6 +32,14 @@ class TestProtocolScreen extends StatelessWidget {
     );
   }
 
+  void _startYoYoLevel2Test(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const YoYoTestLevel2Screen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,8 +56,30 @@ class TestProtocolScreen extends StatelessWidget {
                 color: AppTheme.whiteTextColor,
                 size: 28,
               ),
-              tooltip: 'Yo-Yo Test Başlat',
+              tooltip: 'Yo-Yo Level 1 Test Başlat',
               onPressed: () => _startYoYoTest(context),
+            ),
+          if (test.id == 'yo-yo-ir2')
+            IconButton(
+              icon: Icon(
+                Icons.sports_soccer,
+                color: AppTheme.whiteTextColor,
+                size: 28,
+              ),
+              tooltip: 'Yo-Yo Level 2 Test Başlat',
+              onPressed: () => _startYoYoLevel2Test(context),
+            ),
+          if (test.id == 'beep-test')
+            IconButton(
+              icon: Icon(Icons.directions_run, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: '20m Shuttle Test Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BeepTestScreen())),
+            ),
+          if (test.id == 'cooper')
+            IconButton(
+              icon: Icon(Icons.timer, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: 'Cooper 12 Dakika Test Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CooperTestScreen())),
             ),
           IconButton(
             icon: Icon(

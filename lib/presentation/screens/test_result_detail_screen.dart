@@ -3,6 +3,7 @@ import 'package:athleticcoach/data/models/athlete_model.dart';
 import 'package:athleticcoach/data/models/test_result_model.dart';
 import 'package:athleticcoach/presentation/screens/test_result_analysis_screen.dart';
 import 'package:athleticcoach/services/gemini_service.dart';
+import 'package:athleticcoach/services/pdf_export_service.dart';
 import 'package:athleticcoach/core/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -27,25 +28,52 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
   final Map<String, bool> _isAnalysisExpanded = {};
   final Map<String, Map<String, String>> _analysisSections = {}; // Parçalanmış analizler
   final Map<String, Map<String, bool>> _sectionExpanded = {}; // Her bölüm için ayrı durum
+  List<TestResultModel> _currentResults = []; // Güncel sonuçlar
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // Her sonuç için analiz durumunu başlat
-    for (final result in widget.results) {
-      _isAnalyzing[result.id] = false;
-      _isAnalysisExpanded[result.id] = false;
-      _analysisSections[result.id] = {};
-      _sectionExpanded[result.id] = {
-        'degerlendirme': false,
-        'eksik_guclu': false,
-        'genel_notlar': false,
-      };
+    _loadUpdatedResults();
+  }
+
+  Future<void> _loadUpdatedResults() async {
+    try {
+      // Veritabanından güncel test sonuçlarını çek
+      final database = AthleteDatabase();
+      final allResults = await database.getAllTestResults();
       
-      // Eğer analiz varsa, parçala
-      if (result.aiAnalysis != null && result.aiAnalysis!.isNotEmpty) {
-        _analysisSections[result.id] = _parseAnalysis(result.aiAnalysis!);
+      // Aynı test oturumundaki sonuçları filtrele
+      final sessionId = widget.results.first.sessionId;
+      final updatedResults = allResults.where((r) => r.sessionId == sessionId).toList();
+      
+      // Her sonuç için analiz durumunu başlat
+      for (final result in updatedResults) {
+        _isAnalyzing[result.id] = false;
+        _isAnalysisExpanded[result.id] = false;
+        _analysisSections[result.id] = {};
+        _sectionExpanded[result.id] = {
+          'degerlendirme': false,
+          'eksik_guclu': false,
+          'genel_notlar': false,
+        };
+        
+        // Eğer analiz varsa, parçala
+        if (result.aiAnalysis != null && result.aiAnalysis!.isNotEmpty) {
+          _analysisSections[result.id] = _parseAnalysis(result.aiAnalysis!);
+        }
       }
+      
+      setState(() {
+        _currentResults = updatedResults;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Güncel sonuçlar yüklenirken hata: $e');
+      setState(() {
+        _currentResults = widget.results;
+        _isLoading = false;
+      });
     }
   }
 
@@ -92,8 +120,6 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
         });
         
         // Analizi hemen veritabanına kaydet
-        final database = AthleteDatabase();
-        
         final updatedResult = TestResultModel(
           id: result.id,
           testId: result.testId,
@@ -112,9 +138,11 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
         await database.updateTestResult(updatedResult);
         
         // Widget'taki sonucu da güncelle
-        final index = widget.results.indexWhere((r) => r.id == result.id);
+        final index = _currentResults.indexWhere((r) => r.id == result.id);
         if (index != -1) {
-          widget.results[index] = updatedResult;
+          setState(() {
+            _currentResults[index] = updatedResult;
+          });
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -146,7 +174,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
   Future<void> _analyzeAllResults() async {
     int analyzedCount = 0;
     
-    for (final result in widget.results) {
+    for (final result in _currentResults) {
       if (result.aiAnalysis == null || result.aiAnalysis!.isEmpty) {
         await _analyzeResult(result);
         analyzedCount++;
@@ -171,10 +199,30 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 
-  String _formatTime(DateTime date) {
-    // Türkçe saat formatı: HH:MM
-    return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  Future<void> _exportToPdf(TestResultModel result) async {
+    try {
+      await PdfExportService.exportTestAnalysis(result);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('PDF başarıyla oluşturuldu'),
+            backgroundColor: AppTheme.successColor,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('PDF oluşturulurken hata: $e'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
   }
+
+
 
   DateTime _parseDate(String dateString) {
     final parts = dateString.split('.');
@@ -230,111 +278,12 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
         .trim();
   }
 
-  Widget _buildAnalysisSection(String sectionKey, String title, IconData icon, Color color, TestResultModel result) {
-    final sections = _analysisSections[result.id];
-    final content = sections?[sectionKey] ?? 'İçerik bulunamadı';
-    final isExpanded = _sectionExpanded[result.id]?[sectionKey] ?? false;
-    
-    return Container(
-      width: 250, // Yatay kartlar için sabit genişlik
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: AppTheme.cardBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.shadowColorWithOpacity,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Başlık
-          InkWell(
-            onTap: () {
-              setState(() {
-                _sectionExpanded[result.id]![sectionKey] = !isExpanded;
-              });
-            },
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.05),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      icon,
-                      size: 18,
-                      color: color,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryTextColor,
-                        fontSize: AppTheme.getResponsiveFontSize(context, 16),
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Icon(
-                      isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                      color: color,
-                      size: 18,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          // İçerik
-          if (isExpanded)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-                    child: Text(
-                    content,
-                    style: TextStyle(
-                  color: AppTheme.primaryTextColor,
-                  fontSize: 14,
-                  height: 1.5,
-                  ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildResultsList() {
     // Test sonuçlarını tarihe göre grupla
     final Map<String, List<TestResultModel>> dateGroups = {};
-    for (final result in widget.results) {
+    for (final result in _currentResults) {
       final dateKey = _formatDate(result.testDate);
       if (!dateGroups.containsKey(dateKey)) {
         dateGroups[dateKey] = [];
@@ -499,132 +448,201 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                           margin: const EdgeInsets.only(top: 16),
                           decoration: AppTheme.cardDecoration,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Başlık
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.primaryColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Icon(
-                                        Icons.auto_awesome,
-                                        size: 22,
-                                        color: AppTheme.primaryColor,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'AI Analizi',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: AppTheme.getResponsiveFontSize(context, 18),
-                                              color: AppTheme.primaryTextColor,
-                                              letterSpacing: 0.2,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Performans değerlendirmesi',
-                                            style: TextStyle(
-                                              fontSize: AppTheme.getResponsiveFontSize(context, 13),
-                                              color: AppTheme.secondaryTextColor,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              
-                              // AI Analizi İçeriği - Tek Kart
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Tam analiz metni
-                                    Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.primaryColor.withOpacity(0.05),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: AppTheme.primaryColor.withOpacity(0.2),
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        result.aiAnalysis!,
-                                        style: TextStyle(
-                                          color: AppTheme.primaryTextColor,
-                                          fontSize: 14,
-                                          height: 1.6,
-                                          letterSpacing: 0.2,
-                                        ),
-                                      ),
-                                    ),
-                                    
-                                    const SizedBox(height: 16),
-                                    
-                                    // Detayları Gör Butonu
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) => TestResultAnalysisScreen(
-                                              testResult: result,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              // Başlık - Tıklanabilir
+                              InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _isAnalysisExpanded[result.id] = !(_isAnalysisExpanded[result.id] ?? false);
+                                  });
+                                },
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: AppTheme.primaryColor.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(
-                                            color: AppTheme.primaryColor.withOpacity(0.3),
-                                            width: 1,
-                                          ),
+                                          borderRadius: BorderRadius.circular(10),
                                         ),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                        child: Icon(
+                                          Icons.auto_awesome,
+                                          size: 22,
+                                          color: AppTheme.primaryColor,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Icon(
-                                              Icons.arrow_forward,
-                                              color: AppTheme.primaryColor,
-                                              size: 18,
-                                            ),
-                                            const SizedBox(width: 8),
                                             Text(
-                                              'Detayları Gör',
+                                              'AI Analizi',
                                               style: TextStyle(
-                                                color: AppTheme.primaryColor,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14,
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: AppTheme.getResponsiveFontSize(context, 18),
+                                                color: AppTheme.primaryTextColor,
+                                                letterSpacing: 0.2,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Performans değerlendirmesi',
+                                              style: TextStyle(
+                                                fontSize: AppTheme.getResponsiveFontSize(context, 13),
+                                                color: AppTheme.secondaryTextColor,
+                                                fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                      Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primaryColor.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Icon(
+                                          (_isAnalysisExpanded[result.id] ?? false) 
+                                              ? Icons.keyboard_arrow_up 
+                                              : Icons.keyboard_arrow_down,
+                                          color: AppTheme.primaryColor,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
+                              
+                              // AI Analizi İçeriği - Daraltılabilir
+                              if (_isAnalysisExpanded[result.id] ?? false)
+                                Container(
+                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Tam analiz metni
+                                      Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primaryColor.withOpacity(0.05),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: AppTheme.primaryColor.withOpacity(0.2),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          result.aiAnalysis!,
+                                          style: TextStyle(
+                                            color: AppTheme.primaryTextColor,
+                                            fontSize: 14,
+                                            height: 1.6,
+                                            letterSpacing: 0.2,
+                                          ),
+                                        ),
+                                      ),
+                                      
+                                      const SizedBox(height: 16),
+                                      
+                                      // Butonlar
+                                      Row(
+                                        children: [
+                                          // Detayları Gör Butonu
+                                          Expanded(
+                                            child: InkWell(
+                                              onTap: () {
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder: (context) => TestResultAnalysisScreen(
+                                                      testResult: result,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              borderRadius: BorderRadius.circular(12),
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.primaryColor.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: AppTheme.primaryColor.withOpacity(0.3),
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.arrow_forward,
+                                                      color: AppTheme.primaryColor,
+                                                      size: 18,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Text(
+                                                      'Detayları Gör',
+                                                      style: TextStyle(
+                                                        color: AppTheme.primaryColor,
+                                                        fontWeight: FontWeight.w600,
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          
+                                          const SizedBox(width: 12),
+                                          
+                                          // PDF Export Butonu
+                                          Expanded(
+                                            child: InkWell(
+                                              onTap: () => _exportToPdf(result),
+                                              borderRadius: BorderRadius.circular(12),
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.secondaryColor.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: AppTheme.secondaryColor.withOpacity(0.3),
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.picture_as_pdf,
+                                                      color: AppTheme.secondaryColor,
+                                                      size: 18,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Text(
+                                                      'PDF İndir',
+                                                      style: TextStyle(
+                                                        color: AppTheme.secondaryColor,
+                                                        fontWeight: FontWeight.w600,
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
                             ],
                           ),
                         )
@@ -652,7 +670,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final hasExistingAnalyses = widget.results.any((r) => r.aiAnalysis != null && r.aiAnalysis!.isNotEmpty);
+    final hasExistingAnalyses = _currentResults.any((r) => r.aiAnalysis != null && r.aiAnalysis!.isNotEmpty);
     
     return Scaffold(
       appBar: AppBar(
@@ -697,7 +715,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        '${widget.results.length} katılımcı',
+                        '${_currentResults.length} katılımcı',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppTheme.whiteTextColor,
                           fontWeight: FontWeight.w500,
@@ -712,7 +730,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        _formatDate(widget.results.first.testDate),
+                        _formatDate(_currentResults.first.testDate),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppTheme.whiteTextColor,
                           fontWeight: FontWeight.w500,
@@ -744,7 +762,9 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
           
           // Katılımcı listesi
           Expanded(
-            child: _buildResultsList(),
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
+                : _buildResultsList(),
           ),
         ],
       ),

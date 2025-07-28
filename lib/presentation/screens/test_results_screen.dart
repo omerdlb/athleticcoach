@@ -510,7 +510,10 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
           results: sameTestResults,
         ),
       ),
-    );
+    ).then((_) {
+      // Detay sayfasından dönüldüğünde listeyi yenile
+      _loadResults();
+    });
   }
 
   Future<void> _addToRecentTests(TestResultModel result) async {

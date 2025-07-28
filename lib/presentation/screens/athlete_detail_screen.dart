@@ -3,8 +3,9 @@ import 'package:athleticcoach/data/models/athlete_model.dart';
 import 'package:athleticcoach/data/models/test_result_model.dart';
 import 'package:athleticcoach/core/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:athleticcoach/services/gemini_service.dart';
+import 'package:athleticcoach/services/pdf_export_service.dart';
 import 'test_results_graph_screen.dart'; // grafik ekranı
+import 'test_result_detail_screen.dart'; // test sonuç detay ekranı
 
 class AthleteDetailScreen extends StatefulWidget {
   final AthleteModel athlete;
@@ -79,6 +80,52 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 
+  Future<void> _exportProfileToPdf() async {
+    try {
+      await PdfExportService.exportAthleteProfile(widget.athlete, athleteResults);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sporcu profili PDF olarak başarıyla oluşturuldu'),
+            backgroundColor: AppTheme.successColor,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('PDF oluşturulurken hata: $e'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _exportTestToPdf(TestResultModel result) async {
+    try {
+      await PdfExportService.exportTestAnalysis(result);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Test analizi PDF olarak başarıyla oluşturuldu'),
+            backgroundColor: AppTheme.successColor,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('PDF oluşturulurken hata: $e'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
+  }
+
   int _calculateAge(DateTime birthDate) {
     final now = DateTime.now();
     int age = now.year - birthDate.year;
@@ -137,82 +184,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
         .trim();
   }
 
-  Widget _buildAnalysisSection(String resultId, String sectionKey, String title, IconData icon, Color color) {
-    final sections = _analysisSections[resultId];
-    final content = sections?[sectionKey] ?? 'İçerik bulunamadı';
-    final isExpanded = _sectionExpanded[resultId]?[sectionKey] ?? false;
-    
-    return Container(
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          InkWell(
-            onTap: () {
-              setState(() {
-                _sectionExpanded[resultId]![sectionKey] = !isExpanded;
-              });
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Icon(
-                      icon,
-                      size: 16,
-                      color: color,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: color,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    color: color,
-                    size: 20,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (isExpanded)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: Text(
-                content,
-                style: TextStyle(
-                  color: color.withOpacity(0.8),
-                  fontSize: 13,
-                  height: 1.4,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildGroupedTestResults() {
     if (isLoading) {
@@ -489,7 +461,11 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                                 ),
                                 if (hasAnalysis)
                                   InkWell(
-                                    onTap: () => _showAnalysis(result),
+                                    onTap: () {
+                                      setState(() {
+                                        _analysisExpanded[result.id] = !(_analysisExpanded[result.id] ?? false);
+                                      });
+                                    },
                                     borderRadius: BorderRadius.circular(10),
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -508,7 +484,13 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                                                   fontWeight: FontWeight.w600,
                                                 ),
                                           ),
-                                          Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.secondaryTextColor),
+                                          Icon(
+                                            (_analysisExpanded[result.id] ?? false) 
+                                                ? Icons.keyboard_arrow_up 
+                                                : Icons.keyboard_arrow_down,
+                                            size: 16,
+                                            color: AppTheme.primaryColor,
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -529,6 +511,137 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                                   ),
                               ],
                             ),
+                            
+                            // Analiz Detayları - Daraltılabilir
+                            if (hasAnalysis && (_analysisExpanded[result.id] ?? false)) ...[
+                              const SizedBox(height: 16),
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryColor.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: AppTheme.primaryColor.withOpacity(0.2),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.auto_awesome,
+                                          size: 20,
+                                          color: AppTheme.primaryColor,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'AI Performans Analizi',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16,
+                                            color: AppTheme.primaryColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      result.aiAnalysis!,
+                                      style: TextStyle(
+                                        color: AppTheme.primaryTextColor,
+                                        fontSize: 14,
+                                        height: 1.5,
+                                        letterSpacing: 0.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        // Detayları Gör Butonu
+                                        Expanded(
+                                          child: InkWell(
+                                            onTap: () => _showAnalysis(result),
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: AppTheme.primaryColor.withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: AppTheme.primaryColor.withOpacity(0.3),
+                                                  width: 1,
+                                                ),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.arrow_forward,
+                                                    color: AppTheme.primaryColor,
+                                                    size: 16,
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    'Detayları Gör',
+                                                    style: TextStyle(
+                                                      color: AppTheme.primaryColor,
+                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        
+                                        const SizedBox(width: 8),
+                                        
+                                        // PDF Export Butonu
+                                        Expanded(
+                                          child: InkWell(
+                                            onTap: () => _exportTestToPdf(result),
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: AppTheme.secondaryColor.withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: AppTheme.secondaryColor.withOpacity(0.3),
+                                                  width: 1,
+                                                ),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.picture_as_pdf,
+                                                    color: AppTheme.secondaryColor,
+                                                    size: 16,
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    'PDF İndir',
+                                                    style: TextStyle(
+                                                      color: AppTheme.secondaryColor,
+                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -543,14 +656,22 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
   }
 
   void _showAnalysis(TestResultModel result) async {
+    // Aynı test oturumundaki tüm sonuçları bul
+    final sessionKey = result.sessionId;
+    final sameTestResults = athleteResults.where((r) => r.sessionId == sessionKey).toList();
+    
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => TestResultAnalysisScreen(
-          athlete: widget.athlete,
-          result: result,
+        builder: (context) => TestResultDetailScreen(
+          testName: result.testName,
+          testId: result.testId,
+          results: sameTestResults,
         ),
       ),
-    );
+    ).then((_) {
+      // Detay sayfasından dönüldüğünde listeyi yenile
+      _loadAthleteResults();
+    });
   }
 
   @override
