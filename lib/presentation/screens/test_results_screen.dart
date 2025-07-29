@@ -402,6 +402,7 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                           runSpacing: 4,
                                           children: results.map((result) {
                                             return Container(
+                                              constraints: BoxConstraints(maxWidth: 150),
                                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                               decoration: BoxDecoration(
                                                 color: AppTheme.primaryColor.withOpacity(0.1),
@@ -418,6 +419,8 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                                   color: AppTheme.primaryColor,
                                                   fontWeight: FontWeight.w500,
                                                 ),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
                                               ),
                                             );
                                           }).toList(),
@@ -438,6 +441,7 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                           children: [
                                             ...results.take(3).map((result) {
                                               return Container(
+                                                constraints: BoxConstraints(maxWidth: 150),
                                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                                 decoration: BoxDecoration(
                                                   color: AppTheme.primaryColor.withOpacity(0.1),
@@ -454,6 +458,8 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                                     color: AppTheme.primaryColor,
                                                     fontWeight: FontWeight.w500,
                                                   ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  maxLines: 1,
                                                 ),
                                               );
                                             }),

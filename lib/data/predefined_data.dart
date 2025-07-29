@@ -38,43 +38,7 @@ final List<TestDefinitionModel> predefinedTests = [
     protocol: 'Parkur Hazırlığı:\n1. Düz bir atletizm pisti veya ölçülü bir alan hazırlanır.\n2. Kronometre ve ölçüm bandı hazır edilir.\n\nUygulama:\n1. Katılımcı 12 dakika boyunca mümkün olan en uzun mesafeyi koşar.\n2. Süre dolduğunda koşulan toplam mesafe ölçülür.\n3. Katılımcı istediği tempoda koşabilir, gerekirse yürüyebilir.\n\nSonuç ve Puanlama:\n- Sonuç, 12 dakikada koşulan toplam mesafe (metre) olarak kaydedilir.\n- VO2max tahmini için: VO2max = (koşulan mesafe - 504.9) / 44.73 (ml/kg/dk)',
     resultUnit: 'metre',
   ),
-  TestDefinitionModel(
-    id: '6min-walk',
-    name: '6 Dakika Yürüme Testi',
-    category: 'Aerobik',
-    description: 'Submaksimal aerobik kapasiteyi ölçer.',
-    purpose: 'Submaksimal aerobik kapasiteyi ölçer.',
-    protocol: 'Parkur Hazırlığı:\n1. Düz bir parkurda 30m veya 50m\'lik bir alan belirlenir.\n2. Kronometre ve ölçüm bandı hazır edilir.\n\nUygulama:\n1. Katılımcı 6 dakika boyunca mümkün olan en uzun mesafeyi yürür.\n2. Süre dolduğunda yürüyüş durdurulur ve toplam mesafe ölçülür.\n\nSonuç ve Puanlama:\n- Sonuç, 6 dakikada yürüyerek kat edilen toplam mesafe (metre) olarak kaydedilir.\n- Klinik değerlendirmelerde referans tablolara bakılır.',
-    resultUnit: 'metre',
-  ),
-  TestDefinitionModel(
-    id: '2.4km-run',
-    name: '2.4 km Koşu Testi',
-    category: 'Aerobik',
-    description: 'VO2max tahmini için kullanılır.',
-    purpose: 'VO2max tahmini için kullanılır.',
-    protocol: 'Parkur Hazırlığı:\n1. 400m pistte 6 tur veya düz bir 2.4 km parkur hazırlanır.\n2. Kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı 2.4 km mesafeyi en kısa sürede koşar.\n2. Süre kaydedilir.\n\nSonuç ve Puanlama:\n- Sonuç, 2.4 km\'yi tamamlama süresi (saniye) olarak kaydedilir.\n- VO2max tahmini için: VO2max = 483 / süre (dakika) + 3.5 (ml/kg/dk)',
-    resultUnit: 'saniye',
-  ),
   // Anaerobik Testler
-  TestDefinitionModel(
-    id: 'rast',
-    name: 'RAST (Running-based Anaerobic Sprint Test)',
-    category: 'Anaerobik',
-    description: 'RAST testi, 35 metrelik parkurda 6 kez maksimum hızda sprint ve aralarda kısa dinlenme ile yapılan, saha ortamında anaerobik güç ve yorgunluk ölçümü sağlayan bir testtir.',
-    purpose: 'Sporcunun anaerobik güç, patlayıcı kuvvet ve yorgunluk indeksini değerlendirmek için kullanılır. Özellikle sprint, futbol, basketbol gibi sporlarda kısa süreli yüksek şiddetli performans kapasitesini ölçer.',
-    protocol: 'Parkur Hazırlığı:\n1. 35 metrelik düz bir parkur hazırlanır.\n2. Kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı 6 kez 35 metreyi maksimum hızda koşar.\n2. Her koşu arası 10 saniye dinlenir.\n3. Her koşunun süresi kronometreyle ölçülür.\n\nSonuç ve Puanlama:\n- Her sprintin süresi kaydedilir.\n- En yüksek güç hesaplanır: Güç (Watt) = (Vücut ağırlığı × 35²) / süre³\n- Ortalama güç ve yorgunluk indeksi de hesaplanabilir.\n- En yüksek güç değeri kaydedilir.',
-    resultUnit: 'Watt',
-  ),
-  TestDefinitionModel(
-    id: 'wingate',
-    name: 'Wingate Anaerobik Testi',
-    category: 'Anaerobik',
-    description: '30 sn bisiklet ergometresinde maksimum güç ve yorgunluk ölçümü.',
-    purpose: '30 sn bisiklet ergometresinde maksimum güç ve yorgunluk ölçümü.',
-    protocol: 'Ekipman:\n- Bisiklet ergometresi, kronometre, ağırlıklar.\n\nUygulama:\n1. Katılımcı 30 saniye boyunca maksimum hızda pedal çevirir.\n2. Sabit direnç uygulanır (genellikle vücut ağırlığının %7.5\'i).\n3. Her 5 saniyede bir devir sayısı kaydedilir.\n\nSonuç ve Puanlama:\n- En yüksek güç, ortalama güç ve yorgunluk indeksi hesaplanır.\n- Güç (Watt) = (Ağırlık × pedal çevresi × devir sayısı) / süre\n- En yüksek güç değeri kaydedilir.',
-    resultUnit: 'Watt',
-  ),
   TestDefinitionModel(
     id: 'margaria',
     name: 'Margaria-Kalamen Testi',
@@ -188,24 +152,7 @@ final List<TestDefinitionModel> predefinedTests = [
     resultUnit: 'cm',
   ),
   // Dayanıklılık
-  TestDefinitionModel(
-    id: 'yo-yo-endurance',
-    name: 'Yo-Yo Endurance Test',
-    category: 'Dayanıklılık',
-    description: 'Uzun süreli tekrarlı koşu ile dayanıklılık ölçümü.',
-    purpose: 'Uzun süreli tekrarlı koşu ile dayanıklılık ölçümü.',
-    protocol: 'Parkur Hazırlığı:\n1. 20 metrelik düz bir parkur hazırlanır.\n2. Sinyal ses kaydı ve kronometre hazır edilir.\n\nUygulama:\n1. Katılımcı, sinyal sesiyle bir uçtan diğer uca koşar.\n2. Dinlenme yoktur, tempo giderek artar.\n3. Sinyale yetişilemezse test biter.\n\nSonuç ve Puanlama:\n- Son tamamlanan seviye kaydedilir.\n- Toplam mesafe = (seviye × 20m).',
-    resultUnit: 'Seviye',
-  ),
-  TestDefinitionModel(
-    id: 'harvard-step',
-    name: 'Harvard Step Test',
-    category: 'Dayanıklılık',
-    description: 'Harvard Step Test, 45 cm yüksekliğinde bir basamağa belirli tempoda çıkıp inerek kardiyovasküler dayanıklılığı ölçen klasik bir testtir.',
-    purpose: 'Kardiyovasküler dayanıklılığı, kalp-dolaşım sisteminin egzersize verdiği yanıtı ve toparlanma hızını değerlendirmek için kullanılır. Özellikle genel sağlık taramaları ve sporcu dayanıklılık testlerinde tercih edilir.',
-    protocol: 'Ekipman:\n- 45 cm yüksekliğinde basamak, kronometre, nabız ölçer.\n\nUygulama:\n1. Katılımcı 5 dakika boyunca belirli tempoda basamağa çıkar ve iner.\n2. Erkek: dakikada 30 adım (2 saniyede bir adım)\n3. Kadın: dakikada 22 adım (2.7 saniyede bir adım)\n4. Test bitince nabız 1., 2. ve 3. dakikalarda ölçülür.\n\nSonuç ve Puanlama:\n- Harvard Step Test Puanı = (Test süresi (sn) × 100) / (toplam nabız × 2)\n- Daha yüksek puan, daha iyi dayanıklılık.\n- 90+ üstün, 80-89 iyi, 65-79 orta, 55-64 düşük, <55 çok düşük.',
-    resultUnit: 'puan',
-  ),
+  // Bu bölümde test bulunmuyor
   // Saha/İndirekt Testler
   TestDefinitionModel(
     id: 'astrand',

@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 import 'package:athleticcoach/presentation/screens/beep_test_screen.dart';
 import 'package:athleticcoach/presentation/screens/cooper_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/margaria_test_screen.dart';
 
 class TestProtocolScreen extends StatelessWidget {
   final TestDefinitionModel test;
@@ -80,6 +81,12 @@ class TestProtocolScreen extends StatelessWidget {
               icon: Icon(Icons.timer, color: AppTheme.whiteTextColor, size: 28),
               tooltip: 'Cooper 12 Dakika Test Başlat',
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CooperTestScreen())),
+            ),
+          if (test.id == 'margaria')
+            IconButton(
+              icon: Icon(Icons.fitness_center, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: 'Margaria Test Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MargariaTestScreen())),
             ),
           IconButton(
             icon: Icon(
