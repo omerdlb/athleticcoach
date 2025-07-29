@@ -44,6 +44,14 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
       final allResults = await database.getAllTestResults();
       
       // Aynı test oturumundaki sonuçları filtrele
+      if (widget.results.isEmpty) {
+        setState(() {
+          _currentResults = [];
+          _isLoading = false;
+        });
+        return;
+      }
+      
       final sessionId = widget.results.first.sessionId;
       final updatedResults = allResults.where((r) => r.sessionId == sessionId).toList();
       
@@ -281,6 +289,29 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
 
 
   Widget _buildResultsList() {
+    // Boş liste kontrolü
+    if (_currentResults.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.analytics_outlined,
+              size: 64,
+              color: AppTheme.secondaryTextColor,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Henüz test sonucu yok',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: AppTheme.secondaryTextColor,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
     // Test sonuçlarını tarihe göre grupla
     final Map<String, List<TestResultModel>> dateGroups = {};
     for (final result in _currentResults) {
@@ -350,70 +381,192 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
               return Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 margin: const EdgeInsets.only(bottom: 16),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Sporcu bilgisi ve sonuç
+                      // Sporcu bilgisi ve sonuç - yeni tasarım
                       Row(
                         children: [
-                          CircleAvatar(
-                            backgroundColor: AppTheme.primaryColor,
-                            child: Text(
-                              '${result.athleteName[0]}${result.athleteSurname[0]}',
-                              style: TextStyle(
-                                color: AppTheme.whiteTextColor,
-                                fontWeight: FontWeight.bold,
+                          // Avatar
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [AppTheme.primaryColor, AppTheme.accentColor],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${(result.athleteName?.isNotEmpty == true ? result.athleteName![0] : "?")}${(result.athleteSurname?.isNotEmpty == true ? result.athleteSurname![0] : "")}',
+                                style: TextStyle(
+                                  color: AppTheme.whiteTextColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          
+                          const SizedBox(width: 16),
+                          
+                          // Sporcu bilgileri
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${result.athleteName} ${result.athleteSurname}',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  '${result.athleteName ?? "Bilinmeyen"} ${result.athleteSurname ?? ""}',
+                                  style: TextStyle(
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                     color: AppTheme.primaryTextColor,
                                   ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
-                                Text(
-                                  'Saat: ${result.testDate.hour.toString().padLeft(2, '0')}:${result.testDate.minute.toString().padLeft(2, '0')}:${result.testDate.second.toString().padLeft(2, '0')}',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppTheme.secondaryTextColor,
-                                  ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.access_time,
+                                      size: 14,
+                                      color: AppTheme.secondaryTextColor,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${result.testDate.hour.toString().padLeft(2, '0')}:${result.testDate.minute.toString().padLeft(2, '0')}',
+                                      style: TextStyle(
+                                        color: AppTheme.secondaryTextColor,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                '${result.result.toStringAsFixed(2)} ${result.resultUnit}',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primaryColor,
-                                ),
-                              ),
-                              if (result.notes?.isNotEmpty == true)
-                                Text(
-                                  'Not: ${result.notes}',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppTheme.secondaryTextColor,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                            ],
-                          ),
                         ],
                       ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Test sonucu - ayrı bölüm
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppTheme.primaryColor.withOpacity(0.1),
+                              AppTheme.accentColor.withOpacity(0.1),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppTheme.primaryColor.withOpacity(0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Test Sonucu',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppTheme.secondaryTextColor,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${result.result.toStringAsFixed(2)} ${result.resultUnit}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                    color: AppTheme.primaryColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                Icons.analytics,
+                                color: AppTheme.primaryColor,
+                                size: 24,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      // Notlar - varsa göster
+                      if (result.notes?.isNotEmpty == true) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.secondaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppTheme.secondaryColor.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.note_alt,
+                                    size: 16,
+                                    color: AppTheme.secondaryColor,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Notlar',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.secondaryColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                result.notes!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppTheme.primaryTextColor,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       
                       const SizedBox(height: 16),
                       
@@ -730,7 +883,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        _formatDate(_currentResults.first.testDate),
+                        _currentResults.isNotEmpty ? _formatDate(_currentResults.first.testDate) : _formatDate(DateTime.now()),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppTheme.whiteTextColor,
                           fontWeight: FontWeight.w500,

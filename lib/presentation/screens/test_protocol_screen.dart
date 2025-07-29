@@ -9,6 +9,11 @@ import 'package:flutter/gestures.dart';
 import 'package:athleticcoach/presentation/screens/beep_test_screen.dart';
 import 'package:athleticcoach/presentation/screens/cooper_test_screen.dart';
 import 'package:athleticcoach/presentation/screens/margaria_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/vertical_jump_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/countermovement_jump_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/medicine_ball_throw_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/illinois_agility_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/t_test_agility_screen.dart';
 
 class TestProtocolScreen extends StatelessWidget {
   final TestDefinitionModel test;
@@ -87,6 +92,36 @@ class TestProtocolScreen extends StatelessWidget {
               icon: Icon(Icons.fitness_center, color: AppTheme.whiteTextColor, size: 28),
               tooltip: 'Margaria Test Başlat',
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MargariaTestScreen())),
+            ),
+          if (test.id == 'vertical-jump')
+            IconButton(
+              icon: Icon(Icons.trending_up, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: 'Dikey Sıçrama Testi Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const VerticalJumpTestScreen())),
+            ),
+          if (test.id == 'cmj')
+            IconButton(
+              icon: Icon(Icons.fitness_center, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: 'CMJ Testi Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CountermovementJumpTestScreen())),
+            ),
+          if (test.id == 'medicine-ball')
+            IconButton(
+              icon: Icon(Icons.sports_baseball, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: 'Medicine Ball Throw Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MedicineBallThrowTestScreen())),
+            ),
+          if (test.id == 'illinois')
+            IconButton(
+              icon: Icon(Icons.directions_run, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: 'Illinois Çeviklik Testi Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const IllinoisAgilityTestScreen())),
+            ),
+          if (test.id == 't-test')
+            IconButton(
+              icon: Icon(Icons.change_history, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: 'T-Test Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TTestAgilityScreen())),
             ),
           IconButton(
             icon: Icon(
