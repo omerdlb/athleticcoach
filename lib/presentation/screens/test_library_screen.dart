@@ -23,6 +23,7 @@ class _TestLibraryScreenState extends State<TestLibraryScreen> {
     'Sürat',
     'Esneklik',
     'Dayanıklılık',
+    'Kardiyovasküler',
     'İndirekt (Submaksimal)',
   ];
   String _selectedCategory = 'Tümü';

@@ -33,7 +33,7 @@ class AppDrawerWidget {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Athletic Coach',
+                    'Athletic Performance Coach',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -108,68 +108,15 @@ class AppDrawerWidget {
                     const Divider(color: Colors.white24, height: 32),
                     _buildDrawerItem(
                       context,
-                      icon: Icons.settings,
-                      title: 'Ayarlar',
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        // Ayarlar sayfasına yönlendirme
-                      },
-                    ),
-                    _buildDrawerItem(
-                      context,
                       icon: Icons.help,
                       title: 'Yardım',
                       onTap: () {
                         Navigator.of(context).pop();
-                        // Yardım sayfasına yönlendirme
+                        _showHelpDialog(context);
                       },
                     ),
                   ],
                 ),
-              ),
-            ),
-            
-            // Footer
-            Container(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Kullanıcı',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          'user@example.com',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
               ),
             ),
           ],
@@ -204,6 +151,158 @@ class AppDrawerWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         hoverColor: Colors.white.withOpacity(0.1),
+      ),
+    );
+  }
+
+  static void _showHelpDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              color: AppTheme.primaryColor,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Uygulama Hakkında',
+              style: TextStyle(
+                color: AppTheme.primaryTextColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Athletic Performance Coach',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Versiyon: 1.0.0',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.secondaryTextColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              Text(
+                'Uygulama Özellikleri:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primaryTextColor,
+                ),
+              ),
+              const SizedBox(height: 8),
+              _buildFeatureItem('• 12 farklı fitness testi'),
+              _buildFeatureItem('• Sporcu yönetimi'),
+              _buildFeatureItem('• Test sonuçları takibi'),
+              _buildFeatureItem('• AI destekli analiz'),
+              _buildFeatureItem('• PDF rapor oluşturma'),
+              
+              const SizedBox(height: 16),
+              
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.warningColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppTheme.warningColor.withOpacity(0.3),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          color: AppTheme.warningColor,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Önemli Bilgi',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.warningColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Tüm veriler telefonunuzda saklanmaktadır. Uygulama silinirse veya telefon sıfırlanırsa verileriniz kaybolabilir. Önemli verilerinizi düzenli olarak yedeklemenizi öneririz.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.primaryTextColor,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              Text(
+                'Destek:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primaryTextColor,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Sorularınız için geliştirici ile iletişime geçebilirsiniz.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppTheme.secondaryTextColor,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Tamam',
+              style: TextStyle(color: AppTheme.primaryColor),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _buildFeatureItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 13,
+          color: AppTheme.primaryTextColor,
+        ),
       ),
     );
   }

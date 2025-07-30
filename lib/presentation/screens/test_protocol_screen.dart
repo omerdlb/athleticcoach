@@ -14,6 +14,14 @@ import 'package:athleticcoach/presentation/screens/countermovement_jump_test_scr
 import 'package:athleticcoach/presentation/screens/medicine_ball_throw_test_screen.dart';
 import 'package:athleticcoach/presentation/screens/illinois_agility_test_screen.dart';
 import 'package:athleticcoach/presentation/screens/t_test_agility_screen.dart';
+import 'package:athleticcoach/presentation/screens/pro_agility_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/ten_meter_sprint_screen.dart';
+import 'package:athleticcoach/presentation/screens/twenty_meter_sprint_screen.dart';
+import 'package:athleticcoach/presentation/screens/thirty_meter_sprint_screen.dart';
+import 'package:athleticcoach/presentation/screens/sit_reach_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/shoulder_flexibility_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/balke_test_screen.dart';
+import 'package:athleticcoach/presentation/screens/bruce_protocol_screen.dart';
 
 class TestProtocolScreen extends StatelessWidget {
   final TestDefinitionModel test;
@@ -122,6 +130,54 @@ class TestProtocolScreen extends StatelessWidget {
               icon: Icon(Icons.change_history, color: AppTheme.whiteTextColor, size: 28),
               tooltip: 'T-Test Başlat',
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TTestAgilityScreen())),
+            ),
+          if (test.id == 'pro-agility')
+            IconButton(
+              icon: Icon(Icons.double_arrow, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: '5-10-5 Pro Agility Test Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProAgilityTestScreen())),
+            ),
+          if (test.id == '10m-sprint')
+            IconButton(
+              icon: Icon(Icons.speed, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: '10m Sprint Test Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TenMeterSprintScreen())),
+            ),
+          if (test.id == '20m-sprint')
+            IconButton(
+              icon: Icon(Icons.speed, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: '20m Sprint Test Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TwentyMeterSprintScreen())),
+            ),
+          if (test.id == '30m-sprint')
+            IconButton(
+              icon: Icon(Icons.speed, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: '30m Sprint Test Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ThirtyMeterSprintScreen())),
+            ),
+          if (test.id == 'sit-reach')
+            IconButton(
+              icon: Icon(Icons.accessibility_new, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: 'Sit and Reach Test Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SitReachTestScreen())),
+            ),
+          if (test.id == 'shoulder-flex')
+            IconButton(
+              icon: Icon(Icons.accessibility_new, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: 'Shoulder Flexibility Test Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ShoulderFlexibilityTestScreen())),
+            ),
+          if (test.id == 'balke-test')
+            IconButton(
+              icon: Icon(Icons.directions_run, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: 'Balke Test Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BalkeTestScreen())),
+            ),
+          if (test.id == 'bruce-protocol')
+            IconButton(
+              icon: Icon(Icons.directions_run, color: AppTheme.whiteTextColor, size: 28),
+              tooltip: 'Bruce Protokolü Başlat',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BruceProtocolScreen())),
             ),
           IconButton(
             icon: Icon(

@@ -1,16 +1,31 @@
-# athleticcoach
+# Athletic Performance Coach
 
-A new Flutter project.
+Atletik Performans Yönetimi Uygulaması
 
-## Getting Started
+## Uygulama Hakkında
 
-This project is a starting point for a Flutter application.
+Athletic Performance Coach, sporcuların atletik performanslarını ölçmek ve takip etmek için geliştirilmiş kapsamlı bir mobil uygulamadır.
 
-A few resources to get you started if this is your first Flutter project:
+### Özellikler
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **12 Farklı Fitness Testi**: Dikey sıçrama, sprint, çeviklik, kardiyovasküler testler
+- **Sporcu Yönetimi**: Sporcu ekleme, düzenleme ve takip
+- **Test Sonuçları**: Detaylı sonuç analizi ve grafikler
+- **AI Destekli Analiz**: Yapay zeka ile performans değerlendirmesi
+- **PDF Raporları**: Test sonuçlarını PDF formatında dışa aktarma
+- **Veri Güvenliği**: Tüm veriler yerel olarak saklanır
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Teknolojiler
+
+- Flutter & Dart
+- SQLite Veritabanı
+- AI Entegrasyonu (Gemini)
+- PDF Oluşturma
+- Ses Dosyası Yönetimi
+
+## Kurulum
+
+```bash
+flutter pub get
+flutter run
+```

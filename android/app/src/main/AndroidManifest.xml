@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="athleticcoach"
+        android:label="Athletic Performance Coach"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

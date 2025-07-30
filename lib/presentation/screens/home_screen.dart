@@ -236,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         title: Text(
-          'Atletik Performans',
+          'Athletic Performance Coach',
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: AppTheme.getResponsiveFontSize(context, 22),
