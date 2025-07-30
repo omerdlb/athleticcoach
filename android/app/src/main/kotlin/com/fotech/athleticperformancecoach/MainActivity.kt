@@ -1,4 +1,4 @@
-package com.fotech.athleticcoach.athleticcoach
+package com.fotech.athleticperformancecoach
 
 import io.flutter.embedding.android.FlutterActivity
 
