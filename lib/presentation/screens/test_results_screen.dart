@@ -201,10 +201,10 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                                 margin: const EdgeInsets.only(bottom: 8),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.primaryColor.withOpacity(0.1),
+                                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: AppTheme.primaryColor.withOpacity(0.3),
+                                    color: AppTheme.primaryColor.withValues(alpha: 0.3),
                                     width: 1,
                                   ),
                                 ),
@@ -231,7 +231,7 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                       style: TextStyle(
                                         fontWeight: FontWeight.w500,
                                         fontSize: AppTheme.getResponsiveFontSize(context, 14),
-                                        color: AppTheme.primaryColor.withOpacity(0.8),
+                                        color: AppTheme.primaryColor.withValues(alpha: 0.8),
                                         letterSpacing: 0.1,
                                       ),
                                     ),
@@ -306,10 +306,10 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                                     Container(
                                                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                                       decoration: BoxDecoration(
-                                                        color: AppTheme.secondaryColor.withOpacity(0.1),
+                                                        color: AppTheme.secondaryColor.withValues(alpha: 0.1),
                                                         borderRadius: BorderRadius.circular(8),
                                                         border: Border.all(
-                                                          color: AppTheme.secondaryColor.withOpacity(0.3),
+                                                          color: AppTheme.secondaryColor.withValues(alpha: 0.3),
                                                           width: 1,
                                                         ),
                                                       ),
@@ -341,10 +341,10 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.secondaryColor.withOpacity(0.1),
+                                          color: AppTheme.secondaryColor.withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(6),
                                           border: Border.all(
-                                            color: AppTheme.secondaryColor.withOpacity(0.3),
+                                            color: AppTheme.secondaryColor.withValues(alpha: 0.3),
                                             width: 1,
                                           ),
                                         ),
@@ -405,10 +405,10 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                               constraints: BoxConstraints(maxWidth: 150),
                                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                               decoration: BoxDecoration(
-                                                color: AppTheme.primaryColor.withOpacity(0.1),
+                                                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                                                 borderRadius: BorderRadius.circular(12),
                                                 border: Border.all(
-                                                  color: AppTheme.primaryColor.withOpacity(0.3),
+                                                  color: AppTheme.primaryColor.withValues(alpha: 0.3),
                                                   width: 1,
                                                 ),
                                               ),
@@ -444,10 +444,10 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                                 constraints: BoxConstraints(maxWidth: 150),
                                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                                 decoration: BoxDecoration(
-                                                  color: AppTheme.primaryColor.withOpacity(0.1),
+                                                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                                                   borderRadius: BorderRadius.circular(12),
                                                   border: Border.all(
-                                                    color: AppTheme.primaryColor.withOpacity(0.3),
+                                                    color: AppTheme.primaryColor.withValues(alpha: 0.3),
                                                     width: 1,
                                                   ),
                                                 ),
@@ -466,10 +466,10 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                               decoration: BoxDecoration(
-                                                color: AppTheme.secondaryColor.withOpacity(0.1),
+                                                color: AppTheme.secondaryColor.withValues(alpha: 0.1),
                                                 borderRadius: BorderRadius.circular(12),
                                                 border: Border.all(
-                                                  color: AppTheme.secondaryColor.withOpacity(0.3),
+                                                  color: AppTheme.secondaryColor.withValues(alpha: 0.3),
                                                   width: 1,
                                                 ),
                                               ),
@@ -586,7 +586,7 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppTheme.secondaryTextColor.withOpacity(0.3),
+                color: AppTheme.secondaryTextColor.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -740,10 +740,10 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.errorColor.withOpacity(0.1),
+                color: AppTheme.errorColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: AppTheme.errorColor.withOpacity(0.3),
+                  color: AppTheme.errorColor.withValues(alpha: 0.3),
                 ),
               ),
               child: Column(

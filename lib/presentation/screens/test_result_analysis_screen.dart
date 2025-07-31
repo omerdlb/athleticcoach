@@ -92,108 +92,117 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
       ),
       body: Container(
         decoration: AppTheme.gradientDecoration,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Test Bilgileri
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: AppTheme.cardDecoration,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.assignment,
-                            color: AppTheme.primaryColor,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Test Bilgileri',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                            color: AppTheme.primaryTextColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    _buildInfoRow('Sporcu', '${widget.testResult.athleteName} ${widget.testResult.athleteSurname}'),
-                    _buildInfoRow('Test', widget.testResult.testName),
-                    _buildInfoRow('Sonuç', '${widget.testResult.result.toStringAsFixed(2)} ${widget.testResult.resultUnit}'),
-                    _buildInfoRow('Tarih', '${widget.testResult.testDate.day.toString().padLeft(2, '0')}.${widget.testResult.testDate.month.toString().padLeft(2, '0')}.${widget.testResult.testDate.year}'),
-                    if (widget.testResult.notes?.isNotEmpty == true)
-                      _buildInfoRow('Notlar', widget.testResult.notes!),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // AI Analizi - Tek Kart
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: AppTheme.cardDecoration,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Başlık
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.auto_awesome,
-                            color: AppTheme.primaryColor,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'AI Performans Analizi',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                            color: AppTheme.primaryTextColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // Tam analiz metni
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: AppTheme.getResponsivePadding(context),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // Test Bilgileri
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryColor.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppTheme.primaryColor.withOpacity(0.2),
-                          width: 1,
-                        ),
+                      decoration: AppTheme.cardDecoration,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.assignment,
+                                  color: AppTheme.primaryColor,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Test Bilgileri',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: AppTheme.getResponsiveFontSize(context, 18),
+                                    color: AppTheme.primaryTextColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _buildInfoRow('Sporcu', '${widget.testResult.athleteName} ${widget.testResult.athleteSurname}'),
+                          _buildInfoRow('Test', widget.testResult.testName),
+                          _buildInfoRow('Sonuç', '${widget.testResult.result.toStringAsFixed(2)} ${widget.testResult.resultUnit}'),
+                          _buildInfoRow('Tarih', '${widget.testResult.testDate.day.toString().padLeft(2, '0')}.${widget.testResult.testDate.month.toString().padLeft(2, '0')}.${widget.testResult.testDate.year}'),
+                          if (widget.testResult.notes?.isNotEmpty == true)
+                            _buildInfoRow('Notlar', widget.testResult.notes!),
+                        ],
                       ),
-                      child: _buildFormattedAnalysis(widget.testResult.aiAnalysis!),
                     ),
-                  ],
+                    
+                    const SizedBox(height: 16),
+                    
+                    // AI Analizi - Tek Kart
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: AppTheme.cardDecoration,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Başlık
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.auto_awesome,
+                                  color: AppTheme.primaryColor,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'AI Performans Analizi',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: AppTheme.getResponsiveFontSize(context, 18),
+                                    color: AppTheme.primaryTextColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // Tam analiz metni
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppTheme.primaryColor.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: _buildFormattedAnalysis(widget.testResult.aiAnalysis!),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ]),
                 ),
               ),
             ],
@@ -216,7 +225,7 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: AppTheme.secondaryTextColor,
-                fontSize: 14,
+                fontSize: AppTheme.getResponsiveFontSize(context, 14),
               ),
             ),
           ),
@@ -225,9 +234,11 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
               value,
               style: TextStyle(
                 color: AppTheme.primaryTextColor,
-                fontSize: 14,
+                fontSize: AppTheme.getResponsiveFontSize(context, 14),
                 height: 1.4,
               ),
+              overflow: TextOverflow.visible,
+              softWrap: true,
             ),
           ),
         ],
@@ -241,7 +252,9 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: lines.map((line) {
         final trimmed = line.trim();
-        if (trimmed.startsWith('•')) {
+        if (trimmed.isEmpty) {
+          return const SizedBox(height: 4);
+        } else if (trimmed.startsWith('•')) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: Row(
@@ -249,8 +262,16 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
               children: [
                 const Text('• ', style: TextStyle(fontSize: 16, height: 1.6)),
                 Expanded(
-                  child: Text(trimmed.substring(1).trim(),
-                      style: const TextStyle(fontSize: 16, height: 1.6, color: Colors.black87)),
+                  child: Text(
+                    trimmed.substring(1).trim(),
+                    style: TextStyle(
+                      fontSize: AppTheme.getResponsiveFontSize(context, 16),
+                      height: 1.6,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.visible,
+                    softWrap: true,
+                  ),
                 ),
               ],
             ),
@@ -260,18 +281,30 @@ class _TestResultAnalysisScreenState extends State<TestResultAnalysisScreen> {
           final title = trimmed.replaceFirst(RegExp(r'^[0-9]+\.'), '').trim();
           return Padding(
             padding: const EdgeInsets.only(top: 12, bottom: 8),
-            child: Text(title,
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.primaryColor,
-                )),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: AppTheme.getResponsiveFontSize(context, 17),
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryColor,
+              ),
+              overflow: TextOverflow.visible,
+              softWrap: true,
+            ),
           );
         } else {
           return Padding(
             padding: const EdgeInsets.only(bottom: 6),
-            child: Text(trimmed,
-                style: const TextStyle(fontSize: 16, height: 1.6, color: Colors.black87)),
+            child: Text(
+              trimmed,
+              style: TextStyle(
+                fontSize: AppTheme.getResponsiveFontSize(context, 16),
+                height: 1.6,
+                color: Colors.black87,
+              ),
+              overflow: TextOverflow.visible,
+              softWrap: true,
+            ),
           );
         }
       }).toList(),

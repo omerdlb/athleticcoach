@@ -292,6 +292,18 @@ class AthleteDatabase {
     });
   }
 
+  Future<List<TestResultModel>> getRecentTestResults({int limit = 5}) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'test_results',
+      orderBy: 'testDate DESC',
+      limit: limit,
+    );
+    return List.generate(maps.length, (i) {
+      return TestResultModel.fromMap(maps[i]);
+    });
+  }
+
   Future<void> clearRecentTests() async {
     final db = await database;
     await db.delete('recent_tests');

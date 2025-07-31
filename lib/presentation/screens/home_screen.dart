@@ -1,15 +1,16 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:athleticcoach/data/athlete_database.dart';
 import 'package:athleticcoach/data/models/recent_test_model.dart';
+import 'package:athleticcoach/data/models/test_result_model.dart';
 import 'package:athleticcoach/data/models/team_analysis_model.dart';
 import 'package:athleticcoach/core/app_theme.dart';
 import 'package:athleticcoach/presentation/widgets/onboarding_widget.dart';
 import 'package:athleticcoach/presentation/widgets/app_drawer_widget.dart';
 import 'package:athleticcoach/presentation/widgets/recent_tests_card_widget.dart';
 import 'package:athleticcoach/presentation/widgets/team_analysis_card_widget.dart';
-import 'package:athleticcoach/presentation/screens/yo_yo_test_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,6 +24,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   List<RecentTestModel> _recentTests = [];
   bool _isLoadingRecentTests = true;
+  List<TestResultModel> _recentTestResults = [];
+  bool _isLoadingRecentTestResults = true;
   TeamAnalysisModel? _latestTeamAnalysis;
   bool _isLoadingTeamAnalysis = true;
 
@@ -31,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _checkFirstLaunch();
     _loadRecentTests();
+    _loadRecentTestResults();
     _loadTeamAnalysis();
   }
 
@@ -71,6 +75,26 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _loadRecentTestResults() async {
+    try {
+      final database = AthleteDatabase();
+      final recentResults = await database.getRecentTestResults(limit: 5);
+      
+      if (mounted) {
+        setState(() {
+          _recentTestResults = recentResults;
+          _isLoadingRecentTestResults = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingRecentTestResults = false;
+        });
+      }
+    }
+  }
+
   Future<void> _loadTeamAnalysis() async {
     try {
       final database = AthleteDatabase();
@@ -95,90 +119,8 @@ class _HomeScreenState extends State<HomeScreen> {
     await _loadRecentTests();
   }
 
-  Widget _buildYoYoQuickAccessCard() {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.primaryColor,
-            AppTheme.accentColor,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.shadowColorWithOpacity,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const YoYoTestScreen(),
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.whiteTextColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.sports_soccer,
-                    color: AppTheme.whiteTextColor,
-                    size: 32,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Yo-Yo IR1 Test',
-                        style: TextStyle(
-                          color: AppTheme.whiteTextColor,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Senkronize bip sesi ile test yönetimi',
-                        style: TextStyle(
-                          color: AppTheme.whiteTextColor.withOpacity(0.8),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppTheme.whiteTextColor,
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  Future<void> _refreshRecentTestResults() async {
+    await _loadRecentTestResults();
   }
 
   String _getTimeAgo(DateTime dateTime) {
@@ -220,9 +162,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
+      drawerScrimColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: AppTheme.primaryColor,
         elevation: 0,
+        automaticallyImplyLeading: false,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(
@@ -266,11 +215,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
             child: Column(
               children: [
-              // Yo-Yo Test Hızlı Erişim Kartı
-              _buildYoYoQuickAccessCard(),
-              
-              const SizedBox(height: 20),
-              
               // Son İncelenen Testler Kartı
               RecentTestsCardWidget(
                 recentTests: _recentTests,
@@ -278,6 +222,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 onRefresh: _refreshRecentTests,
                 getTimeAgo: _getTimeAgo,
               ),
+              
+              const SizedBox(height: 20),
               
               // Son Uygulanan Test Analizi Kartı
               TeamAnalysisCardWidget(

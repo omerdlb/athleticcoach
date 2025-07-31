@@ -346,10 +346,10 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.1),
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: AppTheme.primaryColor.withOpacity(0.3),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -466,15 +466,15 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              AppTheme.primaryColor.withOpacity(0.1),
-                              AppTheme.accentColor.withOpacity(0.1),
+                              AppTheme.primaryColor.withValues(alpha: 0.1),
+                              AppTheme.accentColor.withValues(alpha: 0.1),
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppTheme.primaryColor.withOpacity(0.2),
+                            color: AppTheme.primaryColor.withValues(alpha: 0.2),
                             width: 1,
                           ),
                         ),
@@ -506,7 +506,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryColor.withOpacity(0.1),
+                                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
@@ -526,10 +526,10 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppTheme.secondaryColor.withOpacity(0.1),
+                            color: AppTheme.secondaryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: AppTheme.secondaryColor.withOpacity(0.2),
+                              color: AppTheme.secondaryColor.withValues(alpha: 0.2),
                               width: 1,
                             ),
                           ),
@@ -576,7 +576,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppTheme.secondaryColor.withOpacity(0.1),
+                            color: AppTheme.secondaryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -617,7 +617,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                       Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.primaryColor.withOpacity(0.1),
+                                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(10),
                                         ),
                                         child: Icon(
@@ -655,7 +655,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                       Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.primaryColor.withOpacity(0.1),
+                                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: Icon(
@@ -683,10 +683,10 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                         width: double.infinity,
                                         padding: const EdgeInsets.all(16),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.primaryColor.withOpacity(0.05),
+                                          color: AppTheme.primaryColor.withValues(alpha: 0.05),
                                           borderRadius: BorderRadius.circular(12),
                                           border: Border.all(
-                                            color: AppTheme.primaryColor.withOpacity(0.2),
+                                            color: AppTheme.primaryColor.withValues(alpha: 0.2),
                                             width: 1,
                                           ),
                                         ),
@@ -720,30 +720,34 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                               },
                                               borderRadius: BorderRadius.circular(12),
                                               child: Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                                 decoration: BoxDecoration(
-                                                  color: AppTheme.primaryColor.withOpacity(0.1),
+                                                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                                                   borderRadius: BorderRadius.circular(12),
                                                   border: Border.all(
-                                                    color: AppTheme.primaryColor.withOpacity(0.3),
+                                                    color: AppTheme.primaryColor.withValues(alpha: 0.3),
                                                     width: 1,
                                                   ),
                                                 ),
                                                 child: Row(
                                                   mainAxisAlignment: MainAxisAlignment.center,
+                                                  mainAxisSize: MainAxisSize.min,
                                                   children: [
                                                     Icon(
                                                       Icons.arrow_forward,
                                                       color: AppTheme.primaryColor,
-                                                      size: 18,
+                                                      size: 16,
                                                     ),
-                                                    const SizedBox(width: 8),
-                                                    Text(
-                                                      'Detayları Gör',
-                                                      style: TextStyle(
-                                                        color: AppTheme.primaryColor,
-                                                        fontWeight: FontWeight.w600,
-                                                        fontSize: 14,
+                                                    const SizedBox(width: 6),
+                                                    Flexible(
+                                                      child: Text(
+                                                        'Detayları Gör',
+                                                        style: TextStyle(
+                                                          color: AppTheme.primaryColor,
+                                                          fontWeight: FontWeight.w600,
+                                                          fontSize: 13,
+                                                        ),
+                                                        overflow: TextOverflow.ellipsis,
                                                       ),
                                                     ),
                                                   ],
@@ -752,7 +756,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                             ),
                                           ),
                                           
-                                          const SizedBox(width: 12),
+                                          const SizedBox(width: 8),
                                           
                                           // PDF Export Butonu
                                           Expanded(
@@ -760,30 +764,34 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                                               onTap: () => _exportToPdf(result),
                                               borderRadius: BorderRadius.circular(12),
                                               child: Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                                 decoration: BoxDecoration(
-                                                  color: AppTheme.secondaryColor.withOpacity(0.1),
+                                                  color: AppTheme.secondaryColor.withValues(alpha: 0.1),
                                                   borderRadius: BorderRadius.circular(12),
                                                   border: Border.all(
-                                                    color: AppTheme.secondaryColor.withOpacity(0.3),
+                                                    color: AppTheme.secondaryColor.withValues(alpha: 0.3),
                                                     width: 1,
                                                   ),
                                                 ),
                                                 child: Row(
                                                   mainAxisAlignment: MainAxisAlignment.center,
+                                                  mainAxisSize: MainAxisSize.min,
                                                   children: [
                                                     Icon(
                                                       Icons.picture_as_pdf,
                                                       color: AppTheme.secondaryColor,
-                                                      size: 18,
+                                                      size: 16,
                                                     ),
-                                                    const SizedBox(width: 8),
-                                                    Text(
-                                                      'PDF İndir',
-                                                      style: TextStyle(
-                                                        color: AppTheme.secondaryColor,
-                                                        fontWeight: FontWeight.w600,
-                                                        fontSize: 14,
+                                                    const SizedBox(width: 6),
+                                                    Flexible(
+                                                      child: Text(
+                                                        'PDF İndir',
+                                                        style: TextStyle(
+                                                          color: AppTheme.secondaryColor,
+                                                          fontWeight: FontWeight.w600,
+                                                          fontSize: 13,
+                                                        ),
+                                                        overflow: TextOverflow.ellipsis,
                                                       ),
                                                     ),
                                                   ],
@@ -864,7 +872,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: AppTheme.whiteTextColor.withOpacity(0.2),
+                        color: AppTheme.whiteTextColor.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -879,7 +887,7 @@ class _TestResultDetailScreenState extends State<TestResultDetailScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: AppTheme.whiteTextColor.withOpacity(0.2),
+                        color: AppTheme.whiteTextColor.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
