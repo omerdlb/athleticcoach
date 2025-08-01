@@ -5,12 +5,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:athleticcoach/data/athlete_database.dart';
 import 'package:athleticcoach/data/models/recent_test_model.dart';
 import 'package:athleticcoach/data/models/test_result_model.dart';
-import 'package:athleticcoach/data/models/team_analysis_model.dart';
 import 'package:athleticcoach/core/app_theme.dart';
 import 'package:athleticcoach/presentation/widgets/onboarding_widget.dart';
 import 'package:athleticcoach/presentation/widgets/app_drawer_widget.dart';
 import 'package:athleticcoach/presentation/widgets/recent_tests_card_widget.dart';
-import 'package:athleticcoach/presentation/widgets/team_analysis_card_widget.dart';
+import 'package:athleticcoach/presentation/widgets/athlete_comparison_card_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,8 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoadingRecentTests = true;
   List<TestResultModel> _recentTestResults = [];
   bool _isLoadingRecentTestResults = true;
-  TeamAnalysisModel? _latestTeamAnalysis;
-  bool _isLoadingTeamAnalysis = true;
 
   @override
   void initState() {
@@ -35,7 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _checkFirstLaunch();
     _loadRecentTests();
     _loadRecentTestResults();
-    _loadTeamAnalysis();
   }
 
   Future<void> _checkFirstLaunch() async {
@@ -95,25 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _loadTeamAnalysis() async {
-    try {
-      final database = AthleteDatabase();
-      final teamAnalysis = await database.getLatestTeamAnalysis();
-      
-      if (mounted) {
-        setState(() {
-          _latestTeamAnalysis = teamAnalysis;
-          _isLoadingTeamAnalysis = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingTeamAnalysis = false;
-        });
-      }
-    }
-  }
+
 
   Future<void> _refreshRecentTests() async {
     await _loadRecentTests();
@@ -224,14 +202,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               
               const SizedBox(height: 20),
-              
-              // Son Uygulanan Test Analizi Kartı
-              TeamAnalysisCardWidget(
-                latestTeamAnalysis: _latestTeamAnalysis,
-                isLoading: _isLoadingTeamAnalysis,
-                getTimeAgo: _getTimeAgo,
-              ),
-              
+
+              // Sporcu Karşılaştırma Kartı
+              AthleteComparisonCardWidget(),
               
             ],
           ),

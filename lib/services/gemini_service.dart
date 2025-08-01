@@ -339,4 +339,109 @@ Tarih ve değerleri gerektiği yerde kısaca kullan. Uzun paragraflardan kaçın
 
     return await generateContent(prompt);
   }
+
+  // SPORCU KARŞILAŞTIRMA ANALİZİ
+  static Future<String?> compareAthletes({
+    required AthleteModel athlete1,
+    required AthleteModel athlete2,
+    required List<TestResultModel> athlete1Results,
+    required List<TestResultModel> athlete2Results,
+  }) async {
+    // Sporcu bilgilerini formatla
+    final athlete1Info = '''
+${athlete1.name} ${athlete1.surname}:
+- Yaş: ${DateTime.now().year - athlete1.birthDate.year}
+- Cinsiyet: ${athlete1.gender}
+- Branş: ${athlete1.branch}
+- Boy: ${athlete1.height} cm
+- Kilo: ${athlete1.weight} kg
+''';
+
+    final athlete2Info = '''
+${athlete2.name} ${athlete2.surname}:
+- Yaş: ${DateTime.now().year - athlete2.birthDate.year}
+- Cinsiyet: ${athlete2.gender}
+- Branş: ${athlete2.branch}
+- Boy: ${athlete2.height} cm
+- Kilo: ${athlete2.weight} kg
+''';
+
+    // Test sonuçlarını formatla
+    String athlete1ResultsText = '';
+    if (athlete1Results.isNotEmpty) {
+      athlete1ResultsText = athlete1Results.take(5).map((r) {
+        final dateStr = '${r.testDate.day.toString().padLeft(2, '0')}.${r.testDate.month.toString().padLeft(2, '0')}.${r.testDate.year}';
+        String formattedResult = '';
+        if (r.resultUnit == 'Seviye') {
+          formattedResult = 'Seviye ${r.result.toStringAsFixed(1)}';
+        } else {
+          formattedResult = '${r.result.toStringAsFixed(2)} ${r.resultUnit}';
+        }
+        return '- $dateStr: ${r.testName} → $formattedResult';
+      }).join('\n');
+    } else {
+      athlete1ResultsText = '- Henüz test sonucu bulunmuyor';
+    }
+
+    String athlete2ResultsText = '';
+    if (athlete2Results.isNotEmpty) {
+      athlete2ResultsText = athlete2Results.take(5).map((r) {
+        final dateStr = '${r.testDate.day.toString().padLeft(2, '0')}.${r.testDate.month.toString().padLeft(2, '0')}.${r.testDate.year}';
+        String formattedResult = '';
+        if (r.resultUnit == 'Seviye') {
+          formattedResult = 'Seviye ${r.result.toStringAsFixed(1)}';
+        } else {
+          formattedResult = '${r.result.toStringAsFixed(2)} ${r.resultUnit}';
+        }
+        return '- $dateStr: ${r.testName} → $formattedResult';
+      }).join('\n');
+    } else {
+      athlete2ResultsText = '- Henüz test sonucu bulunmuyor';
+    }
+
+    final prompt = '''
+Sen deneyimli bir spor antrenörüsün. İki sporcuyu karşılaştırmalı olarak analiz et.
+
+SPORCU BİLGİLERİ:
+
+${athlete1.name} ${athlete1.surname}:
+$athlete1Info
+
+Son Test Sonuçları:
+$athlete1ResultsText
+
+${athlete2.name} ${athlete2.surname}:
+$athlete2Info
+
+Son Test Sonuçları:
+$athlete2ResultsText
+
+KURALLAR:
+1. Her bölümü MUTLAKA tamamla
+2. Yarım cümle bırakma
+3. Her bölüm en az 40 kelime olsun
+4. Spesifik ve detaylı yaz
+5. Sporcu isimlerini kullan
+6. Karşılaştırmalı analiz yap
+7. Test sonuçlarını doğru kullan
+
+Aşağıdaki 4 bölümü tam olarak yaz:
+
+1. GENEL KARŞILAŞTIRMA:
+İki sporcunun genel özelliklerini karşılaştır. Yaş, cinsiyet, branş ve fiziksel özellikler açısından farklılıkları belirt. Hangi sporcunun hangi açıdan avantajlı olduğunu açıkla.
+
+2. PERFORMANS ANALİZİ:
+Mevcut test sonuçlarına göre her iki sporcunun performansını değerlendir. Hangi sporcunun hangi testlerde daha iyi performans gösterdiğini belirt. Performans farklılıklarının nedenlerini açıkla.
+
+3. GÜÇLÜ YÖNLER:
+Her sporcunun güçlü yönlerini ayrı ayrı belirt. Hangi alanlarda öne çıktıklarını açıkla. Bu güçlü yönlerin nasıl geliştirilebileceğini kısaca belirt.
+
+4. GELİŞİM ÖNERİLERİ:
+Her sporcu için 2-3 spesifik gelişim önerisi ver. Bu önerilerin nasıl uygulanacağını açıkla. Hangi sporcunun hangi alanlarda daha fazla çalışması gerektiğini belirt.
+
+ÖNEMLİ: Her bölümü tamamla ve yarım bırakma! Sporcu isimlerini ve test sonuçlarını doğru kullan!
+''';
+
+    return await generateContent(prompt);
+  }
 } 

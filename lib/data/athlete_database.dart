@@ -304,6 +304,19 @@ class AthleteDatabase {
     });
   }
 
+  Future<List<TestResultModel>> getTestResultsByAthleteId(String athleteId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'test_results',
+      where: 'athleteId = ?',
+      whereArgs: [athleteId],
+      orderBy: 'testDate DESC',
+    );
+    return List.generate(maps.length, (i) {
+      return TestResultModel.fromMap(maps[i]);
+    });
+  }
+
   Future<void> clearRecentTests() async {
     final db = await database;
     await db.delete('recent_tests');

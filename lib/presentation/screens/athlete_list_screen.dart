@@ -221,38 +221,56 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
                                             ),
                                       ),
                                       const SizedBox(height: 4),
-                                      Row(
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 4,
                                         children: [
-                                          Icon(Icons.sports, size: 16, color: AppTheme.primaryColor),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            athlete.branch,
-                                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                                  color: AppTheme.primaryColor,
-                                                  fontWeight: FontWeight.w500,
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.sports, size: 16, color: AppTheme.primaryColor),
+                                              const SizedBox(width: 4),
+                                              Flexible(
+                                                child: Text(
+                                                  athlete.branch,
+                                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                        color: AppTheme.primaryColor,
+                                                        fontWeight: FontWeight.w500,
+                                                      ),
+                                                  overflow: TextOverflow.ellipsis,
                                                 ),
+                                              ),
+                                            ],
                                           ),
-                                          const SizedBox(width: 12),
-                                          Icon(Icons.cake, size: 15, color: AppTheme.secondaryTextColor),
-                                          const SizedBox(width: 2),
-                                          Text(
-                                            '${athlete.birthDate.year}',
-                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                  color: AppTheme.secondaryTextColor,
-                                                ),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.cake, size: 15, color: AppTheme.secondaryTextColor),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                '${athlete.birthDate.year}',
+                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                      color: AppTheme.secondaryTextColor,
+                                                    ),
+                                              ),
+                                            ],
                                           ),
-                                          const SizedBox(width: 12),
-                                          Icon(
-                                            athlete.gender == 'Kadın' ? Icons.female : Icons.male,
-                                            size: 15,
-                                            color: AppTheme.secondaryTextColor,
-                                          ),
-                                          const SizedBox(width: 2),
-                                          Text(
-                                            athlete.gender,
-                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                  color: AppTheme.secondaryTextColor,
-                                                ),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                athlete.gender == 'Kadın' ? Icons.female : Icons.male,
+                                                size: 15,
+                                                color: AppTheme.secondaryTextColor,
+                                              ),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                athlete.gender,
+                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                      color: AppTheme.secondaryTextColor,
+                                                    ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
