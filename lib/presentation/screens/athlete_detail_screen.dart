@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:athleticcoach/services/pdf_export_service.dart';
 import 'test_results_graph_screen.dart'; // grafik ekranı
 import 'test_result_detail_screen.dart'; // test sonuç detay ekranı
+import 'athlete_add_screen.dart'; // sporcu ekleme/düzenleme ekranı
 
 class AthleteDetailScreen extends StatefulWidget {
   final AthleteModel athlete;
@@ -655,6 +656,79 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
     );
   }
 
+  void _editAthlete(BuildContext context) async {
+    // Sporcu düzenleme sayfasına git
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AthleteAddScreen(athlete: widget.athlete),
+      ),
+    );
+    
+    // Eğer sporcu güncellendiyse, ana sayfaya dön ve güncelleme yap
+    if (result == true) {
+      Navigator.of(context).pop(true); // Ana sayfaya güncelleme sinyali ile dön
+    }
+  }
+
+  void _deleteAthlete(BuildContext context) async {
+    // Silme onayı al
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Sporcuyu Sil'),
+          content: Text('${widget.athlete.name} ${widget.athlete.surname} isimli sporcuyu silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz ve sporcunun tüm test sonuçları da silinecektir.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('İptal'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: AppTheme.errorColor,
+              ),
+              child: Text('Sil'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      try {
+        final database = AthleteDatabase();
+        
+        // Önce sporcunun test sonuçlarını sil
+        await database.deleteTestResultsByAthleteId(widget.athlete.id);
+        
+        // Sonra sporcuyu sil
+        await database.deleteAthlete(widget.athlete.id);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${widget.athlete.name} ${widget.athlete.surname} başarıyla silindi'),
+              backgroundColor: AppTheme.successColor,
+            ),
+          );
+          
+          // Ana sayfaya dön ve güncelleme yap
+          Navigator.of(context).pop(true);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Sporcu silinirken hata oluştu: $e'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   void _showAnalysis(TestResultModel result) async {
     // Aynı test oturumundaki tüm sonuçları bul
     final sessionKey = result.sessionId;
@@ -684,8 +758,19 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
          foregroundColor: AppTheme.whiteTextColor,
         actions: [
           IconButton(
+            icon: Icon(Icons.edit, color: AppTheme.whiteTextColor),
+            onPressed: () => _editAthlete(context),
+            tooltip: 'Sporcuyu Düzenle',
+          ),
+          IconButton(
+            icon: Icon(Icons.delete, color: AppTheme.whiteTextColor),
+            onPressed: () => _deleteAthlete(context),
+            tooltip: 'Sporcuyu Sil',
+          ),
+          IconButton(
             icon: Icon(Icons.refresh, color: AppTheme.whiteTextColor),
             onPressed: _loadAthleteResults,
+            tooltip: 'Yenile',
           ),
           if (athleteResults.isNotEmpty)
             IconButton(
@@ -700,6 +785,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                   ),
                 );
               },
+              tooltip: 'Grafikleri Göster',
             ),
         ],
       ),

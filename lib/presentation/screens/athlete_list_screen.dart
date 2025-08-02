@@ -164,12 +164,17 @@ class _AthleteListScreenState extends State<AthleteListScreen> {
                       final athlete = _filteredAthletes[index];
                       return InkWell(
                         borderRadius: BorderRadius.circular(18),
-                        onTap: () {
-                          Navigator.of(context).push(
+                        onTap: () async {
+                          final result = await Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => AthleteDetailScreen(athlete: athlete),
                             ),
                           );
+                          
+                          // Eğer sporcu güncellendi veya silindi ise listeyi yenile
+                          if (result == true) {
+                            _loadAthletes();
+                          }
                         },
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

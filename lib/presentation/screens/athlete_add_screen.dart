@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:athleticcoach/data/models/athlete_model.dart';
+import 'package:athleticcoach/data/athlete_database.dart';
 import 'package:athleticcoach/core/app_theme.dart';
 
 class AthleteAddScreen extends StatefulWidget {
@@ -515,7 +516,7 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                               ),
                             elevation: 4,
                           ),
-                          onPressed: () {
+                          onPressed: () async {
                               // Form validasyonu
                             if (_formKey.currentState!.validate()) {
                                 // Ek validasyonlar
@@ -566,7 +567,38 @@ class _AthleteAddScreenState extends State<AthleteAddScreen> {
                                   height: height,
                                 branch: _selectedBranch!,
                               );
-                              Navigator.of(context).pop(athlete);
+                              
+                              try {
+                                // Sporcuyu veritabanına kaydet
+                                if (isEdit) {
+                                  await AthleteDatabase().updateAthlete(athlete);
+                                } else {
+                                  await AthleteDatabase().insertAthlete(athlete);
+                                }
+                                
+                                // Başarı mesajı göster
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      isEdit ? 'Sporcu başarıyla güncellendi!' : 'Sporcu başarıyla eklendi!',
+                                    ),
+                                    backgroundColor: AppTheme.primaryColor,
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                                
+                                // Geri dön ve true döndür (güncelleme yapıldığını belirt)
+                                Navigator.of(context).pop(true);
+                              } catch (e) {
+                                // Hata mesajı göster
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Hata: $e'),
+                                    backgroundColor: AppTheme.errorColor,
+                                    duration: const Duration(seconds: 3),
+                                  ),
+                                );
+                              }
                             }
                           },
                         ),

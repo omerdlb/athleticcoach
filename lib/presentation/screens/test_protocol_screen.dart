@@ -1,6 +1,5 @@
 import 'package:athleticcoach/data/models/test_definition_model.dart';
 import 'package:athleticcoach/core/app_theme.dart';
-import 'package:athleticcoach/presentation/screens/test_session_select_athletes_screen.dart';
 import 'package:athleticcoach/presentation/screens/yo_yo_test_screen.dart';
 import 'package:athleticcoach/presentation/screens/yo_yo_test_level2_screen.dart';
 import 'package:flutter/material.dart';
@@ -28,15 +27,7 @@ class TestProtocolScreen extends StatelessWidget {
 
   const TestProtocolScreen({super.key, required this.test});
 
-  void _startTestSession(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => TestSessionSelectAthletesScreen(
-          selectedTest: test,
-        ),
-      ),
-    );
-  }
+
 
   void _startYoYoTest(BuildContext context) {
     Navigator.of(context).push(
@@ -179,15 +170,7 @@ class TestProtocolScreen extends StatelessWidget {
               tooltip: 'Bruce Protokolü Başlat',
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BruceProtocolScreen())),
             ),
-          IconButton(
-            icon: Icon(
-              Icons.play_arrow,
-              color: AppTheme.whiteTextColor,
-              size: 28,
-            ),
-            tooltip: 'Test Oturumu Başlat',
-            onPressed: () => _startTestSession(context),
-          ),
+
         ],
       ),
       body: Stack(

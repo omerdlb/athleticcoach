@@ -317,6 +317,24 @@ class AthleteDatabase {
     });
   }
 
+  Future<void> deleteTestResultsByAthleteId(String athleteId) async {
+    final db = await database;
+    await db.delete(
+      'test_results',
+      where: 'athleteId = ?',
+      whereArgs: [athleteId],
+    );
+  }
+
+  Future<void> deleteAthlete(String athleteId) async {
+    final db = await database;
+    await db.delete(
+      'athletes',
+      where: 'id = ?',
+      whereArgs: [athleteId],
+    );
+  }
+
   Future<void> clearRecentTests() async {
     final db = await database;
     await db.delete('recent_tests');

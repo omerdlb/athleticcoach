@@ -46,6 +46,7 @@ dependencies:
   url_launcher: ^6.2.5
   audioplayers: ^5.2.1
   intl: ^0.18.1
+  reorderable_grid_view: ^2.2.8
  
 
 dev_dependencies:

@@ -6,8 +6,11 @@ import 'package:athleticcoach/services/gemini_service.dart';
 import 'package:athleticcoach/services/pdf_export_service.dart';
 
 class AthleteComparisonCardWidget extends StatefulWidget {
+  final VoidCallback? onAthleteUpdated;
+  
   const AthleteComparisonCardWidget({
     super.key,
+    this.onAthleteUpdated,
   });
 
   @override
@@ -46,6 +49,16 @@ class _AthleteComparisonCardWidgetState extends State<AthleteComparisonCardWidge
         });
       }
     }
+  }
+
+  Future<void> refresh() async {
+    setState(() {
+      _isLoading = true;
+      _selectedAthlete1 = null;
+      _selectedAthlete2 = null;
+      _comparisonResult = null;
+    });
+    await _loadAthletes();
   }
 
   Future<void> _compareAthletes() async {
@@ -490,9 +503,13 @@ class _AthleteComparisonCardWidgetState extends State<AthleteComparisonCardWidge
               width: 1,
             ),
           ),
-          child: DropdownButtonFormField<AthleteModel>(
-            value: selectedAthlete,
-            onChanged: onChanged,
+                      child: DropdownButtonFormField<AthleteModel>(
+              value: selectedAthlete,
+              onChanged: (athlete) {
+                onChanged(athlete);
+                // Ana sayfayı güncelle
+                widget.onAthleteUpdated?.call();
+              },
             isExpanded: true,
             decoration: InputDecoration(
               border: InputBorder.none,
